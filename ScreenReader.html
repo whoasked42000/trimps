@@ -838,33 +838,33 @@
 							</div>
 							<div id="advMapsRow" class="row">
 								<div id="advLootContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Loot', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<button class="advMapsTitle thing" onclick="tooltip('Loot', 'advMaps', 'screenRead')">
 										Loot
-									</div>
+									</button>
 									<br/>
 									<input title="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
 									<div id="lootAdvMapsText"></div>
 								</div>
 								<div id="advSizeContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Size', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<button class="advMapsTitle thing" onclick="tooltip('Size', 'advMaps', 'screenRead')">
 										Size
-									</div>
+									</button>
 									<br/>
 									<input value="0" title="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
 									<div id="sizeAdvMapsText"></div>
 								</div>
 								<div id="advDifficultyContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Difficulty', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<button class="advMapsTitle thing" onclick="tooltip('Difficulty', 'advMaps', 'screenRead')">
 										Difficulty
-									</div>
+									</button>
 									<br/>
 									<input value="0" title="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
 									<div id="difficultyAdvMapsText"></div>
 								</div>
-								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad" onmouseover="tooltip('Biome', 'advMaps', event)" onmouseout="tooltip('hide')">
-									<div class="advMapsTitle">
+								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad">
+									<button class="advMapsTitle thing" onclick="tooltip('Biome', 'advMaps', 'screenRead')">
 										Biome
-									</div>
+									</button>
 									<br/>
 									<select id="biomeAdvMapsSelect" class="advSelect" onchange="updateMapCost()">
 										<option value="Random">Random</option>
@@ -878,9 +878,9 @@
 							<div id="advMapsRow2" class="row">
 								<div class="col-xs-2 mapConfigContainer lowPad"></div>
 								<div class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Special Modifier', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<button class="advMapsTitle thing" onclick="tooltip('Special Modifier', 'advMaps', 'screenRead')">
 										Special Modifier
-									</div>
+									</button>
 									<br/>
 									<select id="advSpecialSelect" class="advSelect" onchange="updateMapCost()">
 									</select>
@@ -893,9 +893,9 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advPerfectUnlocked" style="display: none">
-										<div class="advMapsTitle" onmouseover="tooltip('Perfect Sliders', 'advMaps', event)" onmouseout="tooltip('hide')">
+										<button class="advMapsTitle thing" onclick="tooltip('Perfect Sliders', 'advMaps', 'screenRead')">
 											Perfect Sliders
-										</div>
+										</button>
 										<br/>
 										<span id="advPerfectCheckbox" class="icomoon icon-checkbox-unchecked niceCheckbox" data-checked="false" onclick="swapNiceCheckbox(this); updateMapNumbers()"></span>
 									</div>
@@ -908,9 +908,9 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advExtraLevelUnlocked" style="display: none">
-										<div class="advMapsTitle" onmouseover="tooltip('Extra Zones', 'advMaps', event)" onmouseout="tooltip('hide')">
+										<button class="advMapsTitle thing" onclick="tooltip('Extra Zones', 'advMaps', 'screenRead')">
 											Extra Zones
-										</div>
+										</button>
 										<br/>
 										<select id="advExtraLevelSelect" class="advSelect" onchange="updateMapCost()"></select>
 									</div>
