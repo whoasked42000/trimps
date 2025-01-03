@@ -327,7 +327,7 @@
 							<button id="CombatFilter" type="button" onclick="filterMessage('Combat')" class="btn btn-success logFlt">Combat</button>
 						</div>
 						<div id="logConfigHolder" class="btn-group" role="group">
-							<button title="Configure Displayed Messages" id="logConfigBtn" type="button" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
+							<button aria-label="Configure Displayed Messages" id="logConfigBtn" type="button" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
 						</div>						
 					</div>
 					<div id="achievementTracker">
@@ -700,7 +700,7 @@
 									<div class="col-xs-4 noPad pointer noselect bdHover" id="blockDiv" style="visibility: hidden" onclick="getBattleStatBd('block')">
 										<span id="goodGuyBlock">0</span> <span id='goodGuyBlockName'>BLK</span>
 									</div>
-									<div class="col-xs-2 pointer noselect" title="Activate MagnetoShriek" role="button" style="padding-left: 0" id="roboTrimpBtn" onclick="magnetoShriek()">
+									<div class="col-xs-2 pointer noselect" aria-label="Activate MagnetoShriek" role="button" style="padding-left: 0" id="roboTrimpBtn" onclick="magnetoShriek()">
 										<span id="chainHolder" class="shriekStateCooldown" style='visibility: hidden' onmouseover="tooltip('MagnetoShriek', null, event)" onmouseout="tooltip('hide')"><span id="roboTrimpTurnsLeft"></span> <span class="icomoon icon-chain" style="color: white"></span></span>
 									</div>
 								</div>
@@ -769,7 +769,7 @@
 							</div>
 							<div class="battleSideBtnContainer">
 								<div id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
-									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div><div role="button" title='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
+									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div><div role="button" aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
 										<span class='glyphicon glyphicon-cog'></span></div>
 								</div>
 							</div>
@@ -816,21 +816,21 @@
 									<span id="openTutorialBtn2" class="flashNo icomoon icon-star pointer tutorialStar" onclick="tutorial.popup()" style="color: gold;"></span>
 								</div>
 								<div id='advMapsControlBtns'>
-									<span id='advMapsHideBtn' role="button" title="Show/Hide map settings" class='icomoon icon-minus-circle pointer' onclick='hideAdvMaps()' onmouseover="tooltip('Show/Hide Map Config', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>
-									<span id='advMapsPreset1' role="button" title="Load Preset 1" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(1)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">1</span>
-									<span id='advMapsPreset2' role="button" title="Load Preset 2" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(2)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">2</span>
-									<span id='advMapsPreset3' role="button" title="Load Preset 3" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(3)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">3</span>
+									<span id='advMapsHideBtn' role="button" aria-label="Show/Hide map settings" class='icomoon icon-minus-circle pointer' onclick='hideAdvMaps()' onmouseover="tooltip('Show/Hide Map Config', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>
+									<span id='advMapsPreset1' role="button" aria-label="Load Preset 1" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(1)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">1</span>
+									<span id='advMapsPreset2' role="button" aria-label="Load Preset 2" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(2)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">2</span>
+									<span id='advMapsPreset3' role="button" aria-label="Load Preset 3" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(3)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">3</span>
 									<span id='advMapsPreset4' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(4)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">4</span>
 									<span id='advMapsPreset5' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(5)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">5</span>
-									<span id='advMapsSaveBtn' role="button" title="Save Settings to Selected Preset" class='icomoon icon-save pointer' onclick='saveAdvMaps()' onmouseover="tooltip('Save Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>	
-									<span id='advMapsResetBtn' role="button" title="Reset The Selected Preset" class='icomoon icon-refresh pointer' onclick='resetAdvMaps(true)' onmouseover="tooltip('Reset Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>											
-									<span id='advMapsRecycleBtn' role="button" title="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</span>
+									<span id='advMapsSaveBtn' role="button" aria-label="Save Settings to Selected Preset" class='icomoon icon-save pointer' onclick='saveAdvMaps()' onmouseover="tooltip('Save Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>	
+									<span id='advMapsResetBtn' role="button" aria-label="Reset The Selected Preset" class='icomoon icon-refresh pointer' onclick='resetAdvMaps(true)' onmouseover="tooltip('Reset Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>											
+									<span id='advMapsRecycleBtn' role="button" aria-label="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</span>
 								</div>
 								<div id="mapLevelContainer" class="col-xs-4">
-									Level <span role="button" title="Reduce map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" title="Increase map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
+									Level <span role="button" aria-label="Reduce map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" aria-label="Increase map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
 								</div>
 								<div id="mapCostContainer" class="col-xs-4 lowPad">
-									<h4 title="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
+									<h4 aria-label="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
 								</div>
 								<div id="mapCreateBtn" role="button" onclick='buyMap()' class="workBtn primaryColor pointer noselect col-xs-4">
 									Create
@@ -842,7 +842,7 @@
 										Loot
 									</button>
 									<br/>
-									<input title="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
+									<input aria-label="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
 									<div id="lootAdvMapsText"></div>
 								</div>
 								<div id="advSizeContainer" class="col-xs-3 mapConfigContainer lowPad">
@@ -850,7 +850,7 @@
 										Size
 									</button>
 									<br/>
-									<input value="0" title="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
+									<input value="0" aria-label="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
 									<div id="sizeAdvMapsText"></div>
 								</div>
 								<div id="advDifficultyContainer" class="col-xs-3 mapConfigContainer lowPad">
@@ -858,7 +858,7 @@
 										Difficulty
 									</button>
 									<br/>
-									<input value="0" title="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
+									<input value="0" aria-label="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
 									<div id="difficultyAdvMapsText"></div>
 								</div>
 								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad">
@@ -923,7 +923,7 @@
 							<div id="selectedMapContainer" class="row">
 								<div id="selectedMapCol" class="col-xs-3 lowPad">
 									<div id="selectedMapName"></div><br/>
-									<div id="mapCreditsLeft" title="Earn 1 Credit for each zone you clear while on this challenge"></div>
+									<div id="mapCreditsLeft" aria-label="Earn 1 Credit for each zone you clear while on this challenge"></div>
 								</div>
 
 								<div id="mapStatsCol3" class="col-xs-5 lowPad">
@@ -1127,7 +1127,7 @@
 	<div id="achievementWrapper" style="display: none">
 		<div id="achievementMainButtons">
 			<span id="achievementHelp" style='display: none' onclick="toggleAchievementHelp()" class="icomoon icon-question-circle"></span>
-			<span id="achievementMainClose" role='button' title='Close Achievement Screen' onclick="toggleAchievementWindow()" class="icomoon icon-close">Close</span>
+			<span id="achievementMainClose" role='button' aria-label='Close Achievement Screen' onclick="toggleAchievementWindow()" class="icomoon icon-close">Close</span>
 		</div>
 		<div class="row" id="achievementTopRow">
 			<div class="col-xs-6">
@@ -1311,7 +1311,7 @@
 			&nbsp;
 		</div>
 		<div id="tutorialInner">
-			<hr title="Tutorial"/>
+			<hr aria-label="Tutorial"/>
 			<div id="tutorialTitle" class="noselect"><span id='tutorialSizeBtn' onclick="tutorial.toggleSize()" class='icomoon icon-expand'></span><span id="tutorialCloseBtn" onclick="tutorial.closeWindow()" class='icmoon icon-close'></span><span class="pointer" onclick='tutorial.back()'><span id="tutorialBackBtn" class='icomoon icon-arrow-left'></span><span class='icomoon icon-star tutorialStar'></span></span>  ADVISOR <span id='tutorialStep'></span>  <span class="pointer" onclick='tutorial.next()'><span class='icomoon icon-star tutorialStar'></span><span id="tutorialNextBtn" class='icomoon icon-arrow-right'></span></span></div>
 			<hr/>
 			<div id="tutorialText"><div id="tutorialTextInner" class="niceScroll"></div></div>
