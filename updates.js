@@ -370,7 +370,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			if (count != 0 && count % 2 == 0) tooltipText += "</tr><tr>";
 			setting = settingGroup[item];
 			selectedPerc = (setting) ? setting.value : 0.1;		
-			checkbox = buildNiceCheckbox('structConfig' + item, 'autoCheckbox', (setting && setting.enabled));
+			checkbox = buildNiceCheckbox('structConfig' + item, 'autoCheckbox', (setting && setting.enabled), false, "Enable Building");
 			options = "<option value='0.1'" + ((selectedPerc == 0.1) ? " selected" : "") + ">0.1%</option><option value='1'" + ((selectedPerc == 1) ? " selected" : "") + ">1%</option><option value='5'" + ((selectedPerc == 5) ? " selected" : "") + ">5%</option><option value='10'" + ((selectedPerc == 10) ? " selected" : "") + ">10%</option><option value='25'" + ((selectedPerc == 25) ? " selected" : "") + ">25%</option><option value='50'" + ((selectedPerc == 50) ? " selected" : "") + ">50%</option><option value='99'" + ((selectedPerc == 99) ? " selected" : "") + ">99%</option>";
 			var id = "structSelect" + item;
 			tooltipText += "<td><div class='row'><div class='col-xs-5' style='padding-right: 5px'>" + checkbox + "&nbsp;&nbsp;<span>" + item + "</span></div><div style='text-align: center; padding-left: 0px;' class='col-xs-2'><select class='structSelect' id='" + id + "'>" + options + "</select></div><div class='col-xs-5 lowPad' style='text-align: right'>Up To: <input class='structConfigQuantity' id='structQuant" + item + "' type='number'  value='" + ((setting && setting.buyMax) ? setting.buyMax : 0 ) + "'/></div></div></td>";
@@ -382,7 +382,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			//stupid gigas making this all spaghetti
 			setting = settingGroup.Gigastation;
 			selectedPerc = (setting) ? setting.value : 0.1;		
-			checkbox = buildNiceCheckbox('structConfigGigastation', 'autoCheckbox', (setting && setting.enabled));
+			checkbox = buildNiceCheckbox('structConfigGigastation', 'autoCheckbox', (setting && setting.enabled), false, "Enable Building");
 			options = "<option value='0.1'" + ((selectedPerc == 0.1) ? " selected" : "") + ">0.1%</option><option value='1'" + ((selectedPerc == 1) ? " selected" : "") + ">1%</option><option value='5'" + ((selectedPerc == 5) ? " selected" : "") + ">5%</option><option value='10'" + ((selectedPerc == 10) ? " selected" : "") + ">10%</option><option value='25'" + ((selectedPerc == 25) ? " selected" : "") + ">25%</option><option value='50'" + ((selectedPerc == 50) ? " selected" : "") + ">50%</option><option value='99'" + ((selectedPerc == 99) ? " selected" : "") + ">99%</option>";
 			tooltipText += "<td><div class='row'><div class='col-xs-5' style='padding-right: 5px'>" + checkbox + "&nbsp;&nbsp;<span>Gigastation</span></div><div style='text-align: center; padding-left: 0px;' class='col-xs-2'><select class='structSelect' id='structSelectGigastation'>" + options + "</select></div><div class='col-xs-5 lowPad' style='text-align: right'>At W: <input class='structConfigQuantity' id='structQuantGigastation' type='number'  value='" + ((setting && setting.buyMax) ? setting.buyMax : 0 ) + "'/></div></div></td>";
 			if (getHighestLevelCleared() >= 229){
@@ -419,7 +419,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			setting = settingGroup[item];
 			selectedPerc = (setting) ? setting.value : 0.1;
 			type = ((equipment.health) ? "Armor" : "Wep");
-			checkbox = buildNiceCheckbox('equipConfig' + item, 'autoCheckbox checkbox' + type, (setting && setting.enabled));
+			checkbox = buildNiceCheckbox('equipConfig' + item, 'autoCheckbox checkbox' + type, (setting && setting.enabled), false, "Enable Equipment");
 			options = "<option value='0.1'" + ((selectedPerc == 0.1) ? " selected" : "") + ">0.1%</option><option value='1'" + ((selectedPerc == 1) ? " selected" : "") + ">1%</option><option value='5'" + ((selectedPerc == 5) ? " selected" : "") + ">5%</option><option value='10'" + ((selectedPerc == 10) ? " selected" : "") + ">10%</option><option value='25'" + ((selectedPerc == 25) ? " selected" : "") + ">25%</option><option value='50'" + ((selectedPerc == 50) ? " selected" : "") + ">50%</option><option value='99'" + ((selectedPerc == 99) ? " selected" : "") + ">99%</option>";
 			tooltipText += "<td><div class='row'><div class='col-xs-6' style='padding-right: 5px'>" + checkbox + "&nbsp;&nbsp;<span>" + item + "</span></div><div style='text-align: center; padding-left: 0px;' class='col-xs-2'><select class='equipSelect" + type + "' id='equipSelect" + item + "'>" + options + "</select></div><div class='col-xs-4 lowPad' style='text-align: right'>Up To: <input class='equipConfigQuantity' id='equipQuant" + item + "' type='number'  value='" + ((setting && setting.buyMax) ? setting.buyMax : 0 ) + "'/></div></div></td>";
 			count++;
@@ -484,7 +484,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			var setting = settingGroup[item];
 			var selectedPerc = (setting) ? setting.value : 0.1;
 			var max;	
-			var checkbox = buildNiceCheckbox('autoJobCheckbox' + item, 'autoCheckbox', (setting && setting.enabled));
+			var checkbox = buildNiceCheckbox('autoJobCheckbox' + item, 'autoCheckbox', (setting && setting.enabled), false, "Enable Job");
 			tooltipText += "<td style='width: 40%'><div class='row'><div class='col-xs-6' style='padding-right: 5px'>" + checkbox + "&nbsp;&nbsp;<span>" + item + "</span></div><div class='col-xs-6 lowPad' style='text-align: right'>Ratio: <input class='jobConfigQuantity' id='autoJobQuant" + item + "' type='number'  value='" + ((setting && setting.ratio) ? setting.ratio : 1 ) + "'/></div></div>"
 			if (ratioJobs[x] == "Scientist"){
 				max = ((setting && setting.buyMax) ? setting.buyMax : 0 );
@@ -499,7 +499,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 				selectedPerc = (setting) ? setting.value : 0.1;
 				max = ((setting && setting.buyMax) ? setting.buyMax : 0 );
 				if (max > 1e4) max = max.toExponential().replace('+', '');	
-				checkbox = buildNiceCheckbox('autoJobCheckbox' + item, 'autoCheckbox', (setting && setting.enabled));	
+				checkbox = buildNiceCheckbox('autoJobCheckbox' + item, 'autoCheckbox', (setting && setting.enabled), false, "Enable Job");	
 				var options = "<option value='0.1'" + ((selectedPerc == 0.001) ? " selected" : "") + ">0.1%</option><option value='1'" + ((selectedPerc == .01) ? " selected" : "") + ">1%</option><option value='5'" + ((selectedPerc == .05) ? " selected" : "") + ">5%</option><option value='10'" + ((selectedPerc == .10) ? " selected" : "") + ">10%</option><option value='25'" + ((selectedPerc == .25) ? " selected" : "") + ">25%</option><option value='50'" + ((selectedPerc == .50) ? " selected" : "") + ">50%</option><option value='99'" + ((selectedPerc == .99) ? " selected" : "") + ">99%</option>";
 				tooltipText += "<td style='width: 60%'><div class='row'><div class='col-xs-5' style='padding-right: 5px'>" + checkbox + "&nbsp;&nbsp;<span>" + item + "</span></div><div style='text-align: center; padding-left: 0px;' class='col-xs-2'><select  id='autoJobSelect" + item + "'>" + options + "</select></div><div class='col-xs-5 lowPad' style='text-align: right'>Up To: <input class='jobConfigQuantity' id='autoJobQuant" + item + "'  value='" + prettify(max) + "'/></div></div></td></tr>";	
 			}
@@ -709,7 +709,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			elem = document.getElementById('tooltipDiv2');
 			tip2 = true;
 			var steps = game.global.GeneticistassistSteps;
-			tooltipText = "<div id='GATargetError'></div><div>Customize the target thresholds for your Geneticistassist! Use a number between 0.5 and 5000 seconds for all 3 boxes. Each box corresponds to a Geneticistassist toggle threshold.</div><div style='width: 100%'><input class='GACustomInput' id='target1' value='" + steps[1] + "'/><input class='GACustomInput' id='target2' value='" + steps[2] + "'/><input class='GACustomInput' id='target3' value='" + steps[3] + "'/><hr class='noBotMarg'/><div class='maxCenter'>" + getSettingHtml(game.options.menu.gaFire, 'gaFire') + getSettingHtml(game.options.menu.geneSend, 'geneSend') + "</div><hr class='noTopMarg'/><div id='GADisableCheck'>" + buildNiceCheckbox('disableOnUnlockCheck', null, game.options.menu.GeneticistassistTarget.disableOnUnlock) + "&nbsp;Start disabled when unlocked each run</div></div>";
+			tooltipText = "<div id='GATargetError'></div><div>Customize the target thresholds for your Geneticistassist! Use a number between 0.5 and 5000 seconds for all 3 boxes. Each box corresponds to a Geneticistassist toggle threshold.</div><div style='width: 100%'><input class='GACustomInput' id='target1' value='" + steps[1] + "'/><input class='GACustomInput' id='target2' value='" + steps[2] + "'/><input class='GACustomInput' id='target3' value='" + steps[3] + "'/><hr class='noBotMarg'/><div class='maxCenter'>" + getSettingHtml(game.options.menu.gaFire, 'gaFire') + getSettingHtml(game.options.menu.geneSend, 'geneSend') + "</div><hr class='noTopMarg'/><div id='GADisableCheck'>" + buildNiceCheckbox('disableOnUnlockCheck', null, game.options.menu.GeneticistassistTarget.disableOnUnlock, false, "Start disabled?") + "&nbsp;Start disabled when unlocked each run</div></div>";
 			costText = "<div class='maxCenter'><div class='btn btn-info' id='confirmTooltipBtn' onclick='customizeGATargets();'>Confirm</div> <div class='btn btn-danger' onclick='cancelTooltip()'>Cancel</div></div>"
 			elem.style.left = "33.75%";
 			elem.style.top = "25%";
@@ -819,12 +819,12 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			className += (vals.times == -2) ? " mazTxOn" : " mazTxOff";
 			tooltipText += "<div id='mazRow" + x + "' class='row mazRow " + className + "'" + style + ">";
 			tooltipText += "<div class='mazDelete' onclick='game.options.menu.mapAtZone.removeRow(" + x + ")'><span class='icomoon icon-cross'></span></div>";
-			tooltipText += "<div class='mazCheckbox' style='text-align: center;'>" + buildNiceCheckbox("mazEnableSetting" + x, null, vals.on) + "</div>";
+			tooltipText += "<div class='mazCheckbox' style='text-align: center;'>" + buildNiceCheckbox("mazEnableSetting" + x, null, vals.on, false, "Active?") + "</div>";
 			tooltipText += "<div class='mazWorld'><input value='" + vals.world + "' type='number' id='mazWorld" + x + "'/></div>";
 			tooltipText += "<div class='mazThrough'><input value='" + vals.through + "' type='number' id='mazThrough" + x + "'/></div>";
 			tooltipText += "<div class='mazCell'><input value='" + vals.cell + "' type='number' id='mazCell" + x + "'/></div>";
 			tooltipText += "<div class='mazPrio'><input value='" + vals.prio + "' type='number' id='mazPrio" + x + "'/></div>";
-			tooltipText += "<div class='mazCheckbox' style='text-align: center;'>" + buildNiceCheckbox("mazCheckbox" + x, null, vals.check) + "</div>";
+			tooltipText += "<div class='mazCheckbox' style='text-align: center;'>" + buildNiceCheckbox("mazCheckbox" + x, null, vals.check, false, "Run Map?") + "</div>";
 			tooltipText += "<div class='mazPreset' onchange='updateMazPreset(" + x + ")'><select value='" + vals.preset + "' id='mazPreset" + x + "'>" + presetDropdown + "</select></div>"
 			tooltipText += "<div class='mazRepeat'><select value='" + vals.repeat + "' id='mazRepeat" + x + "'>" + repeatDropdown + "</select></div>";
 			tooltipText += "<div class='mazRepeatUntil' onchange='updateMazPreset(" + x + ")'><select value='" + vals.until + "' id='mazRepeatUntil" + x + "'>" + repeatUntilDropdown + "</select></div>";
@@ -902,7 +902,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 					if (game.global.totalPortals < 1) continue;
 					realName = "Void Maps";
 				}
-				tooltipText += "<span class='messageConfigContainer'><span class='messageCheckboxHolder'>" + buildNiceCheckbox(name + item, 'messageConfigCheckbox', (msgs[name][item])) + "</span><span onmouseover='messageConfigHover(\"" + name + item + "\", event)' onmouseout='tooltip(\"hide\")' class='messageNameHolder'> - " + realName.charAt(0).toUpperCase() + realName.substr(1) + "</span></span><br/>";
+				tooltipText += "<span class='messageConfigContainer'><span class='messageCheckboxHolder'>" + buildNiceCheckbox(name + item, 'messageConfigCheckbox', (msgs[name][item]), false, "Enable Message") + "</span><span onmouseover='messageConfigHover(\"" + name + item + "\", event)' onmouseout='tooltip(\"hide\")' class='messageNameHolder'> - " + realName.charAt(0).toUpperCase() + realName.substr(1) + "</span></span><br/>";
 			}
 			tooltipText += "</div>";
 		}
@@ -1746,7 +1746,7 @@ function getEqualitySliders(short){
 	text += "<b>Your current setting is <span id='equalityCurrentScale'>" + game.portal.Equality.scalingSetting + "</span>.</b>";
 	text += "<br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySlider' min='0' max='10' value='" + game.portal.Equality.scalingSetting + "' />";
 	if (!short) text += "<br/>If Reversing is allowed, Equality stacks will also decrease after the set amount of attacks against the same bad guy.<br/><br/>";
-	text += buildNiceCheckbox("equalityReversing", null, game.portal.Equality.scalingReverse, "scaleEqualityScale(this, \"reverse\")") + " Allow Reversing<br/><b>Your current reversing setting is <span id='equalityCurrentScaleReverse'>" + game.portal.Equality.reversingSetting + "</span>.</b><br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySliderReverse' min='1' max='10' value='" + game.portal.Equality.reversingSetting + "' />"
+	text += buildNiceCheckbox("equalityReversing", null, game.portal.Equality.scalingReverse, "scaleEqualityScale(this, \"reverse\")", "Equality Reversing") + " Allow Reversing<br/><b>Your current reversing setting is <span id='equalityCurrentScaleReverse'>" + game.portal.Equality.reversingSetting + "</span>.</b><br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySliderReverse' min='1' max='10' value='" + game.portal.Equality.reversingSetting + "' />"
 	var disabledStackCount = game.portal.Equality.disabledStackCount;
 	var max = (game.portal.Equality.radLevel + 1);
 	var stackText = disabledStackCount;
@@ -1784,15 +1784,17 @@ function getExtraScryerText(fromForm){
 	return tooltipText;
 }
 
-function swapNiceCheckbox(elem, forceSetting){
+function swapNiceCheckbox(elem, forceSetting, code){
 	//Send just the elem to swap the current state
 	//Send elem and either true or false as forceSetting to force the checkbox to checked/unchecked
+	if (code && code !== "Space") { return; } // Keyboard support, only check/uncheck on spacebar
 	var checked;
 	if (typeof forceSetting === 'undefined') checked = !readNiceCheckbox(elem);
 	else checked = (forceSetting == true);
 	var newClass = (checked) ? "icon-checkbox-checked" : "icon-checkbox-unchecked";
 	swapClass("icon-", newClass, elem);
 	elem.setAttribute('data-checked', checked);
+	elem.setAttribute('aria-checked', checked);
 }
 
 function formatListCommasAndStuff(list){
@@ -1812,15 +1814,14 @@ function readNiceCheckbox(elem){
 	return (elem.dataset.checked == "true");
 }
 
-function buildNiceCheckbox(id, extraClass, enabled, extraFunction){
-	var html = (enabled) ? "icomoon icon-checkbox-checked' data-checked='true' " : "icomoon icon-checkbox-unchecked' data-checked='false' ";
-	var defaultClasses = " niceCheckbox noselect";
-	var title = enabled ? "Checked" : "Not Checked";
-	extraClass = (extraClass) ? extraClass + defaultClasses : defaultClasses;
-	html = "class='" + extraClass + " " + html;
+function buildNiceCheckbox(id, extraClass, enabled, extraFunction, label){
+	var classes = `icomoon niceCheckbox noselect ${(extraClass) ? extraClass : ""} icon-checkbox-${(enabled) ? "checked" : "unchecked"}`
 	extraFunction = (extraFunction) ? " " + extraFunction + ";" : "";
-	html = "<span title='" + title + "' id='" + id + "' " + html + onchange + " onclick='swapNiceCheckbox(this);" + extraFunction + "'></span>";
-	return html;	
+	var html = `<span type='checkbox' tabindex=0 id='${id}' class='${classes}' data-checked='${enabled}' aria-label='${label}' 
+		onclick='swapNiceCheckbox(this); ${extraFunction}' 
+		onKeyDown='swapNiceCheckbox(this, undefined, event.code); ${extraFunction}'>
+		</span>`;
+	return html;
 }
 
 function checkAlert(what, isItIn){
