@@ -2460,7 +2460,7 @@ function updatePerkColor(what){
 			
 			if (affordElem){
 				if (perkClass == "perkColorMaxed") affordElem.innerHTML = ", Max";
-				else affordElem.innerHTML = (removableLevel > 0) ? ", Can Buy" : ", Not Affordable";
+				else affordElem.innerHTML = (perkClass === "perkColorOn") ? ", Can Buy" : ", Not Affordable";
 			}
 		}
 	}
