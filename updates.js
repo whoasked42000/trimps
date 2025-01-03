@@ -1817,7 +1817,7 @@ function readNiceCheckbox(elem){
 function buildNiceCheckbox(id, extraClass, enabled, extraFunction, label){
 	var classes = `icomoon niceCheckbox noselect ${(extraClass) ? extraClass : ""} icon-checkbox-${(enabled) ? "checked" : "unchecked"}`
 	extraFunction = (extraFunction) ? " " + extraFunction + ";" : "";
-	var html = `<span type='checkbox' tabindex=0 id='${id}' class='${classes}' data-checked='${enabled}' aria-label='${label}' 
+	var html = `<span role='checkbox' tabindex=0 id='${id}' class='${classes}' data-checked='${enabled}' aria-checked='${enabled}' aria-label='${label}' 
 		onclick='swapNiceCheckbox(this); ${extraFunction}' 
 		onKeyDown='swapNiceCheckbox(this, undefined, event.code); ${extraFunction}'>
 		</span>`;
