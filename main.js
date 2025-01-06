@@ -19288,4 +19288,24 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
             u2Mutations.dragging(e);
         }
     })
+	// Screen Reader Tooltips
+	if (usingScreenReader) {
+		const tooltips = {
+			fightBtn: function (event) { keyTooltip(event, 'Fight', null) }, 
+			pauseFight: function (event) { keyTooltip(event, 'AutoFight', null) }, 
+			mapsBtn: function (event) { keyTooltip(event, 'Maps', null) }, 
+			portalBtn: function (event) { keyTooltip(event, 'Portal', null) }, 
+			repeatBtn: function (event) { keyTooltip(event, 'Repeat Map', null) }, 
+			finishDailyBtn: function (event) { keyTooltip(event, 'Finish Daily', null) }, 
+		}; 
+		for (const [elemID, tooltip] of Object.entries(tooltips)) {
+			document.getElementById(elemID).addEventListener("keydown", tooltip)
+		}
+	}
 })()
+
+
+screenReaderAssert(
+	`This game uses the ? key to display informational tooltips on buttons. 
+	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".
+	Currently these tooltips are only enabled on the buttons: Fight, AutoFight, Maps, Portal. Please test them!`)

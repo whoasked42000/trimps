@@ -757,52 +757,48 @@
 							<div id="battleSideTitle" onmouseover="getZoneStats(event)" onmouseout="tooltip('hide')">
 									<h3><span id="worldName">Zone</span> <span id="worldNumber">1</span><br/><span id="mapBonus"></span></h3>
 							</div>
-							<div class="battleSideBtnContainer">
-								<span class="btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
+							<button class="battleSideBtnContainer btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
 									Fight
-								</span>
-							</div>
-							<div class="battleSideBtnContainer">
-								<span class="btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
+							</button>
+							<button class="battleSideBtnContainer btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
 									AutoFight Off
-								</span>
-							</div>
+							</button>
 							<div class="battleSideBtnContainer">
-								<div id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
+								<div tabindex="0" id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
 									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div><div role="button" aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
 										<span class='glyphicon glyphicon-cog'></span></div>
-								</div>
+									</div>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
+								<span tabindex="0" class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
 									Void Maps
 								</span>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
+								<span tabindex="0" class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
 									Portal
 								</span>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
+								<span tabindex="0" class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
 									Repeat Off
 								</span>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="heirloomBtnContainer">
-								<span id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</span>
+								<span tabindex="0" id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</span>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="boneBtnContainer">
-								<span class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
+								<span tabindex="0" class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
 									<span id="boneBtnText">Bone Trader</span>
 								</span>
 							</div>							
 							<div class="battleSideBtnContainer" style="display: none" id="finishDailyBtnContainer">
-								<span class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
+								<span tabindex="0" class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
 									Finish Daily
 								</span>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="exitSpireBtnContainer">
-								<span class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
+								<span tabindex="0" class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
 									Exit Spire
 								</span>
 							</div>
