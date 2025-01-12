@@ -4810,9 +4810,15 @@ var u2Mutations = {
             var bgColor = 'available';
             if (itemObj.purchased) bgColor = 'purchased';
             else if (!this.checkRequirements(item)) bgColor = 'requirement';
+			var SRBuyText = `${(bgColor == 'requirement') ? "requirement not met" : bgColor }`
             var dn = (itemObj.dn) ? itemObj.dn : item;
-            text += '<button aria-label="'+ dn + '" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
-            if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
+            text += '<button aria-labelledby="'+ item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
+            if (usingScreenReader ) {
+				text += '<span class="mutTreeName" id="\'' + item + '\'Name">' + dn + ' ' + SRBuyText + '</span>';
+			}
+			else {
+				if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
+			}
             text += '<span class="icomoon icon-star"></span></button>';
             if (!itemObj.require) continue;
             var connect = itemObj.require;
