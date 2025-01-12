@@ -4811,9 +4811,9 @@ var u2Mutations = {
             if (itemObj.purchased) bgColor = 'purchased';
             else if (!this.checkRequirements(item)) bgColor = 'requirement';
             var dn = (itemObj.dn) ? itemObj.dn : item;
-            text += '<div onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
+            text += '<button aria-label="'+ dn + '" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
             if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
-            text += '<span class="icomoon icon-star"></span></div>';
+            text += '<span class="icomoon icon-star"></span></button>';
             if (!itemObj.require) continue;
             var connect = itemObj.require;
             for (var x = 0; x < connect.length; x++){
@@ -4839,6 +4839,10 @@ var u2Mutations = {
         text += "</div>"
         text += "<div id='mutZoomButtons'><div id='mutZoomIn' onclick='u2Mutations.zoomClicked(-1);' onmouseover='tooltip(\"Zoom In\", \"customText\", event, \"Click this to Zoom In to the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-in'></span></div><div id='mutZoomOut' onclick='u2Mutations.zoomClicked(1);' onmouseover='tooltip(\"Zoom Out\", \"customText\", event, \"Click this to Zoom Out of the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-out'></span></div></div>";
         document.getElementById('mutTreeWrapper').innerHTML = text;
+		for (let item in this.tree){ // because of the global keydown event, these have to be added with an event listener rather than using inline onkeydown=""
+			let mutElem = document.getElementById(`${item}MutatorBox`)
+		    mutElem.addEventListener("keydown", function (event) { keyTooltip(event, item, "Mutator")})
+		}
         this.open = true;
     },
     closeTree: function(){

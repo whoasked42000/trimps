@@ -19306,6 +19306,13 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 
 
 screenReaderAssert(
-	`This game uses the ? key to display informational tooltips on buttons. 
-	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".
-	Currently these tooltips are only enabled on the buttons: Fight, AutoFight, Maps, Portal. Please test them!`)
+	`
+	Latest updates: 
+	First pass at the mutator screen. Buttons, aria-labels, and ? tooltips on all mutators.
+	achievement alerts (untested).
+	additional cleanup on the battleside buttons.
+	export read only to avoid accidental button presses.
+
+	
+	This game uses the ? key to display informational tooltips on buttons. 
+	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)

@@ -757,50 +757,55 @@
 							<div id="battleSideTitle" onmouseover="getZoneStats(event)" onmouseout="tooltip('hide')">
 									<h3><span id="worldName">Zone</span> <span id="worldNumber">1</span><br/><span id="mapBonus"></span></h3>
 							</div>
-							<button class="battleSideBtnContainer btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
+							<div class="battleSideBtnContainer">
+							<button class="btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
 									Fight
 							</button>
-							<button class="battleSideBtnContainer btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
+							</div>
+							<div class="battleSideBtnContainer">
+							<button class="btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
 									AutoFight Off
 							</button>
-							<div class="battleSideBtnContainer">
-								<div tabindex="0" id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
-									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div><div role="button" aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
-										<span class='glyphicon glyphicon-cog'></span></div>
-									</div>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span tabindex="0" class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
+								<button id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
+									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div>
+									<button aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
+										<span class='glyphicon glyphicon-cog'>Configure Maps</span></button>
+									</button>
+							</div>
+							<div class="battleSideBtnContainer">
+								<button class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
 									Void Maps
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span tabindex="0" class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
+								<button class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
 									Portal
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span tabindex="0" class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
+								<button class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
 									Repeat Off
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="heirloomBtnContainer">
-								<span tabindex="0" id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</span>
+								<button id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="boneBtnContainer">
-								<span tabindex="0" class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
+								<button class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
 									<span id="boneBtnText">Bone Trader</span>
-								</span>
+								</button>
 							</div>							
 							<div class="battleSideBtnContainer" style="display: none" id="finishDailyBtnContainer">
-								<span tabindex="0" class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
+								<button class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
 									Finish Daily
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="exitSpireBtnContainer">
-								<span tabindex="0" class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
+								<button class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
 									Exit Spire
-								</span>
+								</button>
 							</div>
 
 						</div>
@@ -1260,7 +1265,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="achievementPopup" style="display: none">
+	<div id="achievementPopup" style="display: none" role="alert">
 		<span class="achievementBtns">
 			<span class="achievementBtnGo icomoon icon-newspaper-o" onclick="toggleAchievementWindow()"></span>
 			<span class="achievementBtnClose icomoon icon-close" onclick="closeAchievementPopup()"></span>	
