@@ -531,113 +531,107 @@
 							<div id="natureContainer" style="display: none; height: 100%;">
 								<div class='row noMarg' style="height: 100%;">
 									<div id='tabColPoison' class='col-xs-4 tabColPoison tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoPoison'>
 											<div class='natureTitle'>
-												<span id='infoSpanPoison' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Poison')" onmouseout="tooltip('hide')"><span class='icomoon icon-info2'></span></span>
+												<span id='infoSpanPoison' class='infoSpanNature'><span class='icomoon icon-info2'></span></span>
 												Poison									
 											</div>
 											Tokens: <span id="tokenCountPoison">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Poison')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradePoisonBtn' onclick="naturePurchase('upgrade', 'Poison')">
 											<span class='natureUpgradeLevel' id='natureUpgradePoisonLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradePoisonCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Poison')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureStackTransferPoisonBtn' onclick="naturePurchase('stackTransfer', 'Poison')">
 											<span class='natureUpgradeLevel' id='natureStackTransferPoisonLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferPoisonCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberPoisonContainer' class='natureBuyIcon natureUberContainer noselect' onmouseover="natureTooltip(event, 'uberEmpower', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Poison')">
+										</button>
+										<button id='uberPoisonContainer' id='uberPoisonBtn' class='natureBuyIcon natureUberContainer noselect' onclick="naturePurchase('uberEmpower', 'Poison')">
 											<span class='natureUpgradeLevel natureUberName' id='uberPoisonName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerPoisonCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class="transferButtons">
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Poison', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Poison', 'Wind')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='naturePoisonWindBtn' onclick="naturePurchase('convert', 'Poison', 'Wind')">
 												<span class='natureUpgradeCost' id='naturePoisonWindCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-air'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Poison', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Poison', 'Ice')">
+												Convert Poison to Wind
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='naturePoisonIceBtn' onclick="naturePurchase('convert', 'Poison', 'Ice')">
 												<span class='natureUpgradeCost' id='naturePoisonIceCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon glyphicon glyphicon-certificate'></span>
-											</span>
+												Convert Poison to Ice
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-flask'></span>
 									</div>
 									<div id='tabColWind' class='col-xs-4 tabColWind tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoWind'>
 											<div class='natureTitle'>
-												<span id='infoSpanWind' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Wind')" onmouseout="tooltip('hide')"><span class='icomoon icon-info2'></span></span>
+												<span id='infoSpanWind' class='infoSpanNature'><span class='icomoon icon-info2'></span></span>
 													Wind
 											</div>
 											Tokens: <span id="tokenCountWind">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Wind')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradeWindBtn' onclick="naturePurchase('upgrade', 'Wind')">
 											<span class='natureUpgradeLevel' id='natureUpgradeWindLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradeWindCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Wind')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureStackTransferWindBtn' onclick="naturePurchase('stackTransfer', 'Wind')">
 											<span class='natureUpgradeLevel' id='natureStackTransferWindLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferWindCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberWindContainer' class='natureBuyIcon natureUberContainer noselect' onmouseover="natureTooltip(event, 'uberEmpower', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Wind')">
+										</button>
+										<button id='uberWindContainer' class='natureBuyIcon natureUberContainer noselect' id='uberWindBtn' onclick="naturePurchase('uberEmpower', 'Wind')">
 											<span class='natureUpgradeLevel natureUberName' id='uberWindName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerWindCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class='transferButtons'>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Wind', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Wind', 'Poison')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id="natureWindPoisonBtn" onclick="naturePurchase('convert', 'Wind', 'Poison')">
 												<span class='natureUpgradeCost' id='natureWindPoisonCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-flask'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Wind', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Wind', 'Ice')">
+												Convert Wind to Poison
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='natureWindIceBtn' onclick="naturePurchase('convert', 'Wind', 'Ice')">
 												<span class='natureUpgradeCost' id='natureWindIceCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon glyphicon glyphicon-certificate'></span>
-											</span>
+												Convert Wind to Ice
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-air'></span>
 									</div>
 									<div id='tabColIce' class='col-xs-4 tabColIce tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoIce'>
 											<div class='natureTitle'>
-												<span id='infoSpanIce' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Ice')" onmouseout="tooltip('hide')"></span>
+												<span id='infoSpanIce' class='infoSpanNature'></span>
 												Ice
 											</div>
 											Tokens: <span id="tokenCountIce">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Ice')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradeIceBtn' onclick="naturePurchase('upgrade', 'Ice')">
 											<span class='natureUpgradeLevel' id='natureUpgradeIceLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradeIceCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Ice')">
+										</button>
+										<button class='natureBuyIcon noselect' id="natureStackTransferIceBtn" onclick="naturePurchase('stackTransfer', 'Ice')">
 											<span class='natureUpgradeLevel' id='natureStackTransferIceLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferIceCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberIceContainer' class='natureBuyIcon noselect natureUberContainer' onmouseover="natureTooltip(event, 'uberEmpower', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Ice')">
+										</button>
+										<button id='uberIceContainer' class='natureBuyIcon noselect natureUberContainer' id="uberIceBtn" onclick="naturePurchase('uberEmpower', 'Ice')">
 											<span class='natureUpgradeLevel natureUberName' id='uberIceName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerIceCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class="transferButtons">
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Ice', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Ice', 'Poison')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id="natureIcePoisonBtn" onclick="naturePurchase('convert', 'Ice', 'Poison')">
 												<span class='natureUpgradeCost' id='natureIcePoisonCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-flask'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Ice', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Ice', 'Wind')">
+												Convert Ice to Poison
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='natureIceWindBtn'  onclick="naturePurchase('convert', 'Ice', 'Wind')">
 												<span class='natureUpgradeCost' id='natureIceWindCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-air'></span>
-											</span>
+												Convert Ice to Wind
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-certificate'></span>
 									</div>

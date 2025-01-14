@@ -7987,8 +7987,8 @@ function natureTooltip(event, doing, spending, convertTo){
 	}
 	if (tipCost == 0) tipCost = "";
 	else tipCost = (game.empowerments[spending].tokens < tipCost) ? "<span class='red'>" + prettify(tipCost) + " Tokens of " + spending + "</span>" : "<span class='green'>" + prettify(tipCost) + " Tokens of " + spending + "</span>";
-	tooltip(tipTitle, 'customText', event, tipText, tipCost, null, null, null, null, true);
-	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
+	tooltip(tipTitle, 'customText', (usingScreenReader ? "screenRead" : event), tipText, tipCost, null, null, null, null, true);
+	if (!usingScreenReader)	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
 }
 
 function displayNature(){
@@ -19291,15 +19291,36 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 	// Screen Reader Tooltips
 	if (usingScreenReader) {
 		const tooltips = {
-			fightBtn: function (event) { keyTooltip(event, 'Fight', null) }, 
-			pauseFight: function (event) { keyTooltip(event, 'AutoFight', null) }, 
-			mapsBtn: function (event) { keyTooltip(event, 'Maps', null) }, 
-			portalBtn: function (event) { keyTooltip(event, 'Portal', null) }, 
-			repeatBtn: function (event) { keyTooltip(event, 'Repeat Map', null) }, 
-			finishDailyBtn: function (event) { keyTooltip(event, 'Finish Daily', null) }, 
+			// battleside buttons
+			fightBtn: ['Fight', null], 
+			pauseFight: ['AutoFight', null], 
+			mapsBtn: ['Maps', null], 
+			portalBtn: ['Portal', null], 
+			repeatBtn: ['Repeat Map', null], 
+			finishDailyBtn: ['Finish Daily', null], 
+			// nature tab
+			natureInfoPoison: ['description', 'Poison'],
+			natureUpgradePoisonBtn: ['upgrade', 'Poison'],
+			natureStackTransferPoisonBtn: ['stackTransfer', 'Poison'],
+			uberPoisonContainer: ['uberEmpower', 'Poison'],
+			naturePoisonWindBtn: ['convert', 'Poison', 'Wind'],
+			naturePoisonIceBtn: ['convert', 'Poison', 'Ice'],
+			natureInfoWind: ['description', 'Wind'],
+			natureUpgradeWindBtn: ['upgrade', 'Wind'],
+			natureStackTransferWindBtn: ['stackTransfer', 'Wind'],
+			uberWindContainer: ['uberEmpower', 'Wind'],
+			natureWindPoisonBtn: ['convert', 'Wind', 'Poison'],
+			natureWindIceBtn: ['convert', 'Wind', 'Ice'],
+			natureInfoIce: ['description', 'Ice'],
+			natureUpgradeIceBtn: ['upgrade', 'Ice'],
+			natureStackTransferIceBtn: ['stackTransfer', 'Ice'],
+			uberIceContainer: ['uberEmpower', 'Ice'],
+			natureIcePoisonBtn: ['convert', 'Ice', 'Poison'],
+			natureIceWindBtn: ['convert', 'Ice', 'Wind'],
+			
 		}; 
-		for (const [elemID, tooltip] of Object.entries(tooltips)) {
-			document.getElementById(elemID).addEventListener("keydown", tooltip)
+		for (const [elemID, args] of Object.entries(tooltips)) {
+			document.getElementById(elemID).addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
 		}
 	}
 })()
@@ -19308,6 +19329,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
+	Nature Tab ? tooltips 
 	First pass at the mutator screen. Buttons, aria-labels, and ? tooltips on all mutators.
 	achievement alerts (untested).
 	additional cleanup on the battleside buttons.

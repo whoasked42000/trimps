@@ -7229,7 +7229,9 @@ function screenReaderSummary(){
 function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift){
 	// wrapper for tooltips to show screen reader tooltips using onkeydown
 	if (usingScreenReader && keyEvent && keyEvent.key == "?") {
-		tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(4,))
+		const natureTooltips = ["Poison", "Wind", "Ice"]
+		if (natureTooltips.includes(isItIn)) natureTooltip(...Object.values(arguments))
+		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(4,))
 	}
 }
 
