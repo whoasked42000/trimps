@@ -9038,7 +9038,7 @@ function updateGeneratorInfo(){
 	var state = ['Passive', 'Active', 'Hybrid'];
 	state = state[game.global.generatorMode];
 	if (elem == null){
-		document.getElementById('buildingsHere').innerHTML += getGeneratorHtml(true);
+		document.getElementById('buildingsHere').insertAdjacentHTML("beforeend", getGeneratorHtml(true));
 	}
 	changeGeneratorState(null, true);
 	if (game.permanentGeneratorUpgrades.Hybridization.owned) document.getElementById('generatorHybridBtn').style.display = 'inline-block';
@@ -19337,11 +19337,9 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
+	Buildings, Jobs, Upgrades, and Equipment info buttons converted to ? tooltips
+	Hopefully less intrusive mouse-tooltips, work in progress
 	Nature Tab ? tooltips 
-	First pass at the mutator screen. Buttons, aria-labels, and ? tooltips on all mutators.
-	achievement alerts (untested).
-	additional cleanup on the battleside buttons.
-	export read only to avoid accidental button presses.
 
 	
 	This game uses the ? key to display informational tooltips on buttons. 
