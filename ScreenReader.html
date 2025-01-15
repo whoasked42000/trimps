@@ -833,33 +833,33 @@
 							</div>
 							<div id="advMapsRow" class="row">
 								<div id="advLootContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<button class="advMapsTitle thing" onclick="tooltip('Loot', 'advMaps', 'screenRead')">
+									<div class="advMapsTitle">
 										Loot
-									</button>
+									</div>
 									<br/>
 									<input aria-label="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
 									<div id="lootAdvMapsText"></div>
 								</div>
 								<div id="advSizeContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<button class="advMapsTitle thing" onclick="tooltip('Size', 'advMaps', 'screenRead')">
+									<div class="advMapsTitle">
 										Size
-									</button>
+									</div>
 									<br/>
 									<input value="0" aria-label="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
 									<div id="sizeAdvMapsText"></div>
 								</div>
 								<div id="advDifficultyContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<button class="advMapsTitle thing" onclick="tooltip('Difficulty', 'advMaps', 'screenRead')">
+									<div class="advMapsTitle">
 										Difficulty
-									</button>
+									</div>
 									<br/>
 									<input value="0" aria-label="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
 									<div id="difficultyAdvMapsText"></div>
 								</div>
 								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<button class="advMapsTitle thing" onclick="tooltip('Biome', 'advMaps', 'screenRead')">
+									<div class="advMapsTitle">
 										Biome
-									</button>
+									</div>
 									<br/>
 									<select id="biomeAdvMapsSelect" class="advSelect" onchange="updateMapCost()">
 										<option value="Random">Random</option>
@@ -873,9 +873,9 @@
 							<div id="advMapsRow2" class="row">
 								<div class="col-xs-2 mapConfigContainer lowPad"></div>
 								<div class="col-xs-3 mapConfigContainer lowPad">
-									<button class="advMapsTitle thing" onclick="tooltip('Special Modifier', 'advMaps', 'screenRead')">
+									<div class="advMapsTitle">
 										Special Modifier
-									</button>
+									</div>
 									<br/>
 									<select id="advSpecialSelect" class="advSelect" onchange="updateMapCost()">
 									</select>
@@ -888,9 +888,9 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advPerfectUnlocked" style="display: none">
-										<button class="advMapsTitle thing" onclick="tooltip('Perfect Sliders', 'advMaps', 'screenRead')">
+										<div class="advMapsTitle">
 											Perfect Sliders
-										</button>
+										</div>
 										<br/>
 										<span id="advPerfectCheckbox" role='checkbox' tabindex=0 class="icomoon icon-checkbox-unchecked niceCheckbox" aria-checked="false" data-checked="false" onclick="swapNiceCheckbox(this); updateMapNumbers()"></span>
 									</div>
@@ -903,9 +903,9 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advExtraLevelUnlocked" style="display: none">
-										<button class="advMapsTitle thing" onclick="tooltip('Extra Zones', 'advMaps', 'screenRead')">
+										<div class="advMapsTitle">
 											Extra Zones
-										</button>
+										</div>
 										<br/>
 										<select id="advExtraLevelSelect" class="advSelect" onchange="updateMapCost()"></select>
 									</div>
@@ -933,12 +933,12 @@
 									</div>
 								</div>
 								<div id="selectMapBtns">
-									<span id="selectMapBtn" role="button" class="workBtn pointer noselect infoColor selectMapBtn" style="visibility: hidden" onclick="runMap()">
+									<button id="selectMapBtn" class="workBtn pointer noselect infoColor selectMapBtn" style="visibility: hidden" onclick="runMap()">
 										Run Map
-									</span>
-									<span id="recycleMapBtn" role="button" class="workBtn pointer noselect dangerColor selectMapBtn" style="visibility: hidden" onclick="recycleMap()">
+									</button>
+									<button id="recycleMapBtn" class="workBtn pointer noselect dangerColor selectMapBtn" style="visibility: hidden" onclick="recycleMap()">
 										Recycle Map
-									</span>
+									</button>
 								</div>
 								</div>
 								<div id="mapStatsCol1" class="col-xs-2 mapStatsCol">

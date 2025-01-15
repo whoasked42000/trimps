@@ -19317,7 +19317,14 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 			uberIceContainer: ['uberEmpower', 'Ice'],
 			natureIcePoisonBtn: ['convert', 'Ice', 'Poison'],
 			natureIceWindBtn: ['convert', 'Ice', 'Wind'],
-			
+			// Map Chamber
+			advSpecialSelect: ['Special Modifier', 'advMaps'],
+			advPerfectCheckbox: ['Perfect Sliders', 'advMaps'],
+			advExtraLevelSelect: ['Extra Zones', 'advMaps'],
+			biomeAdvMapsSelect: ['Biome', 'advMaps'],
+			difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
+			sizeAdvMapsRange: ['Size', 'advMaps'],
+			lootAdvMapsRange: ['Loot', 'advMaps'],
 		}; 
 		for (const [elemID, args] of Object.entries(tooltips)) {
 			document.getElementById(elemID).addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
