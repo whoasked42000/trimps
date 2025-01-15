@@ -7987,8 +7987,9 @@ function natureTooltip(event, doing, spending, convertTo){
 	}
 	if (tipCost == 0) tipCost = "";
 	else tipCost = (game.empowerments[spending].tokens < tipCost) ? "<span class='red'>" + prettify(tipCost) + " Tokens of " + spending + "</span>" : "<span class='green'>" + prettify(tipCost) + " Tokens of " + spending + "</span>";
+	if (usingScreenReader && event == "update") return; // don't do updates for screenreaders
 	tooltip(tipTitle, 'customText', (usingScreenReader ? "screenRead" : event), tipText, tipCost, null, null, null, null, true);
-	if (!usingScreenReader)	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
+	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
 }
 
 function displayNature(){
@@ -16858,7 +16859,7 @@ function costUpdatesTimeout() {
     checkButtons("equipment");
     checkButtons("upgrades");
     checkTriggers();
-	if (tooltipUpdateFunction) tooltipUpdateFunction();
+	if (tooltipUpdateFunction && !usingScreenReader) tooltipUpdateFunction();
 	setTimeout(costUpdatesTimeout, 250);
 }
 
