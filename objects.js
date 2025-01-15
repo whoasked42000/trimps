@@ -3897,6 +3897,9 @@ var autoBattle = {
     },
     hideMode: false,
     popup: function(updateOnly, statsOnly, itemsOnly, leaveMode, fromBattle){
+		// !game.global.lockTooltip does not work as expected with screenreaders, but checking to see if SA is the last tooltip and if there is a tooltip displayed is effectively the same thing for both (I think? I hope? It looks like it is.)
+		// Figuring out why lockTooltip acts inappropriately on SR version is the better solution, but the tooltip code scares me. A lot. 
+		let SAActive = lastTooltipTitle == "Spire Assault" && document.getElementById("tooltipDiv").style.display == "block"
         if (fromBattle){
             if (this.popupMode == "bonuses" && !this.updateBonusPrices()){
                 itemsOnly = true;
@@ -3912,7 +3915,8 @@ var autoBattle = {
             this.hideMode = false;
             this.confirmUndo = false;
         }
-        if ((updateOnly || itemsOnly) && (lastTooltipTitle != "Spire Assault" || !game.global.lockTooltip)) return;
+		
+        if ((updateOnly || itemsOnly) && !SAActive) return; 
         if (usingRealTimeOffline){
             cancelTooltip();
             return;
@@ -3937,7 +3941,7 @@ var autoBattle = {
         var topText = prettify(this.dust) + " Dust (" + prettify(dustPs) + " per sec)" + shardText + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + ((this.settings.practice.enabled == 1) ? "<b style='color: #921707'>Practicing</b>" : ((this.enemyLevel == this.maxEnemyLevel) ? ((this.maxEnemyLevel == 150) ? "Farming (Max Level)" : "Kill " + (this.nextLevelCount() - this.enemiesKilled)) : "Farming")) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enemies Killed: " + this.sessionEnemiesKilled + "&nbsp;" + pctWon + "&nbsp;&nbsp;&nbsp;Fights Lost: " + this.sessionTrimpsKilled + "<br/>Enemy Level " + this.enemy.level + ((this.profile) ? " (" + this.profile + ")" : "") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         var buttons = "";
 
-        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><button id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto noselect'>- Decrease Enemy Level -</button><button onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</button><button onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</button><button id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></button><button id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></button></div>";
+        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><button id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto noselect'>- Decrease Enemy Level -</button><button onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</button><button onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</button><button aria-label='Help' id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></button><button aria-label='Close' id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></button></div>";
         text = "<div class='noselect'><div id='autoDust'>" + topText + "</div>" + buttons + "<div class='autoBattleTopName'>Huffy</div><div class='autoBattleTopName'>Enemy</div>";
         if (updateOnly || itemsOnly) document.getElementById('autoDust').innerHTML = topText;
         var trimpAttackTime = (this.trimp.attackSpeed);
@@ -4288,7 +4292,7 @@ var autoBattle = {
         if (itemsElem){
             scrollTop = itemsElem.scrollTop;
         }
-        if (!(itemsOnly && itemsElem)) {cancelTooltip(); tooltip('confirm', null, 'update', text, '', 'Spire Assault', 'Close', false, true)}
+		if (!(itemsOnly && itemsElem)) { cancelTooltip(); tooltip('confirm', null, 'update', text, '', 'Spire Assault', 'Close', false, true)}
         if (!(updateOnly && statsOnly)) this.updatePopupBtns();
         if (scrollTop > 0){
             itemsElem = document.getElementById('autoItemsDiv');

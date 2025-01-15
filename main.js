@@ -19290,43 +19290,44 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
         }
     })
 	// Screen Reader Tooltips
+	// This could be used to make mouseover events too, to get them out of the html files
+	const tooltips = {
+		// battleside buttons
+		fightBtn: ['Fight', null], 
+		pauseFight: ['AutoFight', null], 
+		mapsBtn: ['Maps', null], 
+		portalBtn: ['Portal', null], 
+		repeatBtn: ['Repeat Map', null], 
+		finishDailyBtn: ['Finish Daily', null], 
+		// nature tab, these have additional handling required
+		natureInfoPoison: ['description', 'Poison'],
+		natureUpgradePoisonBtn: ['upgrade', 'Poison'],
+		natureStackTransferPoisonBtn: ['stackTransfer', 'Poison'],
+		uberPoisonContainer: ['uberEmpower', 'Poison'],
+		naturePoisonWindBtn: ['convert', 'Poison', 'Wind'],
+		naturePoisonIceBtn: ['convert', 'Poison', 'Ice'],
+		natureInfoWind: ['description', 'Wind'],
+		natureUpgradeWindBtn: ['upgrade', 'Wind'],
+		natureStackTransferWindBtn: ['stackTransfer', 'Wind'],
+		uberWindContainer: ['uberEmpower', 'Wind'],
+		natureWindPoisonBtn: ['convert', 'Wind', 'Poison'],
+		natureWindIceBtn: ['convert', 'Wind', 'Ice'],
+		natureInfoIce: ['description', 'Ice'],
+		natureUpgradeIceBtn: ['upgrade', 'Ice'],
+		natureStackTransferIceBtn: ['stackTransfer', 'Ice'],
+		uberIceContainer: ['uberEmpower', 'Ice'],
+		natureIcePoisonBtn: ['convert', 'Ice', 'Poison'],
+		natureIceWindBtn: ['convert', 'Ice', 'Wind'],
+		// Map Chamber
+		advSpecialSelect: ['Special Modifier', 'advMaps'],
+		advPerfectCheckbox: ['Perfect Sliders', 'advMaps'],
+		advExtraLevelSelect: ['Extra Zones', 'advMaps'],
+		biomeAdvMapsSelect: ['Biome', 'advMaps'],
+		difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
+		sizeAdvMapsRange: ['Size', 'advMaps'],
+		lootAdvMapsRange: ['Loot', 'advMaps'],
+	}; 
 	if (usingScreenReader) {
-		const tooltips = {
-			// battleside buttons
-			fightBtn: ['Fight', null], 
-			pauseFight: ['AutoFight', null], 
-			mapsBtn: ['Maps', null], 
-			portalBtn: ['Portal', null], 
-			repeatBtn: ['Repeat Map', null], 
-			finishDailyBtn: ['Finish Daily', null], 
-			// nature tab
-			natureInfoPoison: ['description', 'Poison'],
-			natureUpgradePoisonBtn: ['upgrade', 'Poison'],
-			natureStackTransferPoisonBtn: ['stackTransfer', 'Poison'],
-			uberPoisonContainer: ['uberEmpower', 'Poison'],
-			naturePoisonWindBtn: ['convert', 'Poison', 'Wind'],
-			naturePoisonIceBtn: ['convert', 'Poison', 'Ice'],
-			natureInfoWind: ['description', 'Wind'],
-			natureUpgradeWindBtn: ['upgrade', 'Wind'],
-			natureStackTransferWindBtn: ['stackTransfer', 'Wind'],
-			uberWindContainer: ['uberEmpower', 'Wind'],
-			natureWindPoisonBtn: ['convert', 'Wind', 'Poison'],
-			natureWindIceBtn: ['convert', 'Wind', 'Ice'],
-			natureInfoIce: ['description', 'Ice'],
-			natureUpgradeIceBtn: ['upgrade', 'Ice'],
-			natureStackTransferIceBtn: ['stackTransfer', 'Ice'],
-			uberIceContainer: ['uberEmpower', 'Ice'],
-			natureIcePoisonBtn: ['convert', 'Ice', 'Poison'],
-			natureIceWindBtn: ['convert', 'Ice', 'Wind'],
-			// Map Chamber
-			advSpecialSelect: ['Special Modifier', 'advMaps'],
-			advPerfectCheckbox: ['Perfect Sliders', 'advMaps'],
-			advExtraLevelSelect: ['Extra Zones', 'advMaps'],
-			biomeAdvMapsSelect: ['Biome', 'advMaps'],
-			difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
-			sizeAdvMapsRange: ['Size', 'advMaps'],
-			lootAdvMapsRange: ['Loot', 'advMaps'],
-		}; 
 		for (const [elemID, args] of Object.entries(tooltips)) {
 			document.getElementById(elemID).addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
 		}
@@ -19337,9 +19338,9 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
+	Spire Assault!
 	Buildings, Jobs, Upgrades, and Equipment info buttons converted to ? tooltips
 	Hopefully less intrusive mouse-tooltips, work in progress
-	Nature Tab ? tooltips 
 
 	
 	This game uses the ? key to display informational tooltips on buttons. 
