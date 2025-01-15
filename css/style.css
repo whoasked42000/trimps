@@ -6923,6 +6923,10 @@ sup{
 	text-align: center;
 }
 
+#abLevelButtons button:focus{
+	color: white;
+}
+
 .autoItemUpgrade{
 	border: 1px solid #5e5de8;
 	background-color: #090792;
@@ -6938,6 +6942,10 @@ sup{
 .autoItemUpgrade:hover{
 	border: 1px solid #3f3fa0;
 	background-color: #060472;
+	color: white;
+}
+
+#autoBattleMenuButtons .btn-lg:focus {
 	color: white;
 }
 
@@ -7042,6 +7050,7 @@ sup{
 	height: 9.5em;
 	border-color: #918f8f;
 	font-size: 0.9vw;
+	background: inherit;
 }
 
 #Extra_LimbsBonusBox{
@@ -7191,7 +7200,10 @@ sup{
 	position: absolute; 
 	font-size: 2.5em; 
 	color: #090792;
-	cursor: pointer;
+	cursor: pointer;	
+    background: inherit;
+    border-width: 0;
+
 }
 
 #abCloseBtn{
@@ -7200,7 +7212,10 @@ sup{
 	position: absolute;
 	font-size: 2.7em;
 	cursor: pointer;
-	color: #921707;
+	color: #921707;	
+    background: inherit;
+    border-width: 0;
+
 }
 
 .ringContainer{

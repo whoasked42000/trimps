@@ -3797,7 +3797,7 @@ var autoBattle = {
             if (this.rings.level < 15) text += "Unlock another slot at Level 15!"
             
         }
-        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><span class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)</span><br/>";
+        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><button class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)</button><br/>";
         text += "Every level increases stats of all mods on The Ring.<br/>Every 10 levels, gains a bigger boost in power!<br/>"
         if (this.rings.level < 10) text += "Gains status chance starting at Level 10.<br/>" 
         text += "</div>";
@@ -3937,7 +3937,7 @@ var autoBattle = {
         var topText = prettify(this.dust) + " Dust (" + prettify(dustPs) + " per sec)" + shardText + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + ((this.settings.practice.enabled == 1) ? "<b style='color: #921707'>Practicing</b>" : ((this.enemyLevel == this.maxEnemyLevel) ? ((this.maxEnemyLevel == 150) ? "Farming (Max Level)" : "Kill " + (this.nextLevelCount() - this.enemiesKilled)) : "Farming")) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enemies Killed: " + this.sessionEnemiesKilled + "&nbsp;" + pctWon + "&nbsp;&nbsp;&nbsp;Fights Lost: " + this.sessionTrimpsKilled + "<br/>Enemy Level " + this.enemy.level + ((this.profile) ? " (" + this.profile + ")" : "") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         var buttons = "";
 
-        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><span id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto'>- Decrease Enemy Level -</span><span onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</span><span onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</span><span id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></span><span id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></span></div>";
+        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><button id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto noselect'>- Decrease Enemy Level -</button><button onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</button><button onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</button><button id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></button><button id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></button></div>";
         text = "<div class='noselect'><div id='autoDust'>" + topText + "</div>" + buttons + "<div class='autoBattleTopName'>Huffy</div><div class='autoBattleTopName'>Enemy</div>";
         if (updateOnly || itemsOnly) document.getElementById('autoDust').innerHTML = topText;
         var trimpAttackTime = (this.trimp.attackSpeed);
@@ -4099,9 +4099,9 @@ var autoBattle = {
         }
         text += "<div id='autoBattleStatsText'>" + statsText + "</div>";
         var itemsText = "Items (" + this.countEquippedItems() + "/" + this.getMaxItems() + " Equipped)"; 
-        text += "<div id='autoBattleMenuButtons'><span id='abItemsBtn' onclick='autoBattle.swapPopup(\"items\")' class='btn btn-lg autoItemUpgrade darkBorder'>" + itemsText + "</span><span onclick='autoBattle.swapPopup(\"bonuses\")' class='btn btn-lg colorNavy'>Bonuses</span><span onclick='autoBattle.swapPopup(\"contracts\")' class='btn btn-lg colorVoidy darkBorder'>Contracts</span><span onclick='autoBattle.swapPopup(\"hidden\")' class='btn btn-lg autoColorOrange darkBorder'>Hidden Items</span><span class='btn btn-lg autoItemHide darkBorder' onclick='autoBattle.toggleHideMode()'>Hide Items</span>";
-        text += "<span id='autoBattleRingBtn' onclick='autoBattle.swapPopup(\"rings\")' style='display: " + ((this.oneTimers.The_Ring.owned) ? 'inline-block' : 'none') + "' class='btn btn-lg autoColorTeal active darkBorder'>The Ring</span>";
-        text += "<span onclick='autoBattle.swapPopup(\"other\")' class='btn btn-lg autoColorGrey active darkBorder'>Misc</span></div>";
+        text += "<div id='autoBattleMenuButtons'><button id='abItemsBtn' onclick='autoBattle.swapPopup(\"items\")' class='btn btn-lg autoItemUpgrade darkBorder'>" + itemsText + "</button><button onclick='autoBattle.swapPopup(\"bonuses\")' class='btn btn-lg colorNavy'>Bonuses</button><button onclick='autoBattle.swapPopup(\"contracts\")' class='btn btn-lg colorVoidy darkBorder'>Contracts</button><button onclick='autoBattle.swapPopup(\"hidden\")' class='btn btn-lg autoColorOrange darkBorder'>Hidden Items</button><button class='btn btn-lg autoItemHide darkBorder' onclick='autoBattle.toggleHideMode()'>Hide Items</button>";
+        text += "<button id='autoBattleRingBtn' onclick='autoBattle.swapPopup(\"rings\")' style='display: " + ((this.oneTimers.The_Ring.owned) ? 'inline-block' : 'none') + "' class='btn btn-lg autoColorTeal active darkBorder'>The Ring</button>";
+        text += "<button onclick='autoBattle.swapPopup(\"other\")' class='btn btn-lg autoColorGrey active darkBorder'>Misc</button></div>";
         var notesElem = document.getElementById('autoBattleNotes');
         if (!notesElem || !itemsOnly) text +=  "<div id='autoBattleNotes'" + ((this.popupMode == "items" || this.popupMode == "hidden") ? "" : " style='display: none'") + ">" + this.notes + "</div>";
         if (this.popupMode == "items" || this.popupMode == "hidden") {
@@ -4136,16 +4136,16 @@ var autoBattle = {
                 
                 var equipClass = (itemObj.equipped) ? "Equipped" : "NotEquipped"; 
                 var upgradeCost = prettify(this.upgradeCost(item)) + " " + this.getCurrencyName(item);
-                line1 += "<div class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</div>";
+                line1 += "<button class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
                 if (this.popupMode == "items"){
                     if (this.hideMode)
-                        line2 += "<div class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</div>";
+                        line2 += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";
                     else if (itemObj.noUpgrade) line2 += "<div class='autoItem autoColorGrey'>Unupgradable</div>"
                     else 
-                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</div>";
+                        line2 += "<button class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
                 }
                 else if (this.popupMode == "hidden")
-                    line2 += "<div class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</div>";
+                    line2 += "<button class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</button>";
                 count++;
                 total++
             }
@@ -4163,7 +4163,7 @@ var autoBattle = {
                 var cost = this.getBonusCost(bonus);
                 var costText = ((!bonusObj.useShards && cost <= this.dust) || (bonusObj.useShards && cost <= this.shards)) ? "green" : "red";
                 costText = "<span id='" + bonus + "BonusPrice' class='" + costText + "'>" + prettify(cost) + " " + ((bonusObj.useShards) ? "Shards" : "Dust") + "</span>";
-                text += "<div id='" + bonus + "BonusBox' onclick='autoBattle.buyBonus(\"" + bonus + "\")' class='autoBonusBox'>" + this.cleanName(bonus) + "<br/>Level: " + bonusObj.level + " - " + costText + "<br/>" + bonusObj.description() + "<br/>Unlimited Purchases</div>";
+                text += "<button id='" + bonus + "BonusBox' onclick='autoBattle.buyBonus(\"" + bonus + "\")' class='autoBonusBox'>" + this.cleanName(bonus) + "<br/>Level: " + bonusObj.level + " - " + costText + "<br/>" + bonusObj.description() + "<br/>Unlimited Purchases</button>";
             }
             var oneCount = 0;
             var ownedItems = this.countOwnedItems();
@@ -4181,7 +4181,7 @@ var autoBattle = {
                     var need = (oneObj.requiredItems - ownedItems);
                     text += "<div class='autoBonusBox autoOneTimerNotOwned' style='padding-top: 2%'><br/>Complete " + need + " more Contract" + needAnS(need) + " to reveal this bonus!</div>";
                 }
-                else text += "<div onclick='autoBattle.buyOneTimer(\"" + oneTime + "\")' class='autoBonusBox autoOneTimerNotOwned'>" + this.cleanName(oneTime) + "<br/>" + costText + "<br/>" + oneObj.description + "</div>";
+                else text += "<button onclick='autoBattle.buyOneTimer(\"" + oneTime + "\")' class='autoBonusBox autoOneTimerNotOwned'>" + this.cleanName(oneTime) + "<br/>" + costText + "<br/>" + oneObj.description + "</button>";
             }
             text += "<br/>";
             for (var oneTime in this.oneTimers){
@@ -4203,8 +4203,8 @@ var autoBattle = {
                 var extraClass = "";
                 if (itemObj.longText) extraClass = " descriptionSm";
                 text += "<div class='contractBox" + accepted + "'><div class='contractTitle'>" + this.cleanName(item) + "</div><div class='contractDescription" + extraClass + "'>" + description + "</div>";
-                if (accepted) text += "<span onclick='autoBattle.abandonContract()' class='btn btn-lg autoItemHide'>Abandon and Refund</span>";
-                else if (!this.activeContract) text += "<span onclick='autoBattle.acceptContract(\"" + item + "\")' class='btn btn-lg colorVoidy'>Accept (" + prettify(this.contractPrice(item)) + " " + this.getCurrencyName(item) + ", Complete a Z" + itemObj.zone + " Void Map)</span>";
+                if (accepted) text += "<button onclick='autoBattle.abandonContract()' class='btn btn-lg autoItemHide'>Abandon and Refund</button>";
+                else if (!this.activeContract) text += "<button onclick='autoBattle.acceptContract(\"" + item + "\")' class='btn btn-lg colorVoidy'>Accept (" + prettify(this.contractPrice(item)) + " " + this.getCurrencyName(item) + ", Complete a Z" + itemObj.zone + " Void Map)</button>";
                 else text += "<span class='btn btn-lg autoColorGrey'>Other Contract in Progress</span>";
                 text += "</div>";
             }
@@ -4219,14 +4219,14 @@ var autoBattle = {
                 var thisSetting = this.settings[setting];
                 if (typeof thisSetting.hideUnless !== 'undefined' && !thisSetting.hideUnless()) continue;
                 var className = (thisSetting.enabled) ? "autoItemEquipped" : "autoItemHide";
-                text += "<span class='btn btn-md " + className + "' onclick='autoBattle.toggleSetting(\"" + setting + "\")'>" + thisSetting.text[thisSetting.enabled] + "</span>";
+                text += "<button class='btn btn-md " + className + "' onclick='autoBattle.toggleSetting(\"" + setting + "\")'>" + thisSetting.text[thisSetting.enabled] + "</button>";
             }
             text += "</div>";
             text += "<div class='abMiscBox'><b style='font-size: 1.1em;'>Undo last change</b><br/>";
             var action = this.lastActions[this.lastActions.length - 1];
             if (action){
-                if (!this.confirmUndo) text += "<span class='btn autoItemUpgrade btn-md' onclick='autoBattle.confirmUndoClicked()'>Undo</span>";
-                else text += "<b>Are you sure?!</b><br/><span class='btn autoItemUpgrade btn-md' onclick='autoBattle.restoreLastAction()'>Yes, Undo</span><span class='btn autoItemHide btn-md' onclick='autoBattle.confirmUndoClicked()'>No, Cancel</span>";
+                if (!this.confirmUndo) text += "<button class='btn autoItemUpgrade btn-md' onclick='autoBattle.confirmUndoClicked()'>Undo</button>";
+                else text += "<b>Are you sure?!</b><br/><button class='btn autoItemUpgrade btn-md' onclick='autoBattle.restoreLastAction()'>Yes, Undo</button><button class='btn autoItemHide btn-md' onclick='autoBattle.confirmUndoClicked()'>No, Cancel</button>";
                 text += "<br/>";
                 if (action[0] == "ring"){
                     text += "Downgrade your ring by " + action[5] + " level" + needAnS(action[5]);
@@ -4248,9 +4248,9 @@ var autoBattle = {
                 var pname = 'p' + x;
                 var preset = this.presets[pname];
                 text += "<div class='abMiscBox preset'><b style='font-size: 1.1em;'>" + this.presets.names[x-1] + "</b><br/>";
-                text += "<span class='btn autoItemEquipped btn-md' onclick='autoBattle.savePreset(\"p" + x + "\")'>Save</span>";
-                if (preset.length) text += "<span class='btn autoItemUpgrade btn-md' onclick='autoBattle.loadPreset(\"p" + x + "\")'>Load</span>";
-                text += "<span class='btn autoColorOrange btn-md' onclick='tooltip(\"Rename SA Preset\", null, \"update\", " + x + ")'>Rename</span>";
+                text += "<button class='btn autoItemEquipped btn-md' onclick='autoBattle.savePreset(\"p" + x + "\")'>Save</button>";
+                if (preset.length) text += "<button class='btn autoItemUpgrade btn-md' onclick='autoBattle.loadPreset(\"p" + x + "\")'>Load</button>";
+                text += "<button class='btn autoColorOrange btn-md' onclick='tooltip(\"Rename SA Preset\", null, \"update\", " + x + ")'>Rename</button>";
                 text += "<div class='presetItems'>";
                 var pname = 'p' + x;
                 var preset = this.presets[pname];
