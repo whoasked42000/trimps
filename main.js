@@ -8086,6 +8086,7 @@ function naturePurchase(doing, spending, convertTo){
 		natureTooltip('update', doing, spending);
 		if (spending == "Wind")
 			unlockFormation(5);
+		if (usingScreenReader) screenReaderAssert(spending + " Enlightenment now active.")
 	}
 }
 
