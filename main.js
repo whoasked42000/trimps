@@ -19326,6 +19326,8 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
 		sizeAdvMapsRange: ['Size', 'advMaps'],
 		lootAdvMapsRange: ['Loot', 'advMaps'],
+		// Misc 
+		boneShrineBtn: ['Bone Shrine', null],
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {

@@ -166,7 +166,7 @@
 				<div class="row resourceRow">
 					<div class="col-xs-6 maxH">
 						<div id="food" class="playerGather">
-							<div id="boneShrineBtn" style="display: none" class="isEmpty noselect" onmouseover="tooltip('Bone Shrine', null, event)" onclick="game.permaBoneBonuses.boosts.consume()" onmouseout="tooltip('hide')"></div>
+							<button id="boneShrineBtn" style="display: none" class="isEmpty noselect" onclick="game.permaBoneBonuses.boosts.consume()"></button>
 							<h1 class="title">Food</h1>
 							<span class="ownedArea bdHover" onclick="getMaxResources('Food')"><span id="foodOwned">0</span> / <span id="foodMax"></span></span>
 							<br/>
@@ -752,17 +752,17 @@
 									<h3><span id="worldName">Zone</span> <span id="worldNumber">1</span><br/><span id="mapBonus"></span></h3>
 							</div>
 							<div class="battleSideBtnContainer">
-							<button class="btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
+							<button class="btn btn-primary fightBtn" id="fightBtn" onclick="fightManual()">
 									Fight
 							</button>
 							</div>
 							<div class="battleSideBtnContainer">
-							<button class="btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
+							<button class="btn btn-danger fightBtn" id="pauseFight" onclick="pauseFight()" style="display: none">
 									AutoFight Off
 							</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<button id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
+								<button id="mapsBtn" class="btn btn-warning fightBtn" style="display: none">
 									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div>
 									<button aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
 										<span class='glyphicon glyphicon-cog'>Configure Maps</span></button>
@@ -774,12 +774,12 @@
 								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<button class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
+								<button class="btn btn-info fightBtn" id="portalBtn" onclick="portalClicked()" style="display: none">
 									Portal
 								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<button class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
+								<button class="btn btn-danger fightBtn" id="repeatBtn" onclick = "repeatClicked()" style="display: none">
 									Repeat Off
 								</button>
 							</div>
@@ -1261,8 +1261,8 @@
 	</div>
 	<div id="achievementPopup" style="display: none">
 		<span class="achievementBtns">
-			<span class="achievementBtnGo icomoon icon-newspaper-o" onclick="toggleAchievementWindow()"></span>
-			<span class="achievementBtnClose icomoon icon-close" onclick="closeAchievementPopup()"></span>	
+			<button class="achievementBtnGo icomoon icon-newspaper-o" aria-label="View Achievements" onclick="toggleAchievementWindow()"></button>
+			<button class="achievementBtnClose icomoon icon-close" aria-label="Close" onclick="closeAchievementPopup()"></button>	
 		</span>
 		<div class="row">
 			<div id="achievementPopupIconContainer" class="col-xs-3 lowPad">
@@ -1278,8 +1278,8 @@
 		<div id="heirloomsPopupBtns">
 			You Found an Heirloom!
 
-			<span class="heirloomPopupBtn icomoon icon-close" onclick="closeHeirPopup()"></span>
-			<span class="heirloomPopupBtn icomoon icon-archive" onclick="toggleHeirlooms(); closeHeirPopup();"></span>
+			<button class="heirloomPopupBtn icomoon icon-close" aria-label="Close" onclick="closeHeirPopup()"></button>
+			<button class="heirloomPopupBtn icomoon icon-archive" aria-label="View Heirlooms" onclick="toggleHeirlooms(); closeHeirPopup();"></button>
 		</div>
 		<div id="heirloomsPopupHere">
 		
