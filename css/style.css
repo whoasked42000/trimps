@@ -6820,9 +6820,14 @@ sup{
 	width: calc((63.66% - 24px) / 3)
 }
 
+.autoItemContainer{
+	width: calc((100% - 1.4em - 2px) / 7);
+	display: inline-block;
+}
+
 .autoItem{
 	display: inline-block;
-	width: calc((100% - 1.4em - 2px) / 7);
+	width: 100%;
 	text-align: center;
 	cursor: pointer;
 	padding: 0.2em;
@@ -6832,7 +6837,7 @@ sup{
 	margin-top: 0.1em;
 }
 
-.autoItem:first-child{
+.autoItemContainer:first-child{
 	margin-left: calc(0.1em + 1px);
 }
 
@@ -7470,3 +7475,11 @@ input[type=range]{background: transparent;}
 	   padding: 0.1vw;
 	}
 }
+
+.visually-hidden {
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+  }

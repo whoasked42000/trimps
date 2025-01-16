@@ -4122,9 +4122,9 @@ var autoBattle = {
             swapClass('mode', extraClass, itemsElem)
         }
         if (this.popupMode == "items" || this.popupMode == "hidden"){
+			text += "<h1 class='visually-hidden'>Spire Assault Items</h1>"
             var itemList = this.getItemOrder();
-            var line1 = "";
-            var line2 = "";
+			var line = ""
             var count = 1;
             var total = 0;
             for (x = 0; x < itemList.length; x++){
@@ -4133,33 +4133,33 @@ var autoBattle = {
                 if (!itemObj.owned) continue;
                 if (itemObj.hidden != (this.popupMode == "hidden")) continue;
                 if (count > 7){
-                    text += "<div>" + line1 + "</div><div>" + line2 + "</div>";
-                    line1 = "";
-                    line2 = "";
+                    text += "<div>" + line + "</div>";
+					line = ""
                     count = 1;
                 }
                 
                 var equipClass = (itemObj.equipped) ? "Equipped" : "NotEquipped"; 
                 var upgradeCost = prettify(this.upgradeCost(item)) + " " + this.getCurrencyName(item);
-                line1 += "<button id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
+				line += "<div class='autoItemContainer'><button id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
                 if (this.popupMode == "items"){
                     if (this.hideMode)
-                        line2 += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";
-                    else if (itemObj.noUpgrade) line2 += "<button class='autoItem autoColorGrey'>Unupgradable</button>"
+                        line += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";
+                    else if (itemObj.noUpgrade) line += "<button class='autoItem autoColorGrey' aria-disabled=true>Unupgradable</button>"
                     else 
-                        line2 += "<button id='itemUpgrade" + item + "'class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", true, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
+                        line += "<button id='itemUpgrade" + item + "'class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", true, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
                 }
                 else if (this.popupMode == "hidden")
-                    line2 += "<button class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</button>";
+                    line += "<button class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</button>";
+				line += "</div>"
                 count++;
                 total++
             }
             if (total == 0){
-                if (this.popupMode == "hidden") line1 += "<br/><b style='color: white; padding: 2%;'>You have no hidden items right now, but can hide items you're no longer using using the 'Hide Items' button above.</b>";
-                else line1 += "<br/><b>All of your items are hidden!</b>";
+                if (this.popupMode == "hidden") line += "<br/><b style='color: white; padding: 2%;'>You have no hidden items right now, but can hide items you're no longer using using the 'Hide Items' button above.</b>";
+                else line += "<br/><b>All of your items are hidden!</b>";
             }
 
-            text += "<div>" + line1 + "</div><div>" + line2 + "</div><br/></div>";
+            text += "<div>" + line + "</div><br/></div>";
         }
         else if (this.popupMode == "bonuses"){
             for (var bonus in this.bonuses){
