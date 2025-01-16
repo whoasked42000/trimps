@@ -6945,7 +6945,11 @@ sup{
 	color: white;
 }
 
-#autoBattleMenuButtons .btn-lg:focus {
+#autoBattleMenuButtons .btn:focus {
+	color: white;
+}
+
+#autoItemsDiv .btn:focus {
 	color: white;
 }
 

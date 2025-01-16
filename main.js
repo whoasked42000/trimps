@@ -19338,7 +19338,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
-	Spire Assault!
+	Spire Assault! Including ? tooltips for items.
 	Buildings, Jobs, Upgrades, and Equipment info buttons converted to ? tooltips
 	Hopefully less intrusive mouse-tooltips, work in progress
 

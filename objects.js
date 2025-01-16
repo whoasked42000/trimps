@@ -3472,7 +3472,8 @@ var autoBattle = {
         this.saveLastAction('oneTimer', what, cost);
         this.popup(true, false, true);
     },
-    hoverItem: function(item, upgrade){
+    hoverItem: function(item, upgrade, event){
+		if (event && event.key && event.key != "?") return; // Screenreader keytooltip support, 
         var itemObj = this.items[item];
         if (!itemObj) return;
         if (upgrade){
@@ -4107,7 +4108,7 @@ var autoBattle = {
         text += "<button id='autoBattleRingBtn' onclick='autoBattle.swapPopup(\"rings\")' style='display: " + ((this.oneTimers.The_Ring.owned) ? 'inline-block' : 'none') + "' class='btn btn-lg autoColorTeal active darkBorder'>The Ring</button>";
         text += "<button onclick='autoBattle.swapPopup(\"other\")' class='btn btn-lg autoColorGrey active darkBorder'>Misc</button></div>";
         var notesElem = document.getElementById('autoBattleNotes');
-        if (!notesElem || !itemsOnly) text +=  "<div id='autoBattleNotes'" + ((this.popupMode == "items" || this.popupMode == "hidden") ? "" : " style='display: none'") + ">" + this.notes + "</div>";
+        if (!notesElem || !itemsOnly) text +=  "<div aria-live='polite' id='autoBattleNotes'" + ((this.popupMode == "items" || this.popupMode == "hidden") ? "" : " style='display: none'") + ">" + this.notes + "</div>";
         if (this.popupMode == "items" || this.popupMode == "hidden") {
             if (notesElem) notesElem.style.display = 'block';
         }
@@ -4140,13 +4141,13 @@ var autoBattle = {
                 
                 var equipClass = (itemObj.equipped) ? "Equipped" : "NotEquipped"; 
                 var upgradeCost = prettify(this.upgradeCost(item)) + " " + this.getCurrencyName(item);
-                line1 += "<button class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
+                line1 += "<button id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
                 if (this.popupMode == "items"){
                     if (this.hideMode)
                         line2 += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";
-                    else if (itemObj.noUpgrade) line2 += "<div class='autoItem autoColorGrey'>Unupgradable</div>"
+                    else if (itemObj.noUpgrade) line2 += "<button class='autoItem autoColorGrey'>Unupgradable</button>"
                     else 
-                        line2 += "<button class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
+                        line2 += "<button id='itemUpgrade" + item + "'class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", true, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
                 }
                 else if (this.popupMode == "hidden")
                     line2 += "<button class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</button>";
