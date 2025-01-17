@@ -2296,7 +2296,7 @@ function displayPortalUpgrades(fromTab){
 	var elem = document.getElementById("portalUpgradesHere");
 	elem.innerHTML = "";
 	if (!fromTab) game.resources.helium.totalSpentTemp = 0;
-	for (var what in game.portal){
+	for (let what in game.portal){
 		var itemName = what.replace('_', ' ');
 		var portUpgrade = game.portal[what];
 		if (!fromTab){
@@ -2311,9 +2311,11 @@ function displayPortalUpgrades(fromTab){
 		if (what == "Greed" || what == "Tenacity") level += game.portal.Masterfulness.radLevel + game.portal.Masterfulness.levelTemp;
 		var html = "";
 		if (usingScreenReader){
-			html += '<button class="thing noSelect pointer jobThing" onclick="tooltip(\'' + what + '\',\'portal\',\'screenRead\')">' + itemName + ' Info</button>';
+			html += '<button class="';
 		}
-		html += '<div role="button" onmouseover="tooltip(\'' + what + '\',\'portal\',event)" onmouseout="tooltip(\'hide\')" class="';
+		else {
+			html += '<button onmouseover="tooltip(\'' + what + '\',\'portal\',event)" onmouseout="tooltip(\'hide\')" class="';
+		}
 		var htmlClass = "noselect pointer portalThing thing perkColorOff";
 		if (usingScreenReader) htmlClass += " screenReaderPerk";
 		if (game.options.menu.detailedPerks.enabled == 1) htmlClass += " detailed";
@@ -2331,16 +2333,20 @@ function displayPortalUpgrades(fromTab){
 		html += '<br/>Spent: <span id="' + what + 'Spent">' + prettify(spentRes) + '</span>';
 		}
 		else html += '<br/><span class="thingOwned">Lv:&nbsp;<span id="' + what + 'Owned">' + ((game.options.menu.formatPerkLevels.enabled) ? prettify(level) : level) + '</span>';
-		html += '</span></div>';
+		html += '</span></button>';
 		if (what == "Equality"){
 			var state = game.portal.Equality.scalingActive ? "On" : "Off";
-			html += '<div role="button" onmouseover="tooltip(\'Equality Scaling\', null, event)" onmouseout="tooltip(\'hide\')" class="' + htmlClass + ' equalityColor' + state + '" id="equalityScaling" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br/><span class="thingOwned"><span id="equalityScalingState">' + state + '</span>';
+			html += '<button onmouseover="tooltip(\'Equality Scaling\', null, event)" onmouseout="tooltip(\'hide\')" class="' + htmlClass + ' equalityColor' + state + '" id="equalityScaling" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br/><span class="thingOwned"><span id="equalityScalingState">' + state + '</span>';
 			if (game.options.menu.detailedPerks.enabled) html += "<br/>&nbsp;<br/>&nbsp;";
-			html += "</span></div>";
+			html += "</span></button>";
 		}
-		elem.innerHTML += html;
+		elem.insertAdjacentHTML("beforeend", html)
 		updatePerkColor(what);
 		updatePerkLevel(what);
+		if (usingScreenReader) { 
+			if (what == 'Equality') { document.getElementById('equalityScaling').addEventListener("keydown", function (event) {keyTooltip(event, 'Equality Scaling', "portal",event)}) }
+			document.getElementById(what).addEventListener("keydown", function (event) {keyTooltip(event, what, "portal",event)}) 
+		}
 	}
 }
 
@@ -3260,7 +3266,7 @@ function buyPortalUpgrade(what){
 		toBuy.heliumSpentTemp += price;
 		canSpend -= price;
 		updatePerkLevel(what);
-		tooltip(what, "portal", "update");
+		if(!usingScreenReader) tooltip(what, "portal", "update");
 		document.getElementById("portalHeliumOwned").innerHTML = prettify(canSpend);
 		enablePerkConfirmBtn();
 		if (game.global.buyAmt == "Max") displayPortalUpgrades(true);
@@ -19341,10 +19347,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
-	Spire Assault! Including ? tooltips for items.
-	Buildings, Jobs, Upgrades, and Equipment info buttons converted to ? tooltips
-	Hopefully less intrusive mouse-tooltips, work in progress
-
+	Perk/Portal Screen ? tooltips.
 	
 	This game uses the ? key to display informational tooltips on buttons. 
 	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)
