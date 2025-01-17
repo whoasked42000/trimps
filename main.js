@@ -7159,14 +7159,12 @@ function selectMod(which, fromPopup){
 	var upgradeBtn100 = document.getElementById("modUpgradeBtn100");
 	var upgradeCost10 = getModUpgradeCost(heirloom, which, 10);
 	var upgradeCost100 = getModUpgradeCost(heirloom, which, 100);
-	var newClass = (replaceCost > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, replaceBtn);
-	newClass = (upgradeCost > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn);
-	newClass = (upgradeCost10 > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn10);
-	newClass = (upgradeCost100 > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn100);
+	for (const [cost, elem] of [[replaceCost, replaceBtn], [upgradeCost, upgradeBtn], [upgradeCost10, upgradeBtn10], [upgradeCost100, upgradeBtn100]]) {
+		let cantAfford = (cost > resourceCount) 
+		let newClass = cantAfford ? "heirloomBtnInactive" : "heirloomBtnActive";
+		swapClass("heirloomBtn", newClass, elem);
+		elem.setAttribute("aria-disabled", cantAfford)
+	}
 	replaceBtn.innerHTML = (mod[0] == "empty") ? "Add (" + prettify(replaceCost) + " " + resourceShort + ")" : "Replace (" + prettify(replaceCost) + " " + resourceShort + ")";
 	var step = (typeof modConfig.steps !== 'undefined') ? modConfig.steps : game.heirlooms.defaultSteps;
 	step = step[heirloom.rarity];
@@ -19333,8 +19331,61 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
 		sizeAdvMapsRange: ['Size', 'advMaps'],
 		lootAdvMapsRange: ['Loot', 'advMaps'],
-		// Misc 
+		// All other in-html tooltips (auto generated-ish)
 		boneShrineBtn: ['Bone Shrine', null],
+		portalTimer: ['Pause the game', 'customText', game.options.menu['pauseGame'].description],
+		fluffyBox: ['Fluffy', null],
+		heliumPh: ['Helium Per Hour', null],
+		turkimpBuff: ['Well Fed', null],
+
+		talentsTab: ['Mastery', null],
+		equalityTab: ['Equality Scaling', null, true],
+		natureTab: ['Empowerments of Nature', null],
+		tab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your resources with each purchase. Click twice to customize.'],
+
+		autoStructureBtn: ["AutoStructure", null],
+		autoStorageBtn: ['AutoStorage', 'customText', 'Enabling this will cause your Trimps to automatically add a storage building to the queue if you reach max capacity. This will work on and offline if enabled.'],
+		autoJobsBtn: ["AutoJobs", null],
+		fireBtn: ['Fire Trimps', null],
+		autoGoldenBtn: ['AutoGold', null],
+		autoPrestigeBtn: ['AutoPrestige', null],
+		autoUpgradeBtn: ['AutoUpgrade', null],
+		autoEquipBtn: ["AutoEquip", null],
+		talentRespecBtn: ["Respec Masteries", null],
+
+		formation0: ['No Formation', 'customText', 'Clear your formations, return to normal stats, and derp around the battlefield. (Hotkeys: X or 1)'],
+		formation1: ['Heap Formation', 'customText', 'Trimps gain 4x health but lose half of their attack and block. (Hotkeys: H or 2)'],
+		formation2: ['Dominance Formation', 'customText', 'Trimps gain 4x attack but lose half of their health and block. (Hotkeys: D or 3)'],
+		formation3: ['Barrier Formation', 'customText', 'Trimps gain 4x block and 50% block pierce reduction but lose half of their health and attack. (Hotkeys: B or 4)'],
+		formation4: ['Scryer Formation', null],
+
+		chainHolder: ['MagnetoShriek', null],
+		badCanCrit: ['Crushing Blows', 'customText', 'Your current health is higher than your block, making you vulnerable to critical strikes from your enemies. Better fix that...'],
+
+		advMapsHideBtn: ['Show/Hide Map Config', 'advMaps'],
+		advMapsPreset1: ['Map Preset', 'advMaps'],
+		advMapsPreset2: ['Map Preset', 'advMaps'],
+		advMapsPreset3: ['Map Preset', 'advMaps'],
+		advMapsPreset4: ['Map Preset', 'advMaps'],
+		advMapsPreset5: ['Map Preset', 'advMaps'],
+		advMapsSaveBtn: ['Save Map Settings', 'advMaps'],	
+		advMapsResetBtn: ['Reset Map Settings', 'advMaps'],											
+		advMapsRecycleBtn: ['Recycle All', null],
+
+		swapPortalUniverseBtn: ['Change Universe', null],
+		presetTab1: ['Perk Preset', null, 1],
+		presetTab2: ['Perk Preset', null, 2],
+		presetTabSave: ['Perk Preset', null, 'Save'],
+		presetTabLoad: ['Perk Preset', null, 'Load'],							
+		presetTabRename: ['Perk Preset', null, 'Rename'],
+		presetTabExport: ['Perk Preset', null, 'Export'],
+		presetTabImport: ['Perk Preset', null, 'Import'],
+		ptab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your Helium with each purchase. Click twice to customize.'],
+		challengeSquaredViewBtn: ['Challenge2', null, true],
+		inPortalC2Button: ['Challenge2', null],
+		respecPortalBtn: ['Respec', null],
+		swapToCurrentChallengeBtn: ['View Current Challenge', 'customText', 'Swap the Challenge Selection pane to instead display your current challenge, or vice versa'],
+		respecMutatorsBtn: ['Respec Mutators', null],
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
@@ -19347,6 +19398,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
+	Buttons everywhere, ? tooltips everywhere, new headings and heirloom QoL.
 	Perk/Portal Screen ? tooltips.
 	
 	This game uses the ? key to display informational tooltips on buttons. 

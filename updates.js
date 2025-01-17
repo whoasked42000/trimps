@@ -7238,7 +7238,7 @@ function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, n
 	if (usingScreenReader && keyEvent && keyEvent.key == "?") {
 		const natureTooltips = ["Poison", "Wind", "Ice"]
 		if (natureTooltips.includes(isItIn)) natureTooltip(...Object.values(arguments))
-		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(4,))
+		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(3,))
 	}
 }
 
