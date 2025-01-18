@@ -4139,8 +4139,9 @@ var autoBattle = {
                 }
                 
                 var equipClass = (itemObj.equipped) ? "Equipped" : "NotEquipped"; 
+				
                 var upgradeCost = prettify(this.upgradeCost(item)) + " " + this.getCurrencyName(item);
-				line += "<div class='autoItemContainer'><button id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</button>";
+				line += "<div class='autoItemContainer'><div tabindex=0 id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' role=checkbox aria-checked='" + itemObj.equipped +  "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</div>";
                 if (this.popupMode == "items"){
                     if (this.hideMode)
                         line += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";

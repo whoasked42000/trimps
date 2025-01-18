@@ -19389,7 +19389,9 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
-			document.getElementById(elemID).addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
+			let elem = document.getElementById(elemID);
+			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
+			elem.setAttribute("tabindex", 0)
 		}
 	}
 })()
@@ -19398,8 +19400,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 screenReaderAssert(
 	`
 	Latest updates: 
-	Buttons everywhere, ? tooltips everywhere, new headings and heirloom QoL.
-	Perk/Portal Screen ? tooltips.
+	Spire Assault equipment checkboxes. Less buttons everywhere, tabindex on tooltip iteractables.
 	
 	This game uses the ? key to display informational tooltips on buttons. 
 	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)
