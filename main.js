@@ -19229,40 +19229,44 @@ function gameLoop(makeUp, now) {
 	if (!makeUp && !usingRealTimeOffline && typeof steamCanvas !== 'undefined') steamCanvasContext.clearRect(0, 0, steamCanvas.width, steamCanvas.height);
 }
 
-function runEverySecond(makeUp){
-	//Change game state
-	if (game.global.challengeActive == "Decay" || game.global.challengeActive == "Melt") updateDecayStacks(true);
-	if (game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.pressure !== 'undefined') dailyModifiers.pressure.addSecond();
-	if (game.global.challengeActive == "Archaeology") game.challenges.Archaeology.checkAutomator(true);
-	if (game.global.autoStorage == true) autoStorage();
+function runEverySecond(makeUp) {
+	// Change game state.
+	if (challengeActive('Decay') || challengeActive('Melt')) updateDecayStacks(true);
+	if (challengeActive('Daily') && typeof game.global.dailyChallenge.pressure !== 'undefined') dailyModifiers.pressure.addSecond();
+	if (challengeActive('Archaeology')) game.challenges.Archaeology.checkAutomator(true);
+	if (game.global.autoStorage) autoStorage();
 	if (game.global.sugarRush > 0) sugarRush.tick();
-	//Achieves
-	checkAchieve("totalGems");
-	if (game.buildings.Trap.owned > 1000000) giveSingleAchieve("Hoarder");
-	if (Math.floor(game.stats.heliumHour.value()) == 1337) {
-		if (game.global.universe == 1)
-			giveSingleAchieve("Elite Feat");
-		if (game.global.universe == 2)
-			giveSingleAchieve("Eliter Feat");
+
+	// Achieves.
+	checkAchieve('totalGems');
+	if (game.buildings.Trap.owned > 1000000) giveSingleAchieve('Hoarder');
+	const heHr = game.stats.heliumHour.value();
+	if (Math.floor(heHr) === 1337) {
+		if (game.global.universe === 1) giveSingleAchieve('Elite Feat');
+		if (game.global.universe === 2) giveSingleAchieve('Eliter Feat');
 	}
-	//Display and stats
+
+	// Display and stats.
 	if (savedOfflineText && !game.global.lockTooltip) {
-		tooltip("Trustworthy Trimps", null, "update", savedOfflineText);
-		savedOfflineText = "";
+		tooltip('Trustworthy Trimps', null, 'update', savedOfflineText);
+		savedOfflineText = '';
 	}
 	if (trimpStatsDisplayed) displayAllStats();
-	if (game.resources.helium.owned > 0 || game.resources.radon.owned > 0){
-		 game.stats.bestHeliumHourThisRun.evaluate();
-		 document.getElementById("heliumPh").innerHTML = prettify(game.stats.heliumHour.value()) + "/hr";
-		 if (game.global.universe == 1) checkAchieve("heliumHour");
+	if (game.resources.helium.owned > 0 || game.resources.radon.owned > 0) {
+		game.stats.bestHeliumHourThisRun.evaluate();
+		const newHeliumPhHTML = `${prettify(heHr)}/hr`;
+		const heliumPhElem = document.getElementById('heliumPh');
+		if (heliumPhElem.innerHTML !== newHeliumPhHTML && shouldUpdate(1000)) {
+			heliumPhElem.innerHTML = newHeliumPhHTML;
+		}
+		if (game.global.universe === 1) checkAchieve('heliumHour');
 	}
 	if (Fluffy.getBestExpStat().value > 0) game.stats.bestFluffyExpHourThisRun.evaluate();
-	if (game.global.selectedChallenge == "Daily") updateDailyClock();
+	if (game.global.selectedChallenge === 'Daily') updateDailyClock();
 	if (game.global.autoEquipUnlocked) buyAutoEquip();
 	Fluffy.handleBox();
 	updatePortalTimer();
-	if (playerSpire.initialized)
-		playerSpire.moveEnemies(makeUp);
+	if (playerSpire.initialized) playerSpire.moveEnemies(makeUp);
 	trackAchievement();
 	holidayObj.checkAll();
 	if (game.global.tutorialActive) tutorial.check();
