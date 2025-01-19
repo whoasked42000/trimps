@@ -6535,10 +6535,11 @@ function toggleHeirlooms(){
 	}
 }
 
-function scaleHeirloomModUniverse(type, modName, value){
-	var mod = game.heirlooms[type][modName]
-	var heirloopy = (Fluffy.isRewardActive("heirloopy") && mod.heirloopy);
-	if (!heirloopy && type != "Core" && game.global.universe == 2 && !mod.noScaleU2) value *= 0.1;
+function scaleHeirloomModUniverse(type, modName, value) {
+	if (game.global.universe === 1 || type === 'Core') return value;
+	const mod = game.heirlooms[type][modName];
+	if (mod.noScaleU2) return value;
+	if (!(Fluffy.isRewardActive('heirloopy') && mod.heirloopy)) return value * 0.1;
 	return value;
 }
 
