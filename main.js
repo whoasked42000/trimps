@@ -2652,18 +2652,29 @@ var offlineProgress = {
 		return this.currentFluff;
 	},
 	showEquality: function(){
-		if (this.showingEquality || game.global.universe == 1 || game.portal.Equality.radLocked){
-			this.timeOfflineElem.innerHTML = "Welcome back! You were offline for " + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + ".";
-			this.equalityBtn.innerHTML = "Show Equality";
+		if (this.showingEquality || game.global.universe === 1 || game.portal.Equality.radLocked) {
+			const newTimeOfflineHTML = 'Welcome back! You were offline for ' + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + '.';
+			if (this.timeOfflineElem.innerHTML !== newTimeOfflineHTML) {
+				this.timeOfflineElem.innerHTML = newTimeOfflineHTML;
+			}
+			if (this.equalityBtn.innerHTML !== 'Show Equality') {
+				this.equalityBtn.innerHTML = 'Show Equality';
+			}
 			this.showingEquality = false;
 			return;
 		}
-		var text = '<div style="font-size: 0.75vw; margin-top: -3.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/>'
+		let text = `<div style="font-size: 0.75vw; margin-top: -3.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/></div>`;
 		text += getEqualitySliders(true);
-		text += "</div>";
-		this.timeOfflineElem.innerHTML = text;
+		text += '</div>';
+	
+		if (this.timeOfflineElem.innerHTML !== text) {
+			this.timeOfflineElem.innerHTML = text;
+		}
 		updateEqualityScaling();
-		this.equalityBtn.innerHTML = "Hide Equality";
+	
+		if (this.equalityBtn.innerHTML !== 'Hide Equality') {
+			this.equalityBtn.innerHTML = 'Hide Equality';
+		}
 		this.showingEquality = true;
 	},
 	updateFormations: function(force){
