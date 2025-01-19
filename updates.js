@@ -5594,18 +5594,33 @@ function updatePs(jobObj, trimps, jobName){ //trimps is true/false, send PS as f
 		swapClass('sizeSec', ((psText.replace('.','').length >= 11) ? 'sizeSecReduced' : 'sizeSecRegular'), elem);
 }
 
-function updateSideTrimps(){
-	var trimps = game.resources.trimps;
-	document.getElementById("trimpsEmployed").innerHTML = prettify(trimps.employed);
-	var breedEmployed = trimps.employed;
-	if (game.permaBoneBonuses.multitasking.owned) breedEmployed *= (1 - game.permaBoneBonuses.multitasking.mult());
-	var breedCount = (trimps.owned - breedEmployed > 2) ? prettify(Math.floor(trimps.owned - breedEmployed)) : 0;
-	document.getElementById("trimpsUnemployed").innerHTML = breedCount;
-	document.getElementById("maxEmployed").innerHTML = prettify(Math.ceil(trimps.realMax() / 2));
-	var free = (Math.ceil(trimps.realMax() / 2) - trimps.employed);
+function updateSideTrimps() {
+	const trimps = game.resources.trimps;
+	const realMax = trimps.realMax();
+
+	let elem = document.getElementById('trimpsEmployed');
+	let elemText = prettify(trimps.employed);
+	if (elem.innerHTML !== elemText && !usingRealTimeOffline) elem.innerHTML = elemText;
+
+	const multitaskingMult = game.permaBoneBonuses.multitasking.owned ? game.permaBoneBonuses.multitasking.mult() : 0;
+	const breedEmployed = trimps.employed * (1 - multitaskingMult);
+	const breedCount = trimps.owned - breedEmployed > 2 ? prettify(Math.floor(trimps.owned - breedEmployed)) : 0;
+
+	elem = document.getElementById('trimpsUnemployed');
+	elemText = breedCount;
+	if (elem.innerHTML !== elemText && !usingRealTimeOffline) elem.innerHTML = elemText;
+
+	elem = document.getElementById('maxEmployed');
+	elemText = prettify(Math.ceil(realMax / 2));
+	if (elem.innerHTML !== elemText && !usingRealTimeOffline) elem.innerHTML = elemText;
+
+	let free = Math.ceil(realMax / 2) - trimps.employed;
 	if (free < 0) free = 0;
-	var s = (free > 1) ? "s" : "";
-	document.getElementById("jobsTitleUnemployed").innerHTML = prettify(free) + " workspace" + s;
+	const s = free > 1 ? 's' : '';
+
+	elem = document.getElementById('jobsTitleUnemployed');
+	elemText = `${prettify(free)} workspace${s}`;
+	if (elem.innerHTML !== elemText && !usingRealTimeOffline) elem.innerHTML = elemText;
 }
 
 function unlockBuilding(what) {
