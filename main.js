@@ -18133,14 +18133,18 @@ var Fluffy = {
 		this.updateExp();
 		if (this.currentLevel >= 1) giveSingleAchieve("Consolation Prize");
 	},
-	updateExp: function(){
-		var expElem = document.getElementById('fluffyExp');
-		var lvlElem = document.getElementById('fluffyLevel');
-		var fluffyInfo = (this.cruffysTipActive()) ? game.challenges.Nurture.getExp() : this.getExp();
-		var width = Math.ceil((fluffyInfo[1] / fluffyInfo[2]) * 100);
+	updateExp: function() {
+		const expElem = document.getElementById('fluffyExp');
+		const lvlElem = document.getElementById('fluffyLevel');
+		const fluffyInfo = this.cruffysTipActive() ? game.challenges.Nurture.getExp() : this.getExp();
+		const width = Math.ceil((fluffyInfo[1] / fluffyInfo[2]) * 100);
+	
 		if (width > 100) width = 100;
-		expElem.style.width = width + "%";
-		lvlElem.innerHTML = fluffyInfo[0];
+		expElem.style.width = width + '%';
+	
+		if (lvlElem.innerHTML !== fluffyInfo[0]) {
+			lvlElem.innerHTML = fluffyInfo[0];
+		}
 	},
 	rewardExp: function(count){
 		if (!this.canGainExp()) return;
