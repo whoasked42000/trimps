@@ -7890,54 +7890,95 @@ function stackPoison(trimpAttack){
 	handlePoisonDebuff();
 }
 
-function handlePoisonDebuff(){
-	var elem = document.getElementById('poisonEmpowermentIcon');
-	if (getEmpowerment() != "Poison"){
+function handlePoisonDebuff() {
+	let elem = document.getElementById('poisonEmpowermentIcon');
+
+	if (getEmpowerment() !== 'Poison') {
 		game.empowerments.Poison.currentDebuffPower = 0;
-		if (elem == null) return;
-		elem.style.display = 'none';
+		if (elem && elem.style.display !== 'none') {
+			elem.style.display = 'none';
+		}
 		return;
 	}
-	if (elem == null){
-		document.getElementById('badDebuffSpan').innerHTML += '<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip(\'Poisoned\', null, event)" onmouseout="tooltip(\'hide\')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>';
+
+	if (usingRealTimeOffline) return;
+
+	if (!elem) {
+		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip('Poisoned', null, event)" onmouseout="tooltip('hide')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>`;
 		elem = document.getElementById('poisonEmpowermentIcon');
 	}
-	elem.style.display = 'inline-block';
-	document.getElementById('poisonEmpowermentText').innerHTML = prettify(game.empowerments.Poison.getDamage());
+
+	if (elem.style.display !== 'inline-block') {
+		elem.style.display = 'inline-block';
+	}
+
+	const poisonEmpowermentText = document.getElementById('poisonEmpowermentText');
+	const poisonDamage = prettify(game.empowerments.Poison.getDamage());
+	if (poisonEmpowermentText && poisonEmpowermentText.innerHTML !== poisonDamage) {
+		poisonEmpowermentText.innerHTML = poisonDamage;
+	}
 }
 
 function handleIceDebuff() {
-	var elem = document.getElementById('iceEmpowermentIcon');
-	if (getEmpowerment() != "Ice"){
+	let elem = document.getElementById('iceEmpowermentIcon');
+
+	if (getEmpowerment() !== 'Ice') {
 		game.empowerments.Ice.currentDebuffPower = 0;
-		if (elem == null) return;
-		elem.style.display = 'none';
+		if (elem && elem.style.display !== 'none') {
+			elem.style.display = 'none';
+		}
 		return;
 	}
-	if (elem == null){
-		document.getElementById('badDebuffSpan').innerHTML += '<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip(\'Chilled\', null, event)" onmouseout="tooltip(\'hide\')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>';
+
+	if (usingRealTimeOffline) return;
+
+	if (!elem) {
+		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip('Chilled', null, event)" onmouseout="tooltip('hide')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>`;
 		elem = document.getElementById('iceEmpowermentIcon');
 	}
-	elem.style.display = 'inline-block';
-	document.getElementById('iceEmpowermentText').innerHTML = prettify(game.empowerments.Ice.currentDebuffPower);
+
+	if (elem.style.display !== 'inline-block') {
+		elem.style.display = 'inline-block';
+	}
+
+	const iceEmpowermentText = document.getElementById('iceEmpowermentText');
+	const newIceEmpowermentText = prettify(game.empowerments.Ice.currentDebuffPower);
+	if (iceEmpowermentText && iceEmpowermentText.innerHTML !== newIceEmpowermentText) {
+		iceEmpowermentText.innerHTML = newIceEmpowermentText;
+	}
 }
 
 function handleWindDebuff() {
-	if (game.empowerments.Wind.currentDebuffPower > game.empowerments.Wind.stackMax())
-		game.empowerments.Wind.currentDebuffPower = game.empowerments.Wind.stackMax();
-	var elem = document.getElementById('windEmpowermentIcon');
-	if (getEmpowerment() != "Wind"){
+	let elem = document.getElementById('windEmpowermentIcon');
+	if (getEmpowerment() !== 'Wind') {
 		game.empowerments.Wind.currentDebuffPower = 0;
-		if (elem == null) return;
-		elem.style.display = 'none';
+		if (elem && elem.style.display !== 'none') {
+			elem.style.display = 'none';
+		}
 		return;
 	}
-	if (elem == null){
-		document.getElementById('badDebuffSpan').innerHTML += '<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip(\'Breezy\', null, event)" onmouseout="tooltip(\'hide\')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>';
+
+	if (usingRealTimeOffline) return;
+
+	if (!elem) {
+		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip('Breezy', null, event)" onmouseout="tooltip('hide')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>`;
 		elem = document.getElementById('windEmpowermentIcon');
 	}
-	elem.style.display = 'inline-block';
-	document.getElementById('windEmpowermentText').innerHTML = prettify(game.empowerments.Wind.currentDebuffPower);
+
+	if (elem.style.display !== 'inline-block') {
+		elem.style.display = 'inline-block';
+	}
+
+	const windMaxStacks = game.empowerments.Wind.stackMax();
+	if (game.empowerments.Wind.currentDebuffPower > windMaxStacks) {
+		game.empowerments.Wind.currentDebuffPower = windMaxStacks;
+	}
+
+	const windEmpowermentText = document.getElementById('windEmpowermentText');
+	const newWindEmpowermentText = prettify(game.empowerments.Wind.currentDebuffPower);
+	if (windEmpowermentText && windEmpowermentText.innerHTML !== newWindEmpowermentText) {
+		windEmpowermentText.innerHTML = newWindEmpowermentText;
+	}
 }
 
 function handleDominationDebuff() {
@@ -7970,26 +8011,38 @@ function handleDominationDebuff() {
 	}
 }
 
-function setEmpowerTab(){
-	var empowerMod = getEmpowerment();
-	var empowerTab = document.getElementById('natureTab');
-	if (getHighestLevelCleared() < 235 || game.global.universe == 2) {
-		empowerTab.style.display = 'none';
-		return;
+function setEmpowerTab() {
+	if (usingRealTimeOffline) return;
+
+	const empowerMod = getEmpowerment();
+	const empowerTab = document.getElementById('natureTab');
+	const natureButton = document.getElementById('natureA');
+	const empowerTabDisplay = getHighestLevelCleared() < 235 || game.global.universe === 2 ? 'none' : 'table-cell';
+	let newNatureHTML = 'Nature';
+	let newEmpowerTabClass = 'empowerTabNone';
+
+	if (empowerTabDisplay === 'table-cell' && empowerMod) {
+		const icons = {
+			Poison: 'icomoon icon-flask',
+			Ice: 'glyphicon glyphicon-certificate',
+			Wind: 'icomoon icon-air'
+		};
+
+		newEmpowerTabClass = 'empowerTab' + empowerMod;
+		newNatureHTML = `<span class='${icons[empowerMod]}'></span> Nature`;
 	}
-	empowerTab.style.display = 'table-cell';
-	if (empowerMod == false){
-		swapClass("empowerTab", "empowerTabNone", empowerTab);
-		document.getElementById('natureA').innerHTML = "Nature";
-		return;
+
+	if (empowerTab.style.display !== empowerTabDisplay) {
+		empowerTab.style.display = empowerTabDisplay;
 	}
-	var icons = {
-		Poison: "icomoon icon-flask",
-		Ice: "glyphicon glyphicon-certificate",
-		Wind: "icomoon icon-air"
+
+	if (empowerTab.className.indexOf(newEmpowerTabClass) === -1) {
+		swapClass('empowerTab', newEmpowerTabClass, empowerTab);
 	}
-	swapClass("empowerTab", "empowerTab" + empowerMod, empowerTab);
-	document.getElementById('natureA').innerHTML = "<span class='" + icons[empowerMod] + "'></span> Nature";
+
+	if (natureButton.innerHTML !== newNatureHTML) {
+		natureButton.innerHTML = newNatureHTML;
+	}
 }
 
 function updateEmpowerCosts(){
