@@ -12393,19 +12393,19 @@ function checkIfSpireWorld(getNumber){
 	return false;
 }
 
-function rewardLiquidZone(){
-	messageLock = true;
+function rewardLiquidZone() {
 	game.stats.battlesWon.value += 99;
-	var voidMaps = 0;
-	var unlocks = ["", ""]; //[unique, repeated]
-	var food = game.resources.food.owned;
-	var wood = game.resources.wood.owned;
-	var metal = game.resources.metal.owned;
-	var helium = game.resources.helium.owned;
-	var fragments = game.resources.fragments.owned;
-	var trimpsCount = game.resources.trimps.realMax();
-	var tokText;
-	var trackedImps = {
+
+	const messages = game.global.messages.Loot;
+	const initialResources = {
+		food: game.resources.food.owned,
+		wood: game.resources.wood.owned,
+		metal: game.resources.metal.owned,
+		helium: game.resources.helium.owned,
+		fragments: game.resources.fragments.owned,
+		trimpsCount: game.resources.trimps.realMax()
+	};
+	const trackedImps = {
 		Feyimp: 0,
 		Magnimp: 0,
 		Tauntimp: 0,
@@ -12414,109 +12414,125 @@ function rewardLiquidZone(){
 		Skeletimp: 0,
 		Megaskeletimp: 0
 	};
-	var hiddenUpgrades = ["fiveTrimpMax", "Map", "fruit", "groundLumber", "freeMetals", "Foreman", "FirstMap"];
-	for (var x = 1; x < 100; x++){
+
+	let voidMaps = 0;
+	let unlocks = ['', ''];
+	let text = '';
+	let tokText;
+
+	messageLock = true;
+	const scryBonus = isScryerBonusActive();
+	const hiddenUpgrades = new Set(['fiveTrimpMax', 'Map', 'fruit', 'groundLumber', 'freeMetals', 'Foreman', 'FirstMap']);
+
+	for (let x = 1; x < 100; x++) {
 		game.global.voidSeed++;
 		game.global.scrySeed++;
-		if (isScryerBonusActive()) tryScry();
-		if (checkVoidMap() == 1) voidMaps++;
-		var cell = game.global.gridArray[x];
-		if (cell.special !== ""){
-			var unlock = game.worldUnlocks[cell.special];        
+		if (scryBonus) tryScry();
+		if (checkVoidMap() === 1) voidMaps++;
+		const cell = game.global.gridArray[x];
+
+		if (cell.special !== '') {
+			let unlock = game.worldUnlocks[cell.special];
 			if (typeof unlock !== 'undefined' && typeof unlock.fire !== 'undefined') {
 				unlock.fire(x);
-				if (hiddenUpgrades.indexOf(cell.special) == -1){
-					var index = (unlock.world < 0) ? 1 : 0;
-					if (unlocks[index] !== "") unlocks[index] += ", ";
-					if (typeof unlock.displayAs !== 'undefined')
-						unlocks[index] += unlock.displayAs;
-					else
-						unlocks[index] += cell.special;	
+				if (!hiddenUpgrades.has(cell.special)) {
+					let index = unlock.world < 0 ? 1 : 0;
+					if (unlocks[index] !== '') unlocks[index] += ', ';
+					if (typeof unlock.displayAs !== 'undefined') unlocks[index] += unlock.displayAs;
+					else unlocks[index] += cell.special;
 				}
 			} else {
 				unlockEquipment(cell.special);
 			}
 		}
+
 		if (cell.mutation && typeof mutations[cell.mutation].reward !== 'undefined') mutations[cell.mutation].reward(cell.corrupted);
-		if (cell.empowerment){
-			var tokReward = rewardToken(cell.empowerment);
-			if (game.global.messages.Loot.token && game.global.messages.Loot.enabled && tokReward){
-				tokText = "<span class='message empoweredCell" + cell.empowerment + "'>Found " + prettify(tokReward) + " Token" + ((tokReward == 1) ? "" : "s") + " of " + cell.empowerment + "!</span>";
+		if (cell.empowerment) {
+			const tokReward = rewardToken(cell.empowerment);
+			if (messages.token && messages.enabled && tokReward) {
+				tokText = `<span class='message empoweredCell${cell.empowerment}'>Found ${prettify(tokReward)} Token${tokReward === 1 ? '' : 's'} of ${cell.empowerment}!</span>`;
 			}
 		}
 		if (typeof game.badGuys[cell.name].loot !== 'undefined') game.badGuys[cell.name].loot(cell.level);
-		if (typeof trackedImps[cell.name] !== 'undefined'){
-			trackedImps[cell.name]++;
-		}
+		if (typeof trackedImps[cell.name] !== 'undefined') trackedImps[cell.name]++;
 	}
+
 	messageLock = false;
-	var text = "";
-	var addUniques = (unlocks[0] !== "" && game.global.messages.Unlocks.unique);
-	var addRepeateds = (unlocks[1] !== "" && game.global.messages.Unlocks.repeated);
-	if ((addUniques || addRepeateds) && game.global.messages.Unlocks.enabled){
-		 text += "Unlocks Found: ";
-		 if (addUniques){
-			 text += unlocks[0];
-			 if (addRepeateds) text += ", ";
-		 }
-		if (addRepeateds)
-			text += unlocks[1];
-		text += "<br/>";
+
+	const addUniques = unlocks[0] !== '' && game.global.messages.Unlocks.unique;
+	const addRepeateds = unlocks[1] !== '' && game.global.messages.Unlocks.repeated;
+
+	if ((addUniques || addRepeateds) && game.global.messages.Unlocks.enabled) {
+		let unlockText = [];
+		if (addUniques) {
+			unlockText.push(unlocks[0]);
+		}
+		if (addRepeateds) {
+			unlockText.push(unlocks[1]);
+		}
+		text += `Unlocks Found: ${unlockText.join(', ')}<br/>`;
 	}
-	if (game.global.messages.Loot.enabled && (game.global.messages.Loot.primary || game.global.messages.Loot.secondary)){
-		text += "Resources Found:";
-		var heCount = game.resources.helium.owned - helium;
-		if (game.global.messages.Loot.helium && heCount > 0){
-			text += " Helium - " + prettify(heCount) + ",";
+
+	if (messages.enabled && (messages.primary || messages.secondary)) {
+		let resourceText = [];
+		const heCount = game.resources.helium.owned - initialResources.helium;
+
+		if (messages.helium && heCount > 0) {
+			resourceText.push(` Helium - ${prettify(heCount)}`);
 		}
-		if (game.global.messages.Loot.secondary){
-			text += " Max Trimps - " + prettify(game.resources.trimps.realMax() - trimpsCount) + ",";
-			text += " Fragments - " + prettify(game.resources.fragments.owned - fragments) + ",";
+		if (messages.secondary) {
+			resourceText.push(` Max Trimps - ${prettify(game.resources.trimps.realMax() - initialResources.trimpsCount)}`);
+			resourceText.push(` Fragments - ${prettify(game.resources.fragments.owned - initialResources.fragments)}`);
 		}
-		if (game.global.messages.Loot.primary){
-			text += " Food - " + prettify(game.resources.food.owned - food) + ",";
-			text += " Wood - " + prettify(game.resources.wood.owned - wood) + ",";
-			text += " Metal - " + prettify(game.resources.metal.owned - metal) + ",";
+		if (messages.primary) {
+			resourceText.push(` Food - ${prettify(game.resources.food.owned - initialResources.food)}`);
+			resourceText.push(` Wood - ${prettify(game.resources.wood.owned - initialResources.wood)}`);
+			resourceText.push(` Metal - ${prettify(game.resources.metal.owned - initialResources.metal)}`);
 		}
-		
-		text = text.slice(0, -1);
-		text += "<br/>";
+
+		text += `Resources Found:${resourceText.join(',')}<br/>`;
 	}
-	var trackedList = "";
-	var bones = "";
-	for (var item in trackedImps){
-		if (trackedImps[item] > 0){
-			if (item == "Skeletimp" || item == "Megaskeletimp"){
-				bones = item;
+
+	const trackedList = [];
+	let bones;
+	for (let item in trackedImps) {
+		if (trackedImps[item] > 0) {
+			if (item === 'Skeletimp' || item === 'Megaskeletimp') {
+				bones = true;
 				continue;
 			}
-			if (trackedList !== "") trackedList += ", ";
-			trackedList += item + " - " + trackedImps[item];
+			trackedList.push(` ${item} - ${trackedImps[item]}`);
 		}
 	}
-	if (trackedList != "" && game.global.messages.Loot.exotic && game.global.messages.Loot.enabled){
-		trackedList = "Rare Imps: " + trackedList + "<br/>";
-		text += trackedList;
+
+	if (trackedList && messages.exotic && messages.enabled) {
+		text += `Rare Imps: ${trackedList}<br/>`;
 	}
-	if (bones != "" && game.global.messages.Loot.bone && game.global.messages.Loot.enabled){
-		bones = "Found a " + bones + "!<br/>";
-		text += bones;
+
+	if (bones && messages.bone && messages.enabled) {
+		text += `Found a ${bones}!<br/>`;
 	}
-	if (tokText != null){
-		text += tokText + "<br/>";
+
+	if (tokText) {
+		text += `${tokText}<br/>`;
 	}
-	if (text){
-		text = "You liquified a Liquimp!<br/>" + text;
+
+	if (text) {
+		text = `You liquified a Liquimp!<br/>${text}`;
 		text = text.slice(0, -5);
-		message(text, "Notices", "star", "LiquimpMessage");
+		message(text, 'Notices', 'star', 'LiquimpMessage');
 	}
-	if (challengeActive("Lead")){
+
+	if (challengeActive('Lead')) {
 		game.challenges.Lead.stacks -= 100;
 		manageLeadStacks();
 	}
+
 	game.stats.zonesLiquified.value++;
 	nextWorld();
+	drawAllUpgrades();
 }
+
 
 function checkIfLiquidZone(getMult){
 	if (game.options.menu.liquification.enabled == 0 || game.global.challengeActive == "Obliterated" || game.global.challengeActive == "Eradicated") return false;
@@ -12597,74 +12613,72 @@ function nextU2SpireFloor(){
 }
 
 function nextWorld() {
-	if (game.global.spireActive && game.global.universe == 2){
+	if (game.global.spireActive && game.global.universe === 2) {
 		nextU2SpireFloor();
 		return;
 	}
-	if (game.global.world > getHighestLevelCleared()){
-		if (game.global.universe == 2){
+
+	if (game.global.world > getHighestLevelCleared()) {
+		if (game.global.universe === 2) {
 			game.global.highestRadonLevelCleared = game.global.world;
-		}
-		else{
+		} else {
 			game.global.highestLevelCleared = game.global.world;
 		}
+
 		setVoidMaxLevel(game.global.world);
-		if (game.global.universe == 1){
-			if (game.global.world == 199) addNewSetting('mapsOnSpire');
-			else if (game.global.world == 180) {
+		if (game.global.universe === 1) {
+			if (game.global.world === 199) addNewSetting('mapsOnSpire');
+			else if (game.global.world === 180) {
 				unlockFormation(4);
 				filterTabs('talents');
 				addNewSetting('masteryTab');
-			}
-			else if (game.global.world == 64) tooltip("UnlockedChallenge2", null, 'update');
-			else if (game.global.world == 60) addNewSetting("ctrlGigas");
-			else if (game.global.world == 79) addNewSetting("bigPopups");
-		}
-		else if (game.global.universe == 2){
-			if (game.global.world == 49) tooltip("UnlockedChallenge3", null, 'update');
+			} else if (game.global.world === 64) tooltip('UnlockedChallenge2', null, 'update');
+			else if (game.global.world === 60) addNewSetting('ctrlGigas');
+			else if (game.global.world === 79) addNewSetting('bigPopups');
+		} else if (game.global.universe === 2) {
+			if (game.global.world === 49) tooltip('UnlockedChallenge3', null, 'update');
 			countChallengeSquaredReward();
-			if (game.global.world == 74) autoBattle.firstUnlock();
-			if (game.global.world == 201) {
+			if (game.global.world === 74) autoBattle.firstUnlock();
+			if (game.global.world === 201) {
 				game.global.tabForMastery = false;
-				document.getElementById('MasteryTabName').innerHTML = "Mutators";
+				document.getElementById('MasteryTabName').innerHTML = 'Mutators';
 			}
 		}
 	}
-	if (game.global.universe == 2) u2Mutations.types.Nova.removeStacks();
+	if (game.global.universe === 2 && game.global.novaMutStacks > 0) u2Mutations.types.Nova.removeStacks();
 	Fluffy.rewardExp();
-    game.global.world++;
-    document.getElementById("worldNumber").innerHTML = game.global.world;
+	game.global.world++;
+	document.getElementById('worldNumber').innerHTML = game.global.world;
 	game.global.mapBonus = 0;
-	document.getElementById("mapBonus").innerHTML = "";
-    game.global.lastClearedCell = -1;
-    game.global.gridArray = [];
-    document.getElementById("grid").innerHTML = "";
+	const mapBonusElem = document.getElementById('mapBonus');
+	if (mapBonusElem.innerHTML !== '') document.getElementById('mapBonus').innerHTML = '';
+	game.global.lastClearedCell = -1;
+	game.global.gridArray = [];
 	if (checkIfSpireWorld()) startSpire();
 	buildGrid();
 	liquifyZone();
 	drawGrid();
 	buyAutoJobs(true);
-	var msgText = getWorldText(game.global.world);
-	if (msgText){
-		var extraClass = null;
-		if (Array.isArray(msgText)){
+	let msgText = getWorldText(game.global.world);
+	if (msgText) {
+		let extraClass = null;
+		if (Array.isArray(msgText)) {
 			extraClass = msgText[1];
 			msgText = msgText[0];
 		}
-		message("Z:" + game.global.world + " " + msgText, "Story", null, extraClass)
-	};
-	if (game.global.canMagma) checkAchieve("zones");
-	checkGenStateSwitch();
-	if (game.global.challengeActive == "Scientist" && game.global.highestLevelCleared >= 129 && getSLevel() >= 4 && game.global.world == 76){
-		giveSingleAchieve("AntiScience");
+		message('Z:' + game.global.world + ' ' + msgText, 'Story', null, extraClass);
 	}
-	if (getPerkLevel("Tenacity")){
-		if (game.portal.Tenacity.timeLastZone != -1) game.portal.Tenacity.timeLastZone *= game.portal.Tenacity.getCarryoverMult();
+	if (game.global.canMagma) checkAchieve('zones');
+	checkGenStateSwitch();
+	if (challengeActive('Scientist') && game.global.highestLevelCleared >= 129 && getSLevel() >= 4 && game.global.world === 76) {
+		giveSingleAchieve('AntiScience');
+	}
+	if (getPerkLevel('Tenacity')) {
+		if (game.portal.Tenacity.timeLastZone !== -1) game.portal.Tenacity.timeLastZone *= game.portal.Tenacity.getCarryoverMult();
 		game.portal.Tenacity.timeLastZone += getZoneMinutes();
-		
 	}
 	game.global.zoneStarted = getGameTime();
-	if (challengeActive("Mapology")) {
+	if (challengeActive('Mapology')) {
 		game.challenges.Mapology.credits++;
 		updateMapCredits();
 	}
@@ -12672,49 +12686,48 @@ function nextWorld() {
 		if (game.global.roboTrimpCooldown > 0) game.global.roboTrimpCooldown--;
 		displayRoboTrimp();
 	}
-	if (challengeActive("Toxicity")) {
+	if (challengeActive('Toxicity')) {
 		game.challenges.Toxicity.stacks = 0;
 		updateToxicityStacks();
 	}
-	if (challengeActive("Watch")){
+	if (challengeActive('Watch')) {
 		if (game.global.world > 6) dropPrestiges();
-		if (!getAutoJobsSetting().enabled)
-			assignExtraWorkers()
+		if (!getAutoJobsSetting().enabled) assignExtraWorkers();
 	}
-	if (challengeActive("Lead")){
-		if ((game.global.world % 2) == 0) game.challenges.Lead.stacks = 200;
+	if (challengeActive('Lead')) {
+		if (game.global.world % 2 === 0) game.challenges.Lead.stacks = 200;
 		manageLeadStacks();
 	}
-	if (game.global.challengeActive == "Decay" || game.global.challengeActive == "Melt"){
-		var challenge = game.challenges[game.global.challengeActive];
+	if (challengeActive('Decay') || challengeActive('Melt')) {
+		let challenge = game.challenges[game.global.challengeActive];
 		challenge.stacks = 0;
 	}
-	if (game.global.challengeActive == "Daily"){
-		if (typeof game.global.dailyChallenge.toxic !== 'undefined'){
+	if (challengeActive('Daily')) {
+		if (typeof game.global.dailyChallenge.toxic !== 'undefined') {
 			game.global.dailyChallenge.toxic.stacks = 0;
 			updateDailyStacks('toxic');
 		}
-		if (typeof game.global.dailyChallenge.karma !== 'undefined'){
+		if (typeof game.global.dailyChallenge.karma !== 'undefined') {
 			game.global.dailyChallenge.karma.stacks = 0;
 			updateDailyStacks('karma');
 		}
-		if (typeof game.global.dailyChallenge.pressure !== 'undefined'){
+		if (typeof game.global.dailyChallenge.pressure !== 'undefined') {
 			dailyModifiers.pressure.resetTimer();
 		}
 	}
-	if (game.talents.blacksmith.purchased && (!challengeActive("Mapology") || !game.global.runningChallengeSquared)){
-		var smithWorld = .5;
-		if (game.talents.blacksmith3.purchased) smithWorld = .9;
+	if (game.talents.blacksmith.purchased && (!challengeActive('Mapology') || !game.global.runningChallengeSquared)) {
+		let smithWorld = 0.5;
+		if (game.talents.blacksmith3.purchased) smithWorld = 0.9;
 		else if (game.talents.blacksmith2.purchased) smithWorld = 0.75;
-		smithWorld =  Math.floor((getHighestLevelCleared(false, true) + 1) * smithWorld);
-		if (game.global.world <= smithWorld){
+		smithWorld = Math.floor((getHighestLevelCleared(false, true) + 1) * smithWorld);
+		if (game.global.world <= smithWorld) {
 			dropPrestiges();
 		}
 	}
-	if (game.talents.bionic.purchased && game.global.universe == 1){
-		var bTier = ((game.global.world - 126) / 15);
+	if (game.talents.bionic.purchased && game.global.universe === 1) {
+		let bTier = (game.global.world - 126) / 15;
 		if (game.global.world >= 126) game.mapUnlocks.BionicWonderland.canRunOnce = false;
-		if (bTier % 1 === 0 && bTier == game.global.bionicOwned && game.global.roboTrimpLevel >= bTier) {
+		if (bTier % 1 === 0 && bTier === game.global.bionicOwned && game.global.roboTrimpLevel >= bTier) {
 			game.mapUnlocks.roboTrimp.createMap(bTier);
 			refreshMaps();
 		}
@@ -12722,124 +12735,122 @@ function nextWorld() {
 	if (game.talents.housing.purchased) {
 		autoUnlockHousing();
 	}
-	if (game.global.universe == 2 && getPerkLevel("Prismal") >= 20 && game.global.world == 21 && game.upgrades.Prismalicious.locked == 1){
-		unlockUpgrade("Prismalicious");
+	if (game.global.universe === 2 && getPerkLevel('Prismal') >= 20 && game.global.world === 21 && game.upgrades.Prismalicious.locked === 1) {
+		unlockUpgrade('Prismalicious');
 		game.mapUnlocks.Prismalicious.canRunOnce = false;
 	}
-	if (game.talents.explorers.purchased){
-		if (Math.floor((game.global.world - game.mapUnlocks.Speedexplorer.next) / 10)){
+	if (game.talents.explorers.purchased) {
+		if (Math.floor((game.global.world - game.mapUnlocks.Speedexplorer.next) / 10)) {
 			game.mapUnlocks.Speedexplorer.fire(0, true);
-			if (game.global.currentMapId){
-				for (var x = 0; x < game.global.mapGridArray.length; x++){
-					if (game.global.mapGridArray[x].special == "Speedexplorer") game.global.mapGridArray[x].special = "";
+			if (game.global.currentMapId) {
+				for (let x = 0; x < game.global.mapGridArray.length; x++) {
+					if (game.global.mapGridArray[x].special === 'Speedexplorer') game.global.mapGridArray[x].special = '';
 				}
 			}
 		}
 	}
-	if (game.talents.portal.purchased && game.global.world == 21 && game.mapUnlocks.Portal.canRunOnce){
+	if (game.talents.portal.purchased && game.global.world === 21 && game.mapUnlocks.Portal.canRunOnce) {
 		game.mapUnlocks.Portal.fire(0, true);
 		game.mapUnlocks.Portal.canRunOnce = false;
 		refreshMaps();
 	}
-	if (game.talents.bounty.purchased && game.global.world == 16 && game.mapUnlocks.Bounty.canRunOnce){
+	if (game.talents.bounty.purchased && game.global.world === 16 && game.mapUnlocks.Bounty.canRunOnce) {
 		game.mapUnlocks.Bounty.fire();
 		game.mapUnlocks.Bounty.canRunOnce = false;
 		refreshMaps();
 	}
-	if (game.global.universe == 1 && game.global.world == mutations.Corruption.start(true)){
-		tooltip("Corruption", null, 'update');
+	if (game.global.universe === 1 && game.global.world === mutations.Corruption.start(true)) {
+		tooltip('Corruption', null, 'update');
 	}
-	if (mutations.Magma.active()){
-		if (game.global.world == mutations.Magma.start()){
+	if (mutations.Magma.active()) {
+		if (game.global.world === mutations.Magma.start()) {
 			startTheMagma();
 		}
 		mutations.Magma.increaseTrimpDecay();
 		increaseTheHeat();
 		decayNurseries();
 	}
-	if (game.global.challengeActive == "Eradicated" && game.global.world <= 101) unlockUpgrade("Coordination");
-	if (game.global.world == 30 && game.global.canRespecPerks && !game.global.bonePortalThisRun && countHeliumSpent() <= 60) giveSingleAchieve("Underachiever");
-	else if (game.global.world == 10 && game.stats.trimpsKilled.value <= 5) giveSingleAchieve("Peacekeeper");
-	else if (game.global.world == 60){
-		if (game.stats.trimpsKilled.value <= 1000) giveSingleAchieve("Workplace Safety");
-		if ((game.stats.cellsOverkilled.value + (game.stats.zonesLiquified.value * 50)) == 2950) giveSingleAchieve("Gotta Go Fast");
-		if (getHighestPrestige() <= 3) giveSingleAchieve("Shaggy");
+	if (challengeActive('Eradicated') && game.global.world <= 101) unlockUpgrade('Coordination');
+	if (game.global.world === 30 && game.global.canRespecPerks && !game.global.bonePortalThisRun && countHeliumSpent() <= 60) giveSingleAchieve('Underachiever');
+	else if (game.global.world === 10 && game.stats.trimpsKilled.value <= 5) giveSingleAchieve('Peacekeeper');
+	else if (game.global.world === 60) {
+		if (game.stats.trimpsKilled.value <= 1000) giveSingleAchieve('Workplace Safety');
+		if (game.stats.cellsOverkilled.value + game.stats.zonesLiquified.value * 50 === 2950) giveSingleAchieve('Gotta Go Fast');
+		if (getHighestPrestige() <= 3) giveSingleAchieve('Shaggy');
 		//Without Hiring Anything
-		var jobCount = 0;
-		for (var job in game.jobs) jobCount += game.jobs[job].owned; //Dragimp adds 1
-		if (jobCount - game.jobs.Dragimp.owned - game.jobs.Amalgamator.owned == 0 && game.stats.trimpsFired.value == 0) giveSingleAchieve("Unemployment");
-		if (game.global.universe == 2) buffVoidMaps();
+		let jobCount = 0;
+		for (let job in game.jobs) jobCount += game.jobs[job].owned; //Dragimp adds 1
+		if (jobCount - game.jobs.Dragimp.owned - game.jobs.Amalgamator.owned === 0 && game.stats.trimpsFired.value === 0) giveSingleAchieve('Unemployment');
+		if (game.global.universe === 2) buffVoidMaps();
+	} else if (game.global.world === 65) checkChallengeSquaredAllowed();
+	else if (game.global.world === 75 && checkHousing(true) === 0) giveSingleAchieve('Tent City');
+	else if (game.global.world === 120 && !game.global.researched) giveSingleAchieve('No Time for That');
+	else if (game.global.world === 200 && game.global.universe === 1) buffVoidMaps200();
+	if (game.global.world === 201 && game.global.universe === 2) {
+		tooltip('The Mutated Zones', null, 'update');
 	}
-	else if (game.global.world == 65) checkChallengeSquaredAllowed();
-	else if (game.global.world == 75 && checkHousing(true) == 0) giveSingleAchieve("Tent City");
-	else if (game.global.world == 120 && !game.global.researched) giveSingleAchieve("No Time for That");
-	else if (game.global.world == 200 && game.global.universe == 1) buffVoidMaps200();
-	if (game.global.world == 201 && game.global.universe == 2){
-		tooltip("The Mutated Zones", null, 'update');
-	}
-	if (game.global.challengeActive == "Life"){
-		if (game.global.world >= 100 && game.challenges.Life.lowestStacks == 150) giveSingleAchieve("Very Sneaky");
+	if (challengeActive('Life')) {
+		if (game.global.world >= 100 && game.challenges.Life.lowestStacks === 150) giveSingleAchieve('Very Sneaky');
 		game.challenges.Life.lowestStacks = game.challenges.Life.stacks;
 	}
 	displayGoldenUpgrades();
-	if (game.achievements.humaneRun.earnable){
-		if (game.stats.battlesLost.value > game.achievements.humaneRun.lastZone + 1){
+	if (game.achievements.humaneRun.earnable) {
+		if (game.stats.battlesLost.value > game.achievements.humaneRun.lastZone + 1) {
 			game.achievements.humaneRun.lastZone = game.global.world - 1;
 			game.achievements.humaneRun.earnable = false;
-		}
-		else{
-			checkAchieve("humaneRun");
+		} else {
+			checkAchieve('humaneRun');
 			game.achievements.humaneRun.lastZone = game.stats.battlesLost.value;
-			}
+		}
 	}
 	setEmpowerTab();
-	if (game.global.buyTab == "nature") updateNatureInfoSpans();
-	if (game.global.world == 236 && getUberEmpowerment() == "Wind") unlockFormation(5);
-	if (game.global.world >= 241 && game.global.world % 5 == 1){
+	if (game.global.buyTab === 'nature') updateNatureInfoSpans();
+	if (game.global.world === 236 && getUberEmpowerment() === 'Wind') unlockFormation(5);
+	if (game.global.world >= 241 && game.global.world % 5 === 1) {
 		resetEmpowerStacks();
 	}
 	game.stats.zonesCleared.value++;
-	checkAchieve("totalZones");
-	if (game.global.universe == 2){
-		checkAchieve("mapless");
-		checkAchieve("shielded");
-		checkAchieve("zones2");
+	checkAchieve('totalZones');
+	if (game.global.universe === 2) {
+		checkAchieve('mapless');
+		checkAchieve('shielded');
+		checkAchieve('zones2');
 	}
 
-	if (game.global.challengeActive){
-		var challenge = game.challenges[game.global.challengeActive];
-		if (!game.global.runningChallengeSquared && challenge.completeAfterZone && challenge.completeAfterZone == game.global.world - 1 && typeof challenge.onComplete !== 'undefined') challenge.onComplete();
+	if (game.global.challengeActive) {
+		let challenge = game.challenges[game.global.challengeActive];
+		if (!game.global.runningChallengeSquared && challenge.completeAfterZone && challenge.completeAfterZone === game.global.world - 1 && typeof challenge.onComplete !== 'undefined') challenge.onComplete();
 		else if (typeof challenge.onNextWorld !== 'undefined') challenge.onNextWorld();
 	}
-	if (game.global.challengeActive == "Exterminate" && game.challenges.Exterminate.swarmStacks >= 100 && game.global.world <= 120) game.challenges.Exterminate.achieveDone = true;
-	if (game.global.challengeActive == "Hypothermia" && game.global.world > game.challenges.Hypothermia.failAfterZone) game.challenges.Hypothermia.onFail();
+	if (challengeActive('Exterminate') && game.challenges.Exterminate.swarmStacks >= 100 && game.global.world <= 120) game.challenges.Exterminate.achieveDone = true;
+	if (challengeActive('Hypothermia') && game.global.world > game.challenges.Hypothermia.failAfterZone) game.challenges.Hypothermia.onFail();
 	game.jobs.Meteorologist.onNextWorld();
 	game.jobs.Worshipper.onNextWorld();
-	if (!game.portal.Observation.radLocked && game.global.universe == 2) game.portal.Observation.onNextWorld();
-	if (game.global.capTrimp) message("I'm terribly sorry, but your Trimp<sup>2</sup> run appears to have more than one Trimp fighting, which kinda defeats the purpose. Your score for this Challenge<sup>2</sup> will be capped at 230.", "Notices");
-	if (game.global.world >= getObsidianStart()){
-		var next = (game.global.highestRadonLevelCleared >= 99) ? "50" : "10";
-		var text;
+	if (!game.portal.Observation.radLocked && game.global.universe === 2) game.portal.Observation.onNextWorld();
+	if (game.global.capTrimp) message("I'm terribly sorry, but your Trimp<sup>2</sup> run appears to have more than one Trimp fighting, which kinda defeats the purpose. Your score for this Challenge<sup>2</sup> will be capped at 230.", 'Notices');
+	if (game.global.world >= getObsidianStart()) {
+		let next = game.global.highestRadonLevelCleared >= 99 ? '50' : '10';
+		let text;
 		if (!Fluffy.checkU2Allowed()) text = " Fluffy has an idea for remelting the world, but it will take a tremendous amount of energy from a place Fluffy isn't yet powerful enough to send you. Fluffy asks you to help him reach the <b>10th Level of his 8th Evolution</b>, and he promises he'll make it worth your time.";
-		else if (game.global.world == 810) text = "";
-		else text = " However, all is not lost! Every " + next + " Zones of progress you make in the Radon Universe will allow you to harness enough energy for Fluffy to slow down the hardening of your World for an extra 10 Zones in this Universe.";
-		message("The Magma has solidified into impenetrable Obsidian; your Trimps have no hope of progressing here right now." + text, "Notices", null, "obsidianMessage");
+		else if (game.global.world === 810) text = '';
+		else text = ' However, all is not lost! Every ' + next + ' Zones of progress you make in the Radon Universe will allow you to harness enough energy for Fluffy to slow down the hardening of your World for an extra 10 Zones in this Universe.';
+		message('The Magma has solidified into impenetrable Obsidian; your Trimps have no hope of progressing here right now.' + text, 'Notices', null, 'obsidianMessage');
 	}
 	game.global.zoneRes.unshift(0);
 	if (game.global.zoneRes.length > 5) game.global.zoneRes.pop();
-	if (game.global.world == 60 && game.global.universe == 2 && game.global.exterminateDone && game.buildings.Hub.locked){
-		unlockBuilding("Hub");
+	if (game.global.world === 60 && game.global.universe === 2 && game.global.exterminateDone && game.buildings.Hub.locked) {
+		unlockBuilding('Hub');
 	}
-	if (game.global.world == 175 && game.global.universe == 2){
-		message("You see a strange light radiating out of a strange ice cube in a strange spot in the Zone. You have a nearby Trimp crack it open, and find a map to a Frozen Castle!", "Story");
-		createMap(175, "Frozen Castle", "Frozen", 10, 100, 5, true, true);
+	if (game.global.world === 175 && game.global.universe === 2) {
+		message('You see a strange light radiating out of a strange ice cube in a strange spot in the Zone. You have a nearby Trimp crack it open, and find a map to a Frozen Castle!', 'Story');
+		createMap(175, 'Frozen Castle', 'Frozen', 10, 100, 5, true, true);
 	}
-	if (game.global.world >= 176 && game.global.world <= 200 && game.global.universe == 2){
-		for (var z = 0; z < game.global.mapsOwnedArray.length; z++){
-			if (game.global.mapsOwnedArray[z].location == 'Frozen'){
+	if (game.global.world >= 176 && game.global.world <= 200 && game.global.universe === 2) {
+		for (let z = 0; z < game.global.mapsOwnedArray.length; z++) {
+			if (game.global.mapsOwnedArray[z].location === 'Frozen') {
 				game.global.mapsOwnedArray[z].level = game.global.world;
-				if (game.global.currentMapId == game.global.mapsOwnedArray[z].id){
-					game.global.currentMapId = "";
+				if (game.global.currentMapId === game.global.mapsOwnedArray[z].id) {
+					game.global.currentMapId = '';
 					game.global.lastClearedMapCell = -1;
 					game.global.mapGridArray = [];
 				}
@@ -12847,6 +12858,7 @@ function nextWorld() {
 			}
 		}
 	}
+
 	u2Mutations.tree.Tauntimps.check();
 	u2Mutations.tree.AvgExotic.check();
 }
