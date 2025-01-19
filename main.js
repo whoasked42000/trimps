@@ -5336,9 +5336,11 @@ function canAffordCoordinationTrimps(){
 	return (game.resources.trimps.realMax() >= (game.resources.trimps.getCurrentSend() * 3))
 }
 
+
+/* 	stops lockOnUnlock from running during TW as a 1s delay impacts golden upgrade purchases */
 function buyUpgrade(what, confirmed, noTip, heldCtrl) {
 	if (game.options.menu.pauseGame.enabled) return;
-	if (!confirmed && !noTip && game.options.menu.lockOnUnlock.enabled == 1 && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return;
+	if (!confirmed && !noTip && game.options.menu.lockOnUnlock.enabled == 1 && !usingRealTimeOffline && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return;
     if (what == "Coordination") {
        if (!canAffordCoordinationTrimps()) return false;
     }
