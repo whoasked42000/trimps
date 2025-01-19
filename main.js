@@ -16089,23 +16089,26 @@ function updateGammaStacks(reset){
 	manageStacks('Charging', game.heirlooms.Shield.gammaBurst.stacks, true, 'gammaSpan', 'glyphicon glyphicon-flash', tipText, false);
 }
 
-function manageStacks(stackName, stackCount, isTrimps, elemName, icon, tooltipText, forceHide, addSpace, addClass){
-	var elem = document.getElementById(elemName);
-	var parentName = (isTrimps) ? "goodGuyName" : "badDebuffSpan";
-	var parent = document.getElementById(parentName);
-	if (forceHide){
-		if (elem === null) return;
-		parent.removeChild(elem);
+function manageStacks(stackName, stackCount, isTrimps, elemName, icon, tooltipText, forceHide, addSpace, addClass) {
+	const parentName = isTrimps ? 'goodGuyName' : 'badDebuffSpan';
+	const parent = document.getElementById(parentName);
+	let elem = document.getElementById(elemName);
+
+	if (forceHide) {
+		if (elem) parent.removeChild(elem);
 		return;
 	}
-	if (elem === null){
-		var className = (addClass) ? " class='" + addClass + "'" : "";
-		parent.innerHTML += "<span id='" + elemName + "'" + className + "></span>";
+
+	if (!elem) {
+		let className = addClass ? " class='" + addClass + "'" : '';
+		if (parent) parent.innerHTML += `<span id="${elemName}"${className}></span>`;
 		elem = document.getElementById(elemName);
 	}
-	if (stackCount == -1) stackCount = "";
-	var space = (addSpace) ? "&nbsp;" : "";
-	elem.innerHTML = ' <span class="badge antiBadge" onmouseover="tooltip(\'' + stackName + '\', \'customText\', event, \'' + tooltipText + '\');" onmouseout="tooltip(\'hide\')"><span>' + stackCount + '</span>' + space + '<span class="' + icon + '"></span></span>';
+
+	if (stackCount === -1) stackCount = '';
+	const space = addSpace ? '&nbsp;' : '';
+	const elemText = ` <span class="badge antiBadge" onmouseover="tooltip('${stackName}', 'customText', event, '${tooltipText}')" onmouseout="tooltip('hide')"><span>${stackCount}</span>${space}<span class="${icon}"></span></span>`;
+	if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
 }
 
 function buyEquipment(what, confirmed, noTip, forceAmt) {
