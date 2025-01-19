@@ -166,7 +166,7 @@
 				<div class="row resourceRow">
 					<div class="col-xs-6 maxH">
 						<div id="food" class="playerGather">
-							<div id="boneShrineBtn" style="display: none" class="isEmpty noselect" onmouseover="tooltip('Bone Shrine', null, event)" onclick="game.permaBoneBonuses.boosts.consume()" onmouseout="tooltip('hide')"></div>
+							<button id="boneShrineBtn" style="display: none" class="isEmpty noselect" onclick="game.permaBoneBonuses.boosts.consume()"></button>
 							<h1 class="title">Food</h1>
 							<span class="ownedArea bdHover" onclick="getMaxResources('Food')"><span id="foodOwned">0</span> / <span id="foodMax"></span></span>
 							<br/>
@@ -327,7 +327,7 @@
 							<button id="CombatFilter" type="button" onclick="filterMessage('Combat')" class="btn btn-success logFlt">Combat</button>
 						</div>
 						<div id="logConfigHolder" class="btn-group" role="group">
-							<button title="Configure Displayed Messages" id="logConfigBtn" type="button" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
+							<button aria-label="Configure Displayed Messages" id="logConfigBtn" type="button" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
 						</div>						
 					</div>
 					<div id="achievementTracker">
@@ -433,8 +433,8 @@
 										<div class="col-xs-3 lowPad">&nbsp;</div>
 										<div class="col-xs-3 lowPad">
 											<div id="autoStructureBtn" onmouseover='tooltip("AutoStructure", null, event)' onmouseout='tooltip("hide")' class="toggleConfigBtn pointer noselect colorDanger autoUpgradeBtn">
-												<div id='autoStructureText' onclick="toggleAutoStructure()">AutoStructure</div><div onclick="tooltip('Configure AutoStructure', null, 'update')">
-													<span class='glyphicon glyphicon-cog'></span></div>
+												<div id='autoStructureText' onclick="toggleAutoStructure()">AutoStructure</div><div aria-label="Configure Auto Structure" onclick="tooltip('Configure AutoStructure', null, 'update')">
+													<span class='glyphicon glyphicon-cog'>Configure AutoStructure</span></div>
 											</div>
 										</div>
 										<div class="col-xs-3" style="padding-left: 5px">
@@ -456,8 +456,8 @@
 										</div>
 										<div class="col-xs-3 lowPad">
 											<div id="autoJobsBtn" onmouseover='tooltip("AutoJobs", null, event)' onmouseout='tooltip("hide")' class="toggleConfigBtn pointer noselect colorDanger autoUpgradeBtn">
-												<div id='autoJobsText' role="button" onclick="toggleAutoJobs()">AutoJobs</div><div role="button" title="Configure AutoJobs" onclick="tooltip('Configure AutoJobs', null, 'update')">
-													<span class='glyphicon glyphicon-cog'></span>
+												<div id='autoJobsText' role="button" onclick="toggleAutoJobs()">AutoJobs</div><div role="button" aria-label="Configure AutoJobs" onclick="tooltip('Configure AutoJobs', null, 'update')">
+													<span class='glyphicon glyphicon-cog'>Configure Autojobs</span>
 												</div>
 											</div>
 											
@@ -477,8 +477,9 @@
 											<h2><span id="upgradesTitleSpan" class="titleSpan">Upgrades<br/>(Research first)</span></h2>
 										</div>
 										<div class="col-xs-3 lowPad">								
-											<div id="autoGoldenBtn" onmouseover="tooltip('AutoGold', null, event)" onmouseout="tooltip('hide')" class="pointer noselect settingBtn0 autoUpgradeBtn">
+											<div id="autoGoldenBtn" onmouseover="tooltip('AutoGold', null, event)" onmouseout="tooltip('hide')" class="pointer noselect settingBtn0 autoUpgradeBtn toggleConfigBtn">
 												<div id='autoGoldenText' onclick="toggleAutoGolden()">AutoGold</div>
+												<div id="goldConfig" aria-label="Configure Auto Golden" onclick="archoGolden.popup()"><span class="glyphicon glyphicon-cog"></span></div>
 											</div>
 										</div>
 										<div class="col-xs-3 lowPad">
@@ -502,8 +503,8 @@
 										<div class="col-xs-3 lowPad">&nbsp;</div>
 										<div class="col-xs-3" style="padding-left: 5px">
 											<div id="autoEquipBtn" onmouseover='tooltip("AutoEquip", null, event)' onmouseout='tooltip("hide")' class="toggleConfigBtn pointer noselect colorDanger autoUpgradeBtn">
-												<div id='autoEquipText' onclick="toggleAutoEquip()">AutoEquip</div><div onclick="tooltip('Configure AutoEquip', null, 'update')">
-													<span class='glyphicon glyphicon-cog'></span></div>
+												<div id='autoEquipText' onclick="toggleAutoEquip()">AutoEquip</div><div aria-label="Configure Auto Equip" onclick="tooltip('Configure AutoEquip', null, 'update')">
+													<span class='glyphicon glyphicon-cog'>Configure Auto Equip</span></div>
 											</div>
 										</div>
 									</div>
@@ -530,113 +531,107 @@
 							<div id="natureContainer" style="display: none; height: 100%;">
 								<div class='row noMarg' style="height: 100%;">
 									<div id='tabColPoison' class='col-xs-4 tabColPoison tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoPoison'>
 											<div class='natureTitle'>
-												<span id='infoSpanPoison' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Poison')" onmouseout="tooltip('hide')"><span class='icomoon icon-info2'></span></span>
+												<span id='infoSpanPoison' class='infoSpanNature'><span class='icomoon icon-info2'></span></span>
 												Poison									
 											</div>
 											Tokens: <span id="tokenCountPoison">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Poison')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradePoisonBtn' onclick="naturePurchase('upgrade', 'Poison')">
 											<span class='natureUpgradeLevel' id='natureUpgradePoisonLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradePoisonCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Poison')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureStackTransferPoisonBtn' onclick="naturePurchase('stackTransfer', 'Poison')">
 											<span class='natureUpgradeLevel' id='natureStackTransferPoisonLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferPoisonCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberPoisonContainer' class='natureBuyIcon natureUberContainer noselect' onmouseover="natureTooltip(event, 'uberEmpower', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Poison')">
+										</button>
+										<button id='uberPoisonContainer' id='uberPoisonBtn' class='natureBuyIcon natureUberContainer noselect' onclick="naturePurchase('uberEmpower', 'Poison')">
 											<span class='natureUpgradeLevel natureUberName' id='uberPoisonName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerPoisonCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class="transferButtons">
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Poison', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Poison', 'Wind')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='naturePoisonWindBtn' onclick="naturePurchase('convert', 'Poison', 'Wind')">
 												<span class='natureUpgradeCost' id='naturePoisonWindCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-air'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Poison', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Poison', 'Ice')">
+												Convert Poison to Wind
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='naturePoisonIceBtn' onclick="naturePurchase('convert', 'Poison', 'Ice')">
 												<span class='natureUpgradeCost' id='naturePoisonIceCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon glyphicon glyphicon-certificate'></span>
-											</span>
+												Convert Poison to Ice
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-flask'></span>
 									</div>
 									<div id='tabColWind' class='col-xs-4 tabColWind tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoWind'>
 											<div class='natureTitle'>
-												<span id='infoSpanWind' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Wind')" onmouseout="tooltip('hide')"><span class='icomoon icon-info2'></span></span>
+												<span id='infoSpanWind' class='infoSpanNature'><span class='icomoon icon-info2'></span></span>
 													Wind
 											</div>
 											Tokens: <span id="tokenCountWind">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Wind')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradeWindBtn' onclick="naturePurchase('upgrade', 'Wind')">
 											<span class='natureUpgradeLevel' id='natureUpgradeWindLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradeWindCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Wind')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureStackTransferWindBtn' onclick="naturePurchase('stackTransfer', 'Wind')">
 											<span class='natureUpgradeLevel' id='natureStackTransferWindLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferWindCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberWindContainer' class='natureBuyIcon natureUberContainer noselect' onmouseover="natureTooltip(event, 'uberEmpower', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Wind')">
+										</button>
+										<button id='uberWindContainer' class='natureBuyIcon natureUberContainer noselect' id='uberWindBtn' onclick="naturePurchase('uberEmpower', 'Wind')">
 											<span class='natureUpgradeLevel natureUberName' id='uberWindName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerWindCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class='transferButtons'>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Wind', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Wind', 'Poison')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id="natureWindPoisonBtn" onclick="naturePurchase('convert', 'Wind', 'Poison')">
 												<span class='natureUpgradeCost' id='natureWindPoisonCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-flask'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Wind', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Wind', 'Ice')">
+												Convert Wind to Poison
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='natureWindIceBtn' onclick="naturePurchase('convert', 'Wind', 'Ice')">
 												<span class='natureUpgradeCost' id='natureWindIceCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon glyphicon glyphicon-certificate'></span>
-											</span>
+												Convert Wind to Ice
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-air'></span>
 									</div>
 									<div id='tabColIce' class='col-xs-4 tabColIce tabColNature noPad'>
-										<div class='natureTop'>
+										<button class='natureTop' id='natureInfoIce'>
 											<div class='natureTitle'>
-												<span id='infoSpanIce' class='infoSpanNature' onmouseover="natureTooltip(event, 'description', 'Ice')" onmouseout="tooltip('hide')"></span>
+												<span id='infoSpanIce' class='infoSpanNature'></span>
 												Ice
 											</div>
 											Tokens: <span id="tokenCountIce">0</span>
-										</div>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'upgrade', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('upgrade', 'Ice')">
+										</button>
+										<button class='natureBuyIcon noselect' id='natureUpgradeIceBtn' onclick="naturePurchase('upgrade', 'Ice')">
 											<span class='natureUpgradeLevel' id='natureUpgradeIceLevel'></span>
 											<span class='natureUpgradeCost' id='natureUpgradeIceCost'></span>
 											<span class='natureBigIcon icomoon icon-plus'></span>
-										</span>
-										<span class='natureBuyIcon noselect' onmouseover="natureTooltip(event, 'stackTransfer', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('stackTransfer', 'Ice')">
+										</button>
+										<button class='natureBuyIcon noselect' id="natureStackTransferIceBtn" onclick="naturePurchase('stackTransfer', 'Ice')">
 											<span class='natureUpgradeLevel' id='natureStackTransferIceLevel'></span>
 											<span class='natureUpgradeCost' id='natureStackTransferIceCost'></span>
 											<span class='natureBigIcon icomoon icon-rotate-left'></span>
-										</span>
-										<span id='uberIceContainer' class='natureBuyIcon noselect natureUberContainer' onmouseover="natureTooltip(event, 'uberEmpower', 'Ice')" onmouseout="tooltip('hide');" onclick="naturePurchase('uberEmpower', 'Ice')">
+										</button>
+										<button id='uberIceContainer' class='natureBuyIcon noselect natureUberContainer' id="uberIceBtn" onclick="naturePurchase('uberEmpower', 'Ice')">
 											<span class='natureUpgradeLevel natureUberName' id='uberIceName'></span>
 											<span class='natureUpgradeCost' id='natureUberEmpowerIceCost'></span>
 											<span class='natureBigIcon glyphicon glyphicon-king'></span>
-										</span>
+										</button>
 										<div class="transferButtons">
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Ice', 'Poison')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Ice', 'Poison')">
+											<button class='natureBuyIcon noselect natureBuyIconMini' id="natureIcePoisonBtn" onclick="naturePurchase('convert', 'Ice', 'Poison')">
 												<span class='natureUpgradeCost' id='natureIcePoisonCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-flask'></span>
-											</span>
-											<span class='natureBuyIcon noselect natureBuyIconMini' onmouseover="natureTooltip(event, 'convert', 'Ice', 'Wind')" onmouseout="tooltip('hide');" onclick="naturePurchase('convert', 'Ice', 'Wind')">
+												Convert Ice to Poison
+											</button>
+											<button class='natureBuyIcon noselect natureBuyIconMini' id='natureIceWindBtn'  onclick="naturePurchase('convert', 'Ice', 'Wind')">
 												<span class='natureUpgradeCost' id='natureIceWindCost'></span>
-												<span class='natureSmallIcon icomoon icon-shuffle3'></span>
-												<span class='natureSmallIcon icomoon icon-air'></span>
-											</span>
+												Convert Ice to Wind
+											</button>
 										</div>
 										<span class='natureBackgroundIcon icomoon icon-certificate'></span>
 									</div>
@@ -699,8 +694,8 @@
 									<div class="col-xs-4 noPad pointer noselect bdHover" id="blockDiv" style="visibility: hidden" onclick="getBattleStatBd('block')">
 										<span id="goodGuyBlock">0</span> <span id='goodGuyBlockName'>BLK</span>
 									</div>
-									<div class="col-xs-2 pointer noselect" title="Activate MagnetoShriek" role="button" style="padding-left: 0" id="roboTrimpBtn" onclick="magnetoShriek()">
-										<span id="chainHolder" class="shriekStateCooldown" style='visibility: hidden' onmouseover="tooltip('MagnetoShriek', null, event)" onmouseout="tooltip('hide')"><span id="roboTrimpTurnsLeft"></span> <span class="icomoon icon-chain" style="color: white"></span></span>
+									<div class="col-xs-2 pointer noselect" aria-label="Activate MagnetoShriek" role="button" style="padding-left: 0; visibility: hidden" id="roboTrimpBtn" onclick="magnetoShriek()">
+										<span id="chainHolder" aria-label="Activate MagnetoShriek" class="shriekStateCooldown" onmouseover="tooltip('MagnetoShriek', null, event)" onmouseout="tooltip('hide')"><span id="roboTrimpTurnsLeft"></span> <span class="icomoon icon-chain" style="color: white"></span></span>
 									</div>
 								</div>
 								<div class="progress fightBar">
@@ -730,7 +725,7 @@
 									</div>
 									<div class="col-xs-1" style="font-size: 1.5em; padding: 0;">
 										<div id="lootBdContainer">
-											<span id="lootBdBtn" class="icomoon icon-gift2 pointer" onclick="getLootBd('Food/Wood/Metal')"></span>
+											<span id="lootBdBtn" aria-label="Loot Breakdown" class="icomoon icon-gift2 pointer" onclick="getLootBd('Food/Wood/Metal')"></span>
 											<div id="openTutorialContainer" style="display: none;">
 												<span id="openTutorialBtn" class="flashNo icomoon icon-star pointer tutorialStar" onclick="tutorial.popup()" style="color: gold;"></span>
 											</div>
@@ -757,53 +752,54 @@
 									<h3><span id="worldName">Zone</span> <span id="worldNumber">1</span><br/><span id="mapBonus"></span></h3>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-primary fightBtn" id="fightBtn" onmouseover="tooltip('Fight',null,event)" onmouseout="tooltip('hide')" onclick="fightManual()">
+							<button class="btn btn-primary fightBtn" id="fightBtn" onclick="fightManual()">
 									Fight
-								</span>
+							</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-danger fightBtn" id="pauseFight" onmouseover="tooltip('AutoFight',null,event)" onmouseout="tooltip('hide')" onclick="pauseFight()" style="display: none">
+							<button class="btn btn-danger fightBtn" id="pauseFight" onclick="pauseFight()" style="display: none">
 									AutoFight Off
-								</span>
+							</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<div id="mapsBtn" class="btn btn-warning fightBtn" onmouseover="tooltip('Maps', null, event)" onmouseout="tooltip('hide')" style="display: none">
-									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div><div role="button" title='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
-										<span class='glyphicon glyphicon-cog'></span></div>
-								</div>
+								<button id="mapsBtn" class="btn btn-warning fightBtn" style="display: none">
+									<div id='mapsBtnText' onclick="mapsClicked()">Maps</div>
+									<button aria-label='Configure Map Settings. Press S after clicking.' onclick="tooltip('Configure Maps', null, 'update')">
+										<span class='glyphicon glyphicon-cog'>Configure Maps</span></button>
+									</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
+								<button class="btn voidMessage fightBtn" id="voidMapsBtn" onclick="toggleVoidMaps()" style="display: none">
 									Void Maps
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-info fightBtn" id="portalBtn" onmouseover="tooltip('Portal', null, event)" onmouseout="tooltip('hide')" onclick="portalClicked()" style="display: none">
+								<button class="btn btn-info fightBtn" id="portalBtn" onclick="portalClicked()" style="display: none">
 									Portal
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer">
-								<span class="btn btn-danger fightBtn" id="repeatBtn" onmouseover="tooltip('Repeat Map', null, event)" onmouseout="tooltip('hide')" onclick = "repeatClicked()" style="display: none">
+								<button class="btn btn-danger fightBtn" id="repeatBtn" onclick = "repeatClicked()" style="display: none">
 									Repeat Off
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="heirloomBtnContainer">
-								<span id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</span>
+								<button id="heirloomsBtn" class="btn fightBtn heirloomsBtnColor" onclick="toggleHeirlooms()">Heirlooms</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="boneBtnContainer">
-								<span class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
+								<button class="btn btn-default fightBtn" id="boneBtnMain" onclick="showBones()">
 									<span id="boneBtnText">Bone Trader</span>
-								</span>
+								</button>
 							</div>							
 							<div class="battleSideBtnContainer" style="display: none" id="finishDailyBtnContainer">
-								<span class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
+								<button class="btn btn-success fightBtn" id="finishDailyBtn" onclick="tooltip('Finish Daily', null, 'update')">
 									Finish Daily
-								</span>
+								</button>
 							</div>
 							<div class="battleSideBtnContainer" style="display: none" id="exitSpireBtnContainer">
-								<span class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
+								<button class="btn btn-danger fightBtn" id="exitSpireBtn" onclick="tooltip('Exit Spire', null, 'update')">
 									Exit Spire
-								</span>
+								</button>
 							</div>
 
 						</div>
@@ -815,21 +811,21 @@
 									<span id="openTutorialBtn2" class="flashNo icomoon icon-star pointer tutorialStar" onclick="tutorial.popup()" style="color: gold;"></span>
 								</div>
 								<div id='advMapsControlBtns'>
-									<span id='advMapsHideBtn' role="button" title="Show/Hide map settings" class='icomoon icon-minus-circle pointer' onclick='hideAdvMaps()' onmouseover="tooltip('Show/Hide Map Config', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>
-									<span id='advMapsPreset1' role="button" title="Load Preset 1" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(1)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">1</span>
-									<span id='advMapsPreset2' role="button" title="Load Preset 2" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(2)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">2</span>
-									<span id='advMapsPreset3' role="button" title="Load Preset 3" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(3)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">3</span>
+									<span id='advMapsHideBtn' role="button" aria-label="Show/Hide map settings" class='icomoon icon-minus-circle pointer' onclick='hideAdvMaps()' onmouseover="tooltip('Show/Hide Map Config', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>
+									<span id='advMapsPreset1' role="button" aria-label="Load Preset 1" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(1)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">1</span>
+									<span id='advMapsPreset2' role="button" aria-label="Load Preset 2" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(2)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">2</span>
+									<span id='advMapsPreset3' role="button" aria-label="Load Preset 3" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(3)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">3</span>
 									<span id='advMapsPreset4' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(4)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">4</span>
 									<span id='advMapsPreset5' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(5)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">5</span>
-									<span id='advMapsSaveBtn' role="button" title="Save Settings to Selected Preset" class='icomoon icon-save pointer' onclick='saveAdvMaps()' onmouseover="tooltip('Save Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>	
-									<span id='advMapsResetBtn' role="button" title="Reset The Selected Preset" class='icomoon icon-refresh pointer' onclick='resetAdvMaps(true)' onmouseover="tooltip('Reset Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>											
-									<span id='advMapsRecycleBtn' role="button" title="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</span>
+									<span id='advMapsSaveBtn' role="button" aria-label="Save Settings to Selected Preset" class='icomoon icon-save pointer' onclick='saveAdvMaps()' onmouseover="tooltip('Save Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>	
+									<span id='advMapsResetBtn' role="button" aria-label="Reset The Selected Preset" class='icomoon icon-refresh pointer' onclick='resetAdvMaps(true)' onmouseover="tooltip('Reset Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>											
+									<span id='advMapsRecycleBtn' role="button" aria-label="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</span>
 								</div>
 								<div id="mapLevelContainer" class="col-xs-4">
-									Level <span role="button" title="Reduce map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" title="Increase map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
+									Level <span role="button" aria-label="Reduce map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" aria-label="Increase map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
 								</div>
 								<div id="mapCostContainer" class="col-xs-4 lowPad">
-									<h4 title="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
+									<h4 aria-description="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
 								</div>
 								<div id="mapCreateBtn" role="button" onclick='buyMap()' class="workBtn primaryColor pointer noselect col-xs-4">
 									Create
@@ -837,30 +833,30 @@
 							</div>
 							<div id="advMapsRow" class="row">
 								<div id="advLootContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Loot', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<div class="advMapsTitle">
 										Loot
 									</div>
 									<br/>
-									<input title="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
+									<input aria-label="Loot setting slider" value="0" id="lootAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('loot')" onchange="updateMapNumbers('loot')">
 									<div id="lootAdvMapsText"></div>
 								</div>
 								<div id="advSizeContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Size', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<div class="advMapsTitle">
 										Size
 									</div>
 									<br/>
-									<input value="0" title="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
+									<input value="0" aria-label="Size setting slider" id="sizeAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('size')" onchange="updateMapNumbers('size')">
 									<div id="sizeAdvMapsText"></div>
 								</div>
 								<div id="advDifficultyContainer" class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Difficulty', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<div class="advMapsTitle">
 										Difficulty
 									</div>
 									<br/>
-									<input value="0" title="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
+									<input value="0" aria-label="Difficulty setting slider" id="difficultyAdvMapsRange" class="mapSelector mapInput" type="range" min="0" max="9" oninput="updateMapNumbers('difficulty')" onchange="updateMapNumbers('difficulty')">
 									<div id="difficultyAdvMapsText"></div>
 								</div>
-								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad" onmouseover="tooltip('Biome', 'advMaps', event)" onmouseout="tooltip('hide')">
+								<div id="advBiomeContainer" class="col-xs-3 mapConfigContainer lowPad">
 									<div class="advMapsTitle">
 										Biome
 									</div>
@@ -877,7 +873,7 @@
 							<div id="advMapsRow2" class="row">
 								<div class="col-xs-2 mapConfigContainer lowPad"></div>
 								<div class="col-xs-3 mapConfigContainer lowPad">
-									<div class="advMapsTitle" onmouseover="tooltip('Special Modifier', 'advMaps', event)" onmouseout="tooltip('hide')">
+									<div class="advMapsTitle">
 										Special Modifier
 									</div>
 									<br/>
@@ -892,11 +888,11 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advPerfectUnlocked" style="display: none">
-										<div class="advMapsTitle" onmouseover="tooltip('Perfect Sliders', 'advMaps', event)" onmouseout="tooltip('hide')">
+										<div class="advMapsTitle">
 											Perfect Sliders
 										</div>
 										<br/>
-										<span id="advPerfectCheckbox" class="icomoon icon-checkbox-unchecked niceCheckbox" data-checked="false" onclick="swapNiceCheckbox(this); updateMapNumbers()"></span>
+										<span id="advPerfectCheckbox" role='checkbox' tabindex=0 class="icomoon icon-checkbox-unchecked niceCheckbox" aria-checked="false" data-checked="false" onclick="swapNiceCheckbox(this); updateMapNumbers()"></span>
 									</div>
 								</div>
 								<div class="col-xs-3 mapConfigContainer lowPad">
@@ -907,7 +903,7 @@
 										<span class="icomoon icon-lock3"></span>
 									</div>
 									<div id="advExtraLevelUnlocked" style="display: none">
-										<div class="advMapsTitle" onmouseover="tooltip('Extra Zones', 'advMaps', event)" onmouseout="tooltip('hide')">
+										<div class="advMapsTitle">
 											Extra Zones
 										</div>
 										<br/>
@@ -922,7 +918,7 @@
 							<div id="selectedMapContainer" class="row">
 								<div id="selectedMapCol" class="col-xs-3 lowPad">
 									<div id="selectedMapName"></div><br/>
-									<div id="mapCreditsLeft" title="Earn 1 Credit for each zone you clear while on this challenge"></div>
+									<div id="mapCreditsLeft" aria-label="Earn 1 Credit for each zone you clear while on this challenge"></div>
 								</div>
 
 								<div id="mapStatsCol3" class="col-xs-5 lowPad">
@@ -937,12 +933,12 @@
 									</div>
 								</div>
 								<div id="selectMapBtns">
-									<span id="selectMapBtn" role="button" class="workBtn pointer noselect infoColor selectMapBtn" style="visibility: hidden" onclick="runMap()">
+									<button id="selectMapBtn" class="workBtn pointer noselect infoColor selectMapBtn" style="visibility: hidden" onclick="runMap()">
 										Run Map
-									</span>
-									<span id="recycleMapBtn" role="button" class="workBtn pointer noselect dangerColor selectMapBtn" style="visibility: hidden" onclick="recycleMap()">
+									</button>
+									<button id="recycleMapBtn" class="workBtn pointer noselect dangerColor selectMapBtn" style="visibility: hidden" onclick="recycleMap()">
 										Recycle Map
-									</span>
+									</button>
 								</div>
 								</div>
 								<div id="mapStatsCol1" class="col-xs-2 mapStatsCol">
@@ -1126,7 +1122,7 @@
 	<div id="achievementWrapper" style="display: none">
 		<div id="achievementMainButtons">
 			<span id="achievementHelp" style='display: none' onclick="toggleAchievementHelp()" class="icomoon icon-question-circle"></span>
-			<span id="achievementMainClose" role='button' title='Close Achievement Screen' onclick="toggleAchievementWindow()" class="icomoon icon-close">Close</span>
+			<span id="achievementMainClose" role='button' aria-label='Close Achievement Screen' onclick="toggleAchievementWindow()" class="icomoon icon-close">Close</span>
 		</div>
 		<div class="row" id="achievementTopRow">
 			<div class="col-xs-6">
@@ -1265,8 +1261,8 @@
 	</div>
 	<div id="achievementPopup" style="display: none">
 		<span class="achievementBtns">
-			<span class="achievementBtnGo icomoon icon-newspaper-o" onclick="toggleAchievementWindow()"></span>
-			<span class="achievementBtnClose icomoon icon-close" onclick="closeAchievementPopup()"></span>	
+			<button class="achievementBtnGo icomoon icon-newspaper-o" aria-label="View Achievements" onclick="toggleAchievementWindow()"></button>
+			<button class="achievementBtnClose icomoon icon-close" aria-label="Close" onclick="closeAchievementPopup()"></button>	
 		</span>
 		<div class="row">
 			<div id="achievementPopupIconContainer" class="col-xs-3 lowPad">
@@ -1282,8 +1278,8 @@
 		<div id="heirloomsPopupBtns">
 			You Found an Heirloom!
 
-			<span class="heirloomPopupBtn icomoon icon-close" onclick="closeHeirPopup()"></span>
-			<span class="heirloomPopupBtn icomoon icon-archive" onclick="toggleHeirlooms(); closeHeirPopup();"></span>
+			<button class="heirloomPopupBtn icomoon icon-close" aria-label="Close" onclick="closeHeirPopup()"></button>
+			<button class="heirloomPopupBtn icomoon icon-archive" aria-label="View Heirlooms" onclick="toggleHeirlooms(); closeHeirPopup();"></button>
 		</div>
 		<div id="heirloomsPopupHere">
 		
@@ -1310,7 +1306,7 @@
 			&nbsp;
 		</div>
 		<div id="tutorialInner">
-			<hr title="Tutorial"/>
+			<hr aria-label="Tutorial"/>
 			<div id="tutorialTitle" class="noselect"><span id='tutorialSizeBtn' onclick="tutorial.toggleSize()" class='icomoon icon-expand'></span><span id="tutorialCloseBtn" onclick="tutorial.closeWindow()" class='icmoon icon-close'></span><span class="pointer" onclick='tutorial.back()'><span id="tutorialBackBtn" class='icomoon icon-arrow-left'></span><span class='icomoon icon-star tutorialStar'></span></span>  ADVISOR <span id='tutorialStep'></span>  <span class="pointer" onclick='tutorial.next()'><span class='icomoon icon-star tutorialStar'></span><span id="tutorialNextBtn" class='icomoon icon-arrow-right'></span></span></div>
 			<hr/>
 			<div id="tutorialText"><div id="tutorialTextInner" class="niceScroll"></div></div>

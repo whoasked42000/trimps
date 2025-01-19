@@ -3635,7 +3635,8 @@ var autoBattle = {
         this.saveLastAction('oneTimer', what, cost);
         this.popup(true, false, true);
     },
-    hoverItem: function(item, upgrade){
+    hoverItem: function(item, upgrade, event){
+		if (event && event.key && event.key != "?") return; // Screenreader keytooltip support, 
         var itemObj = this.items[item];
         if (!itemObj) return;
         if (upgrade){
@@ -3965,7 +3966,7 @@ var autoBattle = {
             else if (this.rings.level < 30) text += "Unlock another slot at level 30!"
             
         }
-        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><span class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)</span><br/>";
+        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><button class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)</button><br/>";
         text += "Every level increases stats of all mods on The Ring.<br/>Every 10 levels, gains a bigger boost in power!<br/>"
         if (this.rings.level < 10) text += "Gains status chance starting at Level 10.<br/>" 
         text += "</div>";
@@ -4066,6 +4067,9 @@ var autoBattle = {
     },
     hideMode: false,
     popup: function(updateOnly, statsOnly, itemsOnly, leaveMode, fromBattle){
+		// !game.global.lockTooltip does not work as expected with screenreaders, but checking to see if SA is the last tooltip and if there is a tooltip displayed is effectively the same thing for both (I think? I hope? It looks like it is.)
+		// Figuring out why lockTooltip acts inappropriately on SR version is the better solution, but the tooltip code scares me. A lot. 
+		let SAActive = lastTooltipTitle == "Spire Assault" && document.getElementById("tooltipDiv").style.display == "block"
         if (fromBattle){
             if (this.popupMode == "bonuses" && !this.updateBonusPrices()){
                 itemsOnly = true;
@@ -4081,7 +4085,8 @@ var autoBattle = {
             this.hideMode = false;
             this.confirmUndo = false;
         }
-        if ((updateOnly || itemsOnly) && (lastTooltipTitle != "Spire Assault" || !game.global.lockTooltip)) return;
+		
+        if ((updateOnly || itemsOnly) && !SAActive) return; 
         if (usingRealTimeOffline){
             cancelTooltip();
             return;
@@ -4110,7 +4115,7 @@ var autoBattle = {
         topText += prettify(this.dust) + " Dust (" + prettify(dustPs) + " per sec)" + shardText + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + ((this.settings.practice.enabled == 1) ? "<b style='color: #921707'>Practicing</b>" : ((this.enemyLevel == this.maxEnemyLevel) ? ((this.canSeal) ? "Farming (Max Level)" : "Kill " + (this.nextLevelCount() - this.enemiesKilled)) : "Farming")) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enemies Killed: " + this.sessionEnemiesKilled + "&nbsp;" + pctWon + "&nbsp;&nbsp;&nbsp;Fights Lost: " + this.sessionTrimpsKilled + "<br/>Enemy Level " + this.enemy.level + ((this.profile) ? " (" + this.profile + ")" : "") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         var buttons = "";
 
-        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><span id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto'>- Decrease Enemy Level -</span><span onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</span><span onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</span><span id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></span><span id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></span></div>";
+        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><button id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto noselect'>- Decrease Enemy Level -</button><button onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</button><button onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</button><button aria-label='Help' id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></button><button aria-label='Close' id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></button></div>";
         text = "<div class='noselect'><div id='autoDust'>" + topText + "</div>" + buttons + "<div class='autoBattleTopName'>Huffy</div><div class='autoBattleTopName'>Enemy</div>";
         if (updateOnly || itemsOnly) document.getElementById('autoDust').innerHTML = topText;
         var trimpAttackTime = (this.trimp.attackSpeed);
@@ -4276,11 +4281,11 @@ var autoBattle = {
         }
         text += "<div id='autoBattleStatsText'>" + statsText + "</div>";
         var itemsText = "Items (" + this.countEquippedItems() + "/" + this.getMaxItems() + " Equipped)"; 
-        text += "<div id='autoBattleMenuButtons'><span id='abItemsBtn' onclick='autoBattle.swapPopup(\"items\")' class='btn btn-lg autoItemUpgrade darkBorder'>" + itemsText + "</span><span onclick='autoBattle.swapPopup(\"bonuses\")' class='btn btn-lg colorNavy'>Bonuses</span><span onclick='autoBattle.swapPopup(\"contracts\")' class='btn btn-lg colorVoidy darkBorder'>Contracts</span><span onclick='autoBattle.swapPopup(\"hidden\")' class='btn btn-lg autoColorOrange darkBorder'>Hidden Items</span><span class='btn btn-lg autoItemHide darkBorder' onclick='autoBattle.toggleHideMode()'>Hide Items</span>";
-        text += "<span id='autoBattleRingBtn' onclick='autoBattle.swapPopup(\"rings\")' style='display: " + ((this.oneTimers.The_Ring.owned) ? 'inline-block' : 'none') + "' class='btn btn-lg autoColorTeal active darkBorder'>The Ring</span>";
-        text += "<span onclick='autoBattle.swapPopup(\"other\")' class='btn btn-lg autoColorGrey active darkBorder'>Misc</span></div>";
+        text += "<div id='autoBattleMenuButtons'><button id='abItemsBtn' onclick='autoBattle.swapPopup(\"items\")' class='btn btn-lg autoItemUpgrade darkBorder'>" + itemsText + "</button><button onclick='autoBattle.swapPopup(\"bonuses\")' class='btn btn-lg colorNavy'>Bonuses</button><button onclick='autoBattle.swapPopup(\"contracts\")' class='btn btn-lg colorVoidy darkBorder'>Contracts</button><button onclick='autoBattle.swapPopup(\"hidden\")' class='btn btn-lg autoColorOrange darkBorder'>Hidden Items</button><button class='btn btn-lg autoItemHide darkBorder' onclick='autoBattle.toggleHideMode()'>Hide Items</button>";
+        text += "<button id='autoBattleRingBtn' onclick='autoBattle.swapPopup(\"rings\")' style='display: " + ((this.oneTimers.The_Ring.owned) ? 'inline-block' : 'none') + "' class='btn btn-lg autoColorTeal active darkBorder'>The Ring</button>";
+        text += "<button onclick='autoBattle.swapPopup(\"other\")' class='btn btn-lg autoColorGrey active darkBorder'>Misc</button></div>";
         var notesElem = document.getElementById('autoBattleNotes');
-        if (!notesElem || !itemsOnly) text +=  "<div id='autoBattleNotes'" + ((this.popupMode == "items" || this.popupMode == "hidden") ? "" : " style='display: none'") + ">" + this.notes + "</div>";
+        if (!notesElem || !itemsOnly) text +=  "<div aria-live='polite' id='autoBattleNotes'" + ((this.popupMode == "items" || this.popupMode == "hidden") ? "" : " style='display: none'") + ">" + this.notes + "</div>";
         if (this.popupMode == "items" || this.popupMode == "hidden") {
             if (notesElem) notesElem.style.display = 'block';
         }
@@ -4294,9 +4299,9 @@ var autoBattle = {
             swapClass('mode', extraClass, itemsElem)
         }
         if (this.popupMode == "items" || this.popupMode == "hidden"){
+			text += "<h1 class='visually-hidden'>Spire Assault Items</h1>"
             var itemList = this.getItemOrder();
-            var line1 = "";
-            var line2 = "";
+			var line = ""
             var count = 1;
             var total = 0;
             for (x = 0; x < itemList.length; x++){
@@ -4305,33 +4310,34 @@ var autoBattle = {
                 if (!itemObj.owned) continue;
                 if (itemObj.hidden != (this.popupMode == "hidden")) continue;
                 if (count > 7){
-                    text += "<div>" + line1 + "</div><div>" + line2 + "</div>";
-                    line1 = "";
-                    line2 = "";
+                    text += "<div>" + line + "</div>";
+					line = ""
                     count = 1;
                 }
                 
                 var equipClass = (itemObj.equipped) ? "Equipped" : "NotEquipped"; 
+				
                 var upgradeCost = prettify(this.upgradeCost(item)) + " " + this.getCurrencyName(item);
-                line1 += "<div class='autoItem autoItem" + equipClass + "' onclick='autoBattle.equip(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</div>";
+				line += "<div class='autoItemContainer'><div tabindex=0 id='itemName" + item + "' class='autoItem autoItem" + equipClass + "' role=checkbox aria-checked='" + itemObj.equipped +  "' onclick='autoBattle.equip(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", false, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\")'>" + this.cleanName(item) + ((itemObj.noUpgrade) ? "" : " Lv " + itemObj.level) + "</div>";
                 if (this.popupMode == "items"){
                     if (this.hideMode)
-                        line2 += "<div class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</div>";
-                    else if (itemObj.noUpgrade) line2 += "<div class='autoItem autoColorGrey'>Unupgradable</div>"
+                        line += "<button class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</button>";
+                    else if (itemObj.noUpgrade) line += "<button class='autoItem autoColorGrey' aria-disabled=true>Unupgradable</button>"
                     else 
-                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</div>";
+                        line += "<button id='itemUpgrade" + item + "'class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\")' onkeydown='autoBattle.hoverItem(\"" + item + "\", true, event)' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</button>";
                 }
                 else if (this.popupMode == "hidden")
-                    line2 += "<div class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</div>";
+                    line += "<button class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</button>";
+				line += "</div>"
                 count++;
                 total++
             }
             if (total == 0){
-                if (this.popupMode == "hidden") line1 += "<br/><b style='color: white; padding: 2%;'>You have no hidden items right now, but can hide items you're no longer using using the 'Hide Items' button above.</b>";
-                else line1 += "<br/><b>All of your items are hidden!</b>";
+                if (this.popupMode == "hidden") line += "<br/><b style='color: white; padding: 2%;'>You have no hidden items right now, but can hide items you're no longer using using the 'Hide Items' button above.</b>";
+                else line += "<br/><b>All of your items are hidden!</b>";
             }
 
-            text += "<div>" + line1 + "</div><div>" + line2 + "</div><br/></div>";
+            text += "<div>" + line + "</div><br/></div>";
         }
         else if (this.popupMode == "bonuses"){
             for (var bonus in this.bonuses){
@@ -4346,7 +4352,7 @@ var autoBattle = {
                 }
                 costText = "<span id='" + bonus + "BonusPrice' class='" + costTextColor + "'>" + costText + "</span>";
                 var maxLevel = (bonusObj.max) ? "Max Level " + bonusObj.max : "Unlimited Purchases";
-                text += "<div id='" + bonus + "BonusBox' onclick='autoBattle.buyBonus(\"" + bonus + "\")' class='autoBonusBox'>" + this.cleanName(bonus) + "<br/>Level: " + bonusObj.level + " - " + costText + "<br/>" + bonusObj.description() + "<br/>" + maxLevel + "</div>";
+                text += "<button id='" + bonus + "BonusBox' onclick='autoBattle.buyBonus(\"" + bonus + "\")' class='autoBonusBox'>" + this.cleanName(bonus) + "<br/>Level: " + bonusObj.level + " - " + costText + "<br/>" + bonusObj.description() + "<br/>" + maxLevel + "</button>";
             }
             var oneCount = 0;
             var ownedItems = this.countOwnedItems();
@@ -4364,7 +4370,7 @@ var autoBattle = {
                     var need = (oneObj.requiredItems - ownedItems);
                     text += "<div class='autoBonusBox autoOneTimerNotOwned' style='padding-top: 2%'><br/>Complete " + need + " more Contract" + needAnS(need) + " to reveal this bonus!</div>";
                 }
-                else text += "<div onclick='autoBattle.buyOneTimer(\"" + oneTime + "\")' class='autoBonusBox autoOneTimerNotOwned'>" + this.cleanName(oneTime) + "<br/>" + costText + "<br/>" + oneObj.description + "</div>";
+                else text += "<button onclick='autoBattle.buyOneTimer(\"" + oneTime + "\")' class='autoBonusBox autoOneTimerNotOwned'>" + this.cleanName(oneTime) + "<br/>" + costText + "<br/>" + oneObj.description + "</button>";
             }
             text += "<br/>";
             for (var oneTime in this.oneTimers){
@@ -4386,8 +4392,8 @@ var autoBattle = {
                 var extraClass = "";
                 if (itemObj.longText) extraClass = " descriptionSm";
                 text += "<div class='contractBox" + accepted + "'><div class='contractTitle'>" + this.cleanName(item) + "</div><div class='contractDescription" + extraClass + "'>" + description + "</div>";
-                if (accepted) text += "<span onclick='autoBattle.abandonContract()' class='btn btn-lg autoItemHide'>Abandon and Refund</span>";
-                else if (!this.activeContract) text += "<span onclick='autoBattle.acceptContract(\"" + item + "\")' class='btn btn-lg colorVoidy'>Accept (" + prettify(this.contractPrice(item)) + " " + this.getCurrencyName(item) + ", Complete a Z" + itemObj.zone + " Void Map)</span>";
+                if (accepted) text += "<button onclick='autoBattle.abandonContract()' class='btn btn-lg autoItemHide'>Abandon and Refund</button>";
+                else if (!this.activeContract) text += "<button onclick='autoBattle.acceptContract(\"" + item + "\")' class='btn btn-lg colorVoidy'>Accept (" + prettify(this.contractPrice(item)) + " " + this.getCurrencyName(item) + ", Complete a Z" + itemObj.zone + " Void Map)</button>";
                 else text += "<span class='btn btn-lg autoColorGrey'>Other Contract in Progress</span>";
                 text += "</div>";
             }
@@ -4402,14 +4408,14 @@ var autoBattle = {
                 var thisSetting = this.settings[setting];
                 if (typeof thisSetting.hideUnless !== 'undefined' && !thisSetting.hideUnless()) continue;
                 var className = (thisSetting.enabled) ? "autoItemEquipped" : "autoItemHide";
-                text += "<span class='btn btn-md " + className + "' onclick='autoBattle.toggleSetting(\"" + setting + "\")'>" + thisSetting.text[thisSetting.enabled] + "</span>";
+                text += "<button class='btn btn-md " + className + "' onclick='autoBattle.toggleSetting(\"" + setting + "\")'>" + thisSetting.text[thisSetting.enabled] + "</button>";
             }
             text += "</div>";
             text += "<div class='abMiscBox'><b style='font-size: 1.1em;'>Undo last change</b><br/>";
             var action = this.lastActions[this.lastActions.length - 1];
             if (action){
-                if (!this.confirmUndo) text += "<span class='btn autoItemUpgrade btn-md' onclick='autoBattle.confirmUndoClicked()'>Undo</span>";
-                else text += "<b>Are you sure?!</b><br/><span class='btn autoItemUpgrade btn-md' onclick='autoBattle.restoreLastAction()'>Yes, Undo</span><span class='btn autoItemHide btn-md' onclick='autoBattle.confirmUndoClicked()'>No, Cancel</span>";
+                if (!this.confirmUndo) text += "<button class='btn autoItemUpgrade btn-md' onclick='autoBattle.confirmUndoClicked()'>Undo</button>";
+                else text += "<b>Are you sure?!</b><br/><button class='btn autoItemUpgrade btn-md' onclick='autoBattle.restoreLastAction()'>Yes, Undo</button><button class='btn autoItemHide btn-md' onclick='autoBattle.confirmUndoClicked()'>No, Cancel</button>";
                 text += "<br/>";
                 if (action[0] == "ring"){
                     text += "Downgrade your ring by " + action[5] + " level" + needAnS(action[5]);
@@ -4431,9 +4437,9 @@ var autoBattle = {
                 var pname = 'p' + x;
                 var preset = this.presets[pname];
                 text += "<div class='abMiscBox preset'><b style='font-size: 1.1em;'>" + this.presets.names[x-1] + "</b><br/>";
-                text += "<span class='btn autoItemEquipped btn-md' onclick='autoBattle.savePreset(\"p" + x + "\")'>Save</span>";
-                if (preset.length) text += "<span class='btn autoItemUpgrade btn-md' onclick='autoBattle.loadPreset(\"p" + x + "\")'>Load</span>";
-                text += "<span class='btn autoColorOrange btn-md' onclick='tooltip(\"Rename SA Preset\", null, \"update\", " + x + ")'>Rename</span>";
+                text += "<button class='btn autoItemEquipped btn-md' onclick='autoBattle.savePreset(\"p" + x + "\")'>Save</button>";
+                if (preset.length) text += "<button class='btn autoItemUpgrade btn-md' onclick='autoBattle.loadPreset(\"p" + x + "\")'>Load</button>";
+                text += "<button class='btn autoColorOrange btn-md' onclick='tooltip(\"Rename SA Preset\", null, \"update\", " + x + ")'>Rename</button>";
                 text += "<div class='presetItems'>";
                 var pname = 'p' + x;
                 var preset = this.presets[pname];
@@ -4471,7 +4477,7 @@ var autoBattle = {
         if (itemsElem){
             scrollTop = itemsElem.scrollTop;
         }
-        if (!(itemsOnly && itemsElem)) {cancelTooltip(); tooltip('confirm', null, 'update', text, '', 'Spire Assault', 'Close', false, true)}
+		if (!(itemsOnly && itemsElem)) { cancelTooltip(); tooltip('confirm', null, 'update', text, '', 'Spire Assault', 'Close', false, true)}
         if (!(updateOnly && statsOnly)) this.updatePopupBtns();
         if (scrollTop > 0){
             itemsElem = document.getElementById('autoItemsDiv');
@@ -5038,10 +5044,16 @@ var u2Mutations = {
             var bgColor = 'available';
             if (itemObj.purchased) bgColor = 'purchased';
             else if (!this.checkRequirements(item)) bgColor = 'requirement';
+			var SRBuyText = `${(bgColor == 'requirement') ? "requirement not met" : bgColor }`
             var dn = (itemObj.dn) ? itemObj.dn : item;
-            text += '<div onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
-            if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
-            text += '<span class="icomoon icon-star"></span></div>';
+            text += '<button aria-labelledby="'+ item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
+            if (usingScreenReader ) {
+				text += '<span class="mutTreeName" id="\'' + item + '\'Name">' + dn + ' ' + SRBuyText + '</span>';
+			}
+			else {
+				if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
+			}
+            text += '<span class="icomoon icon-star"></span></button>';
             if (!itemObj.require) continue;
             var connect = itemObj.require;
             for (var x = 0; x < connect.length; x++){
@@ -5067,6 +5079,10 @@ var u2Mutations = {
         text += "</div>"
         text += "<div id='mutZoomButtons'><div id='mutZoomIn' onmouseover='tooltip(\"Mastery Info\", null, event);' onmouseout='tooltip(\"hide\")'>M</div><div id='mutZoomIn' onclick='u2Mutations.zoomClicked(-1);' onmouseover='tooltip(\"Zoom In\", \"customText\", event, \"Click this to Zoom In to the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-in'></span></div><div id='mutZoomOut' onclick='u2Mutations.zoomClicked(1);' onmouseover='tooltip(\"Zoom Out\", \"customText\", event, \"Click this to Zoom Out of the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-out'></span></div></div>";
         document.getElementById('mutTreeWrapper').innerHTML = text;
+		for (let item in this.tree){ // because of the global keydown event, these have to be added with an event listener rather than using inline onkeydown=""
+			let mutElem = document.getElementById(`${item}MutatorBox`)
+		    mutElem.addEventListener("keydown", function (event) { keyTooltip(event, item, "Mutator")})
+		}
         this.open = true;
     },
     closeTree: function(){

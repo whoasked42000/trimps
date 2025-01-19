@@ -2384,7 +2384,7 @@ function displayPortalUpgrades(fromTab){
 	var elem = document.getElementById("portalUpgradesHere");
 	elem.innerHTML = "";
 	if (!fromTab) game.resources.helium.totalSpentTemp = 0;
-	for (var what in game.portal){
+	for (let what in game.portal){
 		var itemName = what.replace('_', ' ');
 		var portUpgrade = game.portal[what];
 		if (!fromTab){
@@ -2399,9 +2399,11 @@ function displayPortalUpgrades(fromTab){
 		if (what == "Greed" || what == "Tenacity") level += game.portal.Masterfulness.radLevel + game.portal.Masterfulness.levelTemp;
 		var html = "";
 		if (usingScreenReader){
-			html += '<button class="thing noSelect pointer jobThing" onclick="tooltip(\'' + what + '\',\'portal\',\'screenRead\')">' + itemName + ' Info</button>';
+			html += '<button class="';
 		}
-		html += '<div role="button" onmouseover="tooltip(\'' + what + '\',\'portal\',event)" onmouseout="tooltip(\'hide\')" class="';
+		else {
+			html += '<button onmouseover="tooltip(\'' + what + '\',\'portal\',event)" onmouseout="tooltip(\'hide\')" class="';
+		}
 		var htmlClass = "noselect pointer portalThing thing perkColorOff";
 		if (usingScreenReader) htmlClass += " screenReaderPerk";
 		if (game.options.menu.detailedPerks.enabled == 1) htmlClass += " detailed";
@@ -2419,16 +2421,20 @@ function displayPortalUpgrades(fromTab){
 		html += '<br/>Spent: <span id="' + what + 'Spent">' + prettify(spentRes) + '</span>';
 		}
 		else html += '<br/><span class="thingOwned">Lv:&nbsp;<span id="' + what + 'Owned">' + ((game.options.menu.formatPerkLevels.enabled) ? prettify(level) : level) + '</span>';
-		html += '</span></div>';
+		html += '</span></button>';
 		if (what == "Equality"){
 			var state = game.portal.Equality.getSetting('scalingActive') ? "On" : "Off";
-			html += '<div role="button" onmouseover="tooltip(\'Equality Scaling\', null, event)" onmouseout="tooltip(\'hide\')" class="' + htmlClass + ' equalityColor' + state + '" id="equalityScaling" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br/><span class="thingOwned"><span id="equalityScalingState">' + state + '</span>';
+			html += '<button onmouseover="tooltip(\'Equality Scaling\', null, event)" onmouseout="tooltip(\'hide\')" class="' + htmlClass + ' equalityColor' + state + '" id="equalityScaling" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br/><span class="thingOwned"><span id="equalityScalingState">' + state + '</span>';
 			if (game.options.menu.detailedPerks.enabled) html += "<br/>&nbsp;<br/>&nbsp;";
-			html += "</span></div>";
+			html += "</span></button>";
 		}
-		elem.innerHTML += html;
+		elem.insertAdjacentHTML("beforeend", html)
 		updatePerkColor(what);
 		updatePerkLevel(what);
+		if (usingScreenReader) { 
+			if (what == 'Equality') { document.getElementById('equalityScaling').addEventListener("keydown", function (event) {keyTooltip(event, 'Equality Scaling', "portal",event)}) }
+			document.getElementById(what).addEventListener("keydown", function (event) {keyTooltip(event, what, "portal",event)}) 
+		}
 	}
 }
 
@@ -2549,7 +2555,7 @@ function updatePerkColor(what){
 			
 			if (affordElem){
 				if (perkClass == "perkColorMaxed") affordElem.innerHTML = ", Max";
-				else affordElem.innerHTML = (removableLevel > 0) ? ", Can Buy" : ", Not Affordable";
+				else affordElem.innerHTML = (perkClass === "perkColorOn") ? ", Can Buy" : ", Not Affordable";
 			}
 		}
 	}
@@ -3349,7 +3355,7 @@ function buyPortalUpgrade(what){
 		toBuy.heliumSpentTemp += price;
 		canSpend -= price;
 		updatePerkLevel(what);
-		tooltip(what, "portal", "update");
+		if(!usingScreenReader) tooltip(what, "portal", "update");
 		document.getElementById("portalHeliumOwned").innerHTML = prettify(canSpend);
 		enablePerkConfirmBtn();
 		if (game.global.buyAmt == "Max") displayPortalUpgrades(true);
@@ -7251,14 +7257,12 @@ function selectMod(which, fromPopup){
 	var upgradeBtn100 = document.getElementById("modUpgradeBtn100");
 	var upgradeCost10 = getModUpgradeCost(heirloom, which, 10);
 	var upgradeCost100 = getModUpgradeCost(heirloom, which, 100);
-	var newClass = (replaceCost > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, replaceBtn);
-	newClass = (upgradeCost > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn);
-	newClass = (upgradeCost10 > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn10);
-	newClass = (upgradeCost100 > resourceCount) ? "heirloomBtnInactive" : "heirloomBtnActive";
-	swapClass("heirloomBtn", newClass, upgradeBtn100);
+	for (const [cost, elem] of [[replaceCost, replaceBtn], [upgradeCost, upgradeBtn], [upgradeCost10, upgradeBtn10], [upgradeCost100, upgradeBtn100]]) {
+		let cantAfford = (cost > resourceCount) 
+		let newClass = cantAfford ? "heirloomBtnInactive" : "heirloomBtnActive";
+		swapClass("heirloomBtn", newClass, elem);
+		elem.setAttribute("aria-disabled", cantAfford)
+	}
 	replaceBtn.innerHTML = (mod[0] == "empty") ? "Add (" + prettify(replaceCost) + " " + resourceShort + ")" : "Replace (" + prettify(replaceCost) + " " + resourceShort + ")";
 	var step = (typeof modConfig.steps !== 'undefined') ? modConfig.steps : game.heirlooms.defaultSteps;
 	step = step[heirloom.rarity];
@@ -8091,7 +8095,8 @@ function natureTooltip(event, doing, spending, convertTo){
 	}
 	if (tipCost == 0) tipCost = "";
 	else tipCost = (game.empowerments[spending].tokens < tipCost) ? "<span class='red'>" + prettify(tipCost) + " Tokens of " + spending + "</span>" : "<span class='green'>" + prettify(tipCost) + " Tokens of " + spending + "</span>";
-	tooltip(tipTitle, 'customText', event, tipText, tipCost, null, null, null, null, true);
+	if (usingScreenReader && event == "update") return; // don't do updates for screenreaders
+	tooltip(tipTitle, 'customText', (usingScreenReader ? "screenRead" : event), tipText, tipCost, null, null, null, null, true);
 	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
 }
 
@@ -8189,6 +8194,7 @@ function naturePurchase(doing, spending, convertTo){
 		natureTooltip('update', doing, spending);
 		if (spending == "Wind")
 			unlockFormation(5);
+		if (usingScreenReader) screenReaderAssert(spending + " Enlightenment now active.")
 	}
 }
 
@@ -9141,7 +9147,7 @@ function updateGeneratorInfo(){
 	var state = ['Passive', 'Active', 'Hybrid'];
 	state = state[game.global.generatorMode];
 	if (elem == null){
-		document.getElementById('buildingsHere').innerHTML += getGeneratorHtml(true);
+		document.getElementById('buildingsHere').insertAdjacentHTML("beforeend", getGeneratorHtml(true));
 	}
 	changeGeneratorState(null, true);
 	if (game.permanentGeneratorUpgrades.Hybridization.owned) document.getElementById('generatorHybridBtn').style.display = 'inline-block';
@@ -9240,7 +9246,7 @@ function getGeneratorHtml(getContainer){
 	if (getContainer)
 		html += "<div class='thing generatorState' id='generatorWindow'>"
 	html += "<div id='genTitleContainer'><div id='generatorTitle'>Dimensional Generator</div>";
-	html += "<div id='dgChangeBtnContainer'" + ((game.global.challengeActive == "Eradicated") ? " class='eradicatedBtns'" : "") + "><span id='generatorActiveBtn' role='button' onclick='changeGeneratorState(1)' class='dgChangeBtn pointer noselect colorDanger hoverColor'>Gain Fuel</span> <span role='button' onclick='changeGeneratorState(0)' id='generatorPassiveBtn' class='dgChangeBtn pointer noselect colorPrimary hoverColor'>Gain Mi</span> <span role='button' onclick='changeGeneratorState(2)' id='generatorHybridBtn' class='dgChangeBtn pointer noselect colorTeal hoverColor' style='display: none'>Hybrid</span> <span role='button' style='display: none' onclick='tooltip(\"Configure Generator State\", null, \"update\")' id='generatorStateConfigBtn' class='pointer noselect hoverColor dgChangeBtn colorDefault'><span class='glyphicon glyphicon-cog'></span></span></div>";
+	html += "<div id='dgChangeBtnContainer'" + ((game.global.challengeActive == "Eradicated") ? " class='eradicatedBtns'" : "") + "><span id='generatorActiveBtn' role='button' onclick='changeGeneratorState(1)' class='dgChangeBtn pointer noselect colorDanger hoverColor'>Gain Fuel</span> <span role='button' onclick='changeGeneratorState(0)' id='generatorPassiveBtn' class='dgChangeBtn pointer noselect colorPrimary hoverColor'>Gain Mi</span> <span role='button' onclick='changeGeneratorState(2)' id='generatorHybridBtn' class='dgChangeBtn pointer noselect colorTeal hoverColor' style='display: none'>Hybrid</span> <div role='button' style='display: none' onclick='tooltip(\"Configure Generator State\", null, \"update\")' id='generatorStateConfigBtn'  aria-label='Configure Supervision' class='pointer noselect hoverColor dgChangeBtn colorDefault'><span class='glyphicon glyphicon-cog'></span></div></div>";
 	html += "<div role='button' id='generatorUpgradeBtn' onclick='tooltip(\"Upgrade Generator\", null, \"update\")'class='workBtn pointer noselect colorDark hoverColor'>Upgrade (<span id='upgradeMagmiteTotal'></span>)</div></div><div id='genGaugeContainer'><div class='row'><div class='col-xs-4'><div id='fuelContainer'><div id='fuelBar' class='" + ((game.options.menu.generatorAnimation.enabled == 0) ? "animateOff" : "animateOn") + "'></div><div id='fuelStorageBar' class='" + ((game.options.menu.generatorAnimation.enabled == 0) ? "animateOff" : "animateOn") + "'></div><div id='fuelGlass'></div><div id='fuelOwnedText'>Fuel<br/><span id='generatorFuelOwned'>0</span> / <span id='generatorFuelMax'>0</span></div></div></div>"
 	if (game.permanentGeneratorUpgrades.Supervision.owned)
 		html += "<div class='col-xs-4 hasSlider' id='generatorProducingColumn'><div id='generatorProducingContainer'>Producing<br/><span id='generatorTrimpsPs'>0</span><br/>Housing/Tick</div><div id='generatorSliderBox'><input id='generatorSlider' onchange='saveSupervisionSetting()' type='range' min='1' max='100' value='" + game.global.supervisionSetting + "' /></div></div>";
@@ -17245,7 +17251,7 @@ function costUpdatesTimeout() {
     checkButtons("equipment");
     checkButtons("upgrades");
     checkTriggers();
-	if (tooltipUpdateFunction) tooltipUpdateFunction();
+	if (tooltipUpdateFunction && !usingScreenReader) tooltipUpdateFunction();
 	setTimeout(costUpdatesTimeout, 250);
 }
 
@@ -19694,4 +19700,113 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
             u2Mutations.dragging(e);
         }
     })
+	// Screen Reader Tooltips
+	// This could be used to make mouseover events too, to get them out of the html files
+	const tooltips = {
+		// battleside buttons
+		fightBtn: ['Fight', null], 
+		pauseFight: ['AutoFight', null], 
+		mapsBtn: ['Maps', null], 
+		portalBtn: ['Portal', null], 
+		repeatBtn: ['Repeat Map', null], 
+		finishDailyBtn: ['Finish Daily', null], 
+		// nature tab, these have additional handling required
+		natureInfoPoison: ['description', 'Poison'],
+		natureUpgradePoisonBtn: ['upgrade', 'Poison'],
+		natureStackTransferPoisonBtn: ['stackTransfer', 'Poison'],
+		uberPoisonContainer: ['uberEmpower', 'Poison'],
+		naturePoisonWindBtn: ['convert', 'Poison', 'Wind'],
+		naturePoisonIceBtn: ['convert', 'Poison', 'Ice'],
+		natureInfoWind: ['description', 'Wind'],
+		natureUpgradeWindBtn: ['upgrade', 'Wind'],
+		natureStackTransferWindBtn: ['stackTransfer', 'Wind'],
+		uberWindContainer: ['uberEmpower', 'Wind'],
+		natureWindPoisonBtn: ['convert', 'Wind', 'Poison'],
+		natureWindIceBtn: ['convert', 'Wind', 'Ice'],
+		natureInfoIce: ['description', 'Ice'],
+		natureUpgradeIceBtn: ['upgrade', 'Ice'],
+		natureStackTransferIceBtn: ['stackTransfer', 'Ice'],
+		uberIceContainer: ['uberEmpower', 'Ice'],
+		natureIcePoisonBtn: ['convert', 'Ice', 'Poison'],
+		natureIceWindBtn: ['convert', 'Ice', 'Wind'],
+		// Map Chamber
+		advSpecialSelect: ['Special Modifier', 'advMaps'],
+		advPerfectCheckbox: ['Perfect Sliders', 'advMaps'],
+		advExtraLevelSelect: ['Extra Zones', 'advMaps'],
+		biomeAdvMapsSelect: ['Biome', 'advMaps'],
+		difficultyAdvMapsRange: ['Difficulty', 'advMaps'],
+		sizeAdvMapsRange: ['Size', 'advMaps'],
+		lootAdvMapsRange: ['Loot', 'advMaps'],
+		// All other in-html tooltips (auto generated-ish)
+		boneShrineBtn: ['Bone Shrine', null],
+		portalTimer: ['Pause the game', 'customText', game.options.menu['pauseGame'].description],
+		fluffyBox: ['Fluffy', null],
+		heliumPh: ['Helium Per Hour', null],
+		turkimpBuff: ['Well Fed', null],
+
+		talentsTab: ['Mastery', null],
+		equalityTab: ['Equality Scaling', null, true],
+		natureTab: ['Empowerments of Nature', null],
+		tab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your resources with each purchase. Click twice to customize.'],
+
+		autoStructureBtn: ["AutoStructure", null],
+		autoStorageBtn: ['AutoStorage', 'customText', 'Enabling this will cause your Trimps to automatically add a storage building to the queue if you reach max capacity. This will work on and offline if enabled.'],
+		autoJobsBtn: ["AutoJobs", null],
+		fireBtn: ['Fire Trimps', null],
+		autoGoldenBtn: ['AutoGold', null],
+		autoPrestigeBtn: ['AutoPrestige', null],
+		autoUpgradeBtn: ['AutoUpgrade', null],
+		autoEquipBtn: ["AutoEquip", null],
+		talentRespecBtn: ["Respec Masteries", null],
+
+		formation0: ['No Formation', 'customText', 'Clear your formations, return to normal stats, and derp around the battlefield. (Hotkeys: X or 1)'],
+		formation1: ['Heap Formation', 'customText', 'Trimps gain 4x health but lose half of their attack and block. (Hotkeys: H or 2)'],
+		formation2: ['Dominance Formation', 'customText', 'Trimps gain 4x attack but lose half of their health and block. (Hotkeys: D or 3)'],
+		formation3: ['Barrier Formation', 'customText', 'Trimps gain 4x block and 50% block pierce reduction but lose half of their health and attack. (Hotkeys: B or 4)'],
+		formation4: ['Scryer Formation', null],
+
+		chainHolder: ['MagnetoShriek', null],
+		badCanCrit: ['Crushing Blows', 'customText', 'Your current health is higher than your block, making you vulnerable to critical strikes from your enemies. Better fix that...'],
+
+		advMapsHideBtn: ['Show/Hide Map Config', 'advMaps'],
+		advMapsPreset1: ['Map Preset', 'advMaps'],
+		advMapsPreset2: ['Map Preset', 'advMaps'],
+		advMapsPreset3: ['Map Preset', 'advMaps'],
+		advMapsPreset4: ['Map Preset', 'advMaps'],
+		advMapsPreset5: ['Map Preset', 'advMaps'],
+		advMapsSaveBtn: ['Save Map Settings', 'advMaps'],	
+		advMapsResetBtn: ['Reset Map Settings', 'advMaps'],											
+		advMapsRecycleBtn: ['Recycle All', null],
+
+		swapPortalUniverseBtn: ['Change Universe', null],
+		presetTab1: ['Perk Preset', null, 1],
+		presetTab2: ['Perk Preset', null, 2],
+		presetTabSave: ['Perk Preset', null, 'Save'],
+		presetTabLoad: ['Perk Preset', null, 'Load'],							
+		presetTabRename: ['Perk Preset', null, 'Rename'],
+		presetTabExport: ['Perk Preset', null, 'Export'],
+		presetTabImport: ['Perk Preset', null, 'Import'],
+		ptab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your Helium with each purchase. Click twice to customize.'],
+		challengeSquaredViewBtn: ['Challenge2', null, true],
+		inPortalC2Button: ['Challenge2', null],
+		respecPortalBtn: ['Respec', null],
+		swapToCurrentChallengeBtn: ['View Current Challenge', 'customText', 'Swap the Challenge Selection pane to instead display your current challenge, or vice versa'],
+		respecMutatorsBtn: ['Respec Mutators', null],
+	}; 
+	if (usingScreenReader) {
+		for (const [elemID, args] of Object.entries(tooltips)) {
+			let elem = document.getElementById(elemID);
+			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
+			elem.setAttribute("tabindex", 0)
+		}
+	}
 })()
+
+
+screenReaderAssert(
+	`
+	Latest updates: 
+	Spire Assault equipment checkboxes. Less buttons everywhere, tabindex on tooltip iteractables.
+	
+	This game uses the ? key to display informational tooltips on buttons. 
+	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)
