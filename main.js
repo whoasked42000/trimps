@@ -7832,9 +7832,7 @@ function buildMapGrid(mapId) {
 	for (let i = 0; i < map.size; i++) {
 		const thisFast = fastTarget && (forceNextFast || i % fastEvery === 0);
 		const name = getRandomBadGuy(map.location, i + 1, map.size, map.level, imports, false, false, thisFast);
-		const enemy = game.badGuys[name];
-		const isEnemyFast = enemy.fast;
-
+		const isEnemyFast = game.badGuys[name].fast;
 		const cell = {
 			level: i + 1,
 			maxHealth: -1,
