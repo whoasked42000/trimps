@@ -2479,7 +2479,7 @@ function getLastPortal(){
 	return game.global.lastPortal;
 }
 
-function displayPortalUpgrades(fromTab){
+function displayPortalUpgrades(fromTab) {
 	document.getElementById('ptabInfoText').innerHTML = (game.options.menu.detailedPerks.enabled) ? "Less Info" : "More Info";
 	toggleRemovePerks(true);
 	var elem = document.getElementById("portalUpgradesHere");
@@ -2533,8 +2533,8 @@ function displayPortalUpgrades(fromTab){
 		updatePerkColor(what);
 		updatePerkLevel(what);
 		if (usingScreenReader) { 
-			if (what == 'Equality') { document.getElementById('equalityScaling').addEventListener("keydown", function (event) {keyTooltip(event, 'Equality Scaling', "portal",event)}) }
-			document.getElementById(what).addEventListener("keydown", function (event) {keyTooltip(event, what, "portal",event)}) 
+			if (what == 'Equality')  makeAccessibleTooltip("equalityScaling", 'Equality Scaling', "portal") 
+			makeAccessibleTooltip(what, [what, "portal"])
 		}
 	}
 }
@@ -20465,18 +20465,61 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
-			let elem = document.getElementById(elemID);
-			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
-			elem.setAttribute("tabindex", 0)
+			makeAccessibleTooltip(elemID, args)
 		}
 	}
 })()
+
+function makeAccessibleTooltip(elemID, args) {
+	// args is an array of [what, isItIn, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift]
+	if (usingScreenReader) {
+		// This contains no less than three different options for how to show tooltips. I may have gone mad.
+		// Pick one. Or two.  Or tie it to a setting. 
+		let elem = document.getElementById(elemID);
+
+		// ? tooltip
+		elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)});
+		elem.setAttribute("tabindex", 0);
+
+		// Shift-Enter(aka shift-click)
+		let callback = elem.onclick;
+		elem.onclick = function() {
+			if(shiftPressed) {
+				keyTooltip({key: "?"}, ...args)
+				return;
+			}
+			if (callback) { callback() }
+		}
+
+		// Separate info buttons
+		let infoElem = document.createElement("div");
+		infoElem.innerText = "Info";
+		infoElem.classList = ["visually-hidden"]
+		infoElem.addEventListener("click", function (event) { keyTooltip({key: "?"}, ...args) } );
+		elem.insertAdjacentElement("afterend", infoElem);
+	}
+	else {
+		if (true === false && !elem.onmouseover) { // TODO very cheeky way of saying this should work but I'm not doing it yet. (also needs the nature tooltip handling from keytooltip before it will all actually work)
+			elem.addEventListener("onmouseover", function (event) { tooltip(...Object.values(arguments).slice(0,2), event, ...Object.values(arguments).slice(2,) ); });
+			elem.addEventListener("onmouseout", function (event)  { tooltip("hide"); });
+		}
+	}
+}
+
+function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift){
+	// wrapper for tooltips to show screen reader tooltips using onkeydown
+	if (usingScreenReader && keyEvent && keyEvent.key == "?") {
+		const natureTooltips = ["Poison", "Wind", "Ice"]
+		if (natureTooltips.includes(isItIn)) natureTooltip(...Object.values(arguments))
+		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(3,))
+	}
+}
 
 
 screenReaderAssert(
 	`
 	Latest updates: 
-	Spire Assault equipment checkboxes. Less buttons everywhere, tabindex on tooltip iteractables.
+	Tooltip experiments: Shift-Enter, ?, and non-button clickable info buttons after elements with tooltips.
 	
 	This game uses the ? key to display informational tooltips on buttons. 
-	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)
+	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document." and `)
