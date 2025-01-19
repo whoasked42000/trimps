@@ -10084,91 +10084,107 @@ function dropPrestiges(){
 	}
 }
 
-function drawGrid(maps) { //maps t or f. This function overwrites the current grid, be carefulz
-	var grid = (maps) ? document.getElementById("mapGrid") : document.getElementById("grid");
+function drawGrid(maps) {
+	const grid = maps ? document.getElementById('mapGrid') : document.getElementById('grid');
+	let map = maps ? getCurrentMapObject() : null;
+	let cols = 10;
+	let rows = 10;
 
-	var map;
-    grid.innerHTML = "";
-    var cols = 10;
-	var rows = 10;
-	if (maps){
-		map = getCurrentMapObject();
-		if (map.size == 150){
+	if (maps) {
+		if (map.size === 150) {
 			rows = 10;
 			cols = 15;
-		}
-		else{
+		} else {
 			cols = Math.floor(Math.sqrt(map.size));
-			if (map.size % cols === 0) rows = map.size / cols;
-			else	rows = ((map.size - (cols * cols)) > cols) ? cols + 2 : cols + 1;
+			if (map.size % cols === 0) {
+				rows = map.size / cols;
+			} else {
+				const sizeGreaterThanCols = map.size - cols * cols > cols;
+				rows = sizeGreaterThanCols ? cols + 2 : cols + 1;
+			}
 		}
 	}
-	var className = "";
-	if (game.global.universe == 1 && !maps && game.global.world >= 60 && game.global.world <= 80){
-		
-		if (game.global.world == 60) className = "gridOverlayGreenGradient1"
-		else if (game.global.world <= 65) className = "gridOverlayGreenGradient2";
-		else if (game.global.world <= 70) className = "gridOverlayGreenGradient3";
-		else if (game.global.world <= 75) className = "gridOverlayGreenGradient4";
-		else className = "gridOverlayGreenGradient5";
+
+	const width = `${100 / cols}%`;
+	const paddingTop = `${100 / cols / 19}vh`;
+	const paddingBottom = `${100 / cols / 19}vh`;
+	const fontSize = `${cols / 14 + 1}vh`;
+
+	let className = '';
+	if (game.global.universe === 1 && !maps && game.global.world >= 60 && game.global.world <= 80) {
+		if (game.global.world === 60) className = 'gridOverlayGreenGradient1';
+		else if (game.global.world <= 65) className = 'gridOverlayGreenGradient2';
+		else if (game.global.world <= 70) className = 'gridOverlayGreenGradient3';
+		else if (game.global.world <= 75) className = 'gridOverlayGreenGradient4';
+		else className = 'gridOverlayGreenGradient5';
 	}
-	if (!maps && game.global.gridArray[0].name == "Liquimp") className += "liquid";
-	else if (!maps && game.global.spireActive) className = "spire";
-	else if (maps && map.location == "Darkness") className = "blackMap"
-	grid.className = className;
-    var counter = 0;
-    var idText = (maps) ? "mapCell" : "cell";
-    var size = 0;
-    if (maps) size = game.global.mapGridArray.length;
-    for (var i = 0; i < rows; i++) {
-        if (maps && counter >= size) return;
-        var row = document.createElement("ul");
-		grid.insertBefore(row, grid.childNodes[0]);
-        row.setAttribute("id", "row" + i);
-		row.className = "battleRow";
-        for (var x = 0; x < cols; x++) {
-            if (maps && counter >= size) return;
-			var cell = document.createElement("li");
-			cell.setAttribute("id", idText + counter);
-			row.appendChild(cell);
-			cell.style.width = (100 / cols) + "%";
-			cell.style.paddingTop = ((100 / cols) / 19)+ "vh";
-			cell.style.paddingBottom = ((100 / cols) / 19) + "vh";
-			cell.style.fontSize = ((cols / 14) + 1) + "vh";
-			var className = "battleCell cellColorNotBeaten"
-			if (maps && game.global.mapGridArray[counter].name == "Pumpkimp") className += " mapPumpkimp";
-			if (maps && map.location == "Void") className += " voidCell";
-			if (!maps && game.global.gridArray[counter].u2Mutation && game.global.gridArray[counter].u2Mutation.length){
-				cell.style.background = "initial";
-				cell.style.backgroundColor = u2Mutations.getColor(game.global.gridArray[counter].u2Mutation);
-				className += " mutatedCell";
-				
+
+	if (!maps && game.global.gridArray[0].name === 'Liquimp') className += 'liquid';
+	else if (!maps && game.global.spireActive) className = 'spire';
+	else if (maps && map.location === 'Darkness') className = 'blackMap';
+
+	const idText = maps ? 'mapCell' : 'cell';
+	let size = maps ? game.global.mapGridArray.length : 0;
+	let counter = 0;
+	let rowHTML = '';
+
+	for (let i = 0; i < rows; i++) {
+		if (maps && counter >= size) break;
+		let html = '';
+		for (let x = 0; x < cols; x++) {
+			if (maps && counter >= size) break;
+
+			const cell = game.global[maps ? 'mapGridArray' : 'gridArray'][counter];
+			const id = `${idText}${counter}`;
+
+			let className = ['battleCell', 'cellColorNotBeaten'];
+			let background = '';
+			let backgroundColor = '';
+			let title = '';
+			let role = '';
+			const innerHTML = cell.text === '' ? '&nbsp;' : cell.text;
+
+			if (maps) {
+				if (cell.name === 'Pumpkimp') className.push('mapPumpkimp');
+				if (map.location === 'Void') className.push('voidCell');
+				if (cell.vm) className.push(cell.vm);
+			} else {
+				if (cell.u2Mutation && cell.u2Mutation.length) {
+					className.push('mutatedCell');
+					background = 'initial';
+					backgroundColor = u2Mutations.getColor(cell.u2Mutation);
+				} else if (cell.mutation) className.push(cell.mutation);
+				if (cell.vm) className.push(cell.vm);
+				if (cell.empowerment) {
+					className.push(`empoweredCell${cell.empowerment}`);
+					title = `Token of ${cell.empowerment}`;
+				} else if (checkIfSpireWorld() && game.global.spireActive) className.push('spireCell');
+				if (cell.special === 'easterEgg') {
+					game.global.eggLoc = counter;
+					className.push('eggCell');
+					title = 'Colored Egg';
+					role = 'button';
+				}
 			}
-			else if (!maps && game.global.gridArray[counter].mutation) className += " " + game.global.gridArray[counter].mutation;
-			if (!maps && game.global.gridArray[counter].vm){
-				className += " " + game.global.gridArray[counter].vm;
-			}
-			else if (maps && game.global.mapGridArray[counter].vm){
-				className += " " + game.global.mapGridArray[counter].vm;
-			}
-			if (!maps && game.global.gridArray[counter].empowerment){
-				className += " empoweredCell" + game.global.gridArray[counter].empowerment;
-				cell.title = "Token of " + game.global.gridArray[counter].empowerment;
-			}
-			else if (!maps && checkIfSpireWorld() && game.global.spireActive) className += " spireCell";
-            cell.className = className;
-            cell.innerHTML = (maps) ? game.global.mapGridArray[counter].text : game.global.gridArray[counter].text;
-			if (cell.innerHTML === "") cell.innerHTML = "&nbsp;";
-			if (!maps && game.global.gridArray[counter].special == "easterEgg"){
-				cell.onclick = function () { easterEggClicked(); };
-				game.global.eggLoc = counter;
-				cell.className += " eggCell";
-				cell.setAttribute("title", "Colored Egg");
-				cell.setAttribute("role", "button");
-			}
+
+			html += `<li id="${id}" 
+						style="width:${width};padding-top:${paddingTop};padding-bottom:${paddingBottom};font-size:${fontSize};background:${background};background-color:${backgroundColor};" 
+						class="${className.join(' ')}" 
+						title="${title}" 
+						role="${role}">
+						${innerHTML}
+					</li>`;
 			counter++;
-        }
-    }
+		}
+
+		rowHTML = `<ul id="row${i}" class="battleRow">${html}</ul>` + rowHTML;
+	}
+
+	grid.className = className;
+	grid.innerHTML = rowHTML;
+
+	const eggCell = document.querySelector('.eggCell');
+	if (eggCell) eggCell.addEventListener('click', easterEggClicked);
 }
 
 function easterEggClicked(){
