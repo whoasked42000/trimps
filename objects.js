@@ -4912,13 +4912,20 @@ var u2Mutations = {
         this.setAlert();
     },
     setAlert: function(){
-        var elem = document.getElementById('mutatorsAlert');
-        var elem2 = document.getElementById('mutatorsAlert2');
-        var text = (game.options.menu.masteryTab.enabled != 0 && game.global.mutatedSeeds >= this.nextCost() && this.purchaseCount < Object.keys(this.tree).length) ? "!" : "";
-        elem.innerHTML = text;
-        elem2.innerHTML = text;
-        if (game.global.tabForMastery) updateTalentNumbers();
-        else document.getElementById('talentsEssenceTotal').innerHTML = (game.options.menu.masteryTab.enabled == 2 || (game.options.menu.masteryTab.enabled == 3 && text != "!")) ? " (" + prettify(game.global.mutatedSeeds) + ")" : "";
+        const alertMutation = document.getElementById('mutatorsAlert');
+        const alertMastery = document.getElementById('mutatorsAlert2');
+        const alertText = game.options.menu.masteryTab.enabled !== 0 && game.global.mutatedSeeds >= this.nextCost() && this.purchaseCount < Object.keys(this.tree).length ? '!' : '';
+
+        if (alertMutation.innerHTML !== alertText) alertMutation.innerHTML = alertText;
+        if (alertMastery.innerHTML !== alertText) alertMastery.innerHTML = alertText;
+
+        if (game.global.tabForMastery) {
+            updateTalentNumbers();
+        } else {
+            const seedCount = document.getElementById('talentsEssenceTotal');
+            const seedText = game.options.menu.masteryTab.enabled === 2 ? ` (${prettify(game.global.mutatedSeeds)})` : '';
+            if (seedCount.innerHTML !== seedText) seedCount.innerHTML = seedText;
+        }
     },
     showNames: function(){
         game.global.showU2MutNames = !game.global.showU2MutNames;
