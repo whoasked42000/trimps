@@ -11586,48 +11586,61 @@ function refillEnergyShield(){
 	game.global.soldierEnergyShield = game.global.soldierEnergyShieldMax;
 }
 
-function updateAllBattleNumbers (skipNum) {
+function updateAllBattleNumbers(skipNum) {
 	if (usingRealTimeOffline) return;
-	var cellNum;
-    var cell;
-    var cellElem;
-    if (game.global.mapsActive) {
-        cellNum = game.global.lastClearedMapCell + 1;
-        cell = game.global.mapGridArray[cellNum];
-        cellElem = document.getElementById("mapCell" + cellNum);
-    } else {
-        cellNum = game.global.lastClearedCell + 1;
-        cell = game.global.gridArray[cellNum];
-        cellElem = document.getElementById("cell" + cellNum);
-    }
-	if (cellElem == null) return;
-    swapClass("cellColor", "cellColorCurrent", cellElem);
-    document.getElementById("goodGuyHealthMax").innerHTML = prettify(game.global.soldierHealthMax);
+
+	const prefix = game.global.mapsActive ? 'Map' : '';
+	const cellNum = game.global[`lastCleared${prefix}Cell`] + 1;
+	const cell = game.global[`${prefix ? 'mapGridArray' : 'gridArray'}`][cellNum];
+	const cellElem = document.getElementById(`${prefix ? 'mapCell' : 'cell'}${cellNum}`);
+	if (!cellElem) return;
+
+	swapClass('cellColor', 'cellColorCurrent', cellElem);
+	let elem = document.getElementById('goodGuyHealthMax');
+	let elemText = prettify(game.global.soldierHealthMax);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
 	updateGoodBar();
 	updateBadBar(cell);
-	document.getElementById("badGuyHealthMax").innerHTML = prettify(cell.maxHealth);
-	if (!skipNum && game.global.challengeActive == "Trimp" && game.jobs.Amalgamator.owned > 0) document.getElementById("trimpsFighting").innerHTML = toZalgo(prettify(game.resources.trimps.getCurrentSend()), game.global.world);
-	else if (!skipNum) document.getElementById("trimpsFighting").innerHTML = prettify(game.resources.trimps.getCurrentSend());
-	var blockDisplay = "";
-	if (game.global.universe == 2){
-		var esMax = game.global.soldierEnergyShieldMax;
-		var esMult = getEnergyShieldMult();
-		var layers = Fluffy.isRewardActive('shieldlayer');
-		if (layers > 0){
-			esMax *= layers + 1;
-			esMult *= layers + 1;
+
+	elem = document.getElementById('badGuyHealthMax');
+	elemText = prettify(cell.maxHealth);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
+
+	if (!skipNum) {
+		elem = document.getElementById('trimpsFighting');
+		elemText = prettify(game.resources.trimps.getCurrentSend());
+		if (challengeActive('Trimp') && game.jobs.Amalgamator.owned > 0) elemText = toZalgo(elemText, game.global.world);
+		if (elem && elem.innerHTML != elemText) elem.innerHTML = elemText;
+	}
+
+	let blockDisplay = '';
+
+	if (game.global.universe === 2) {
+		const layers = Fluffy.isRewardActive('shieldlayer');
+		let shieldMax = game.global.soldierEnergyShieldMax;
+		let shieldMult = getEnergyShieldMult();
+		if (layers > 0) {
+			shieldMax *= layers + 1;
+			shieldMult *= layers + 1;
 		}
-		blockDisplay = prettify(esMax) + " (" + Math.round(esMult * 100) + "%)";
+		blockDisplay = `${prettify(shieldMax)} (${Math.round(shieldMult * 100)}%)`;
+	} else {
+		blockDisplay = prettify(game.global.soldierCurrentBlock);
 	}
-	else blockDisplay = prettify(game.global.soldierCurrentBlock);
-	document.getElementById("goodGuyBlock").innerHTML = blockDisplay;
-	document.getElementById("goodGuyAttack").innerHTML = calculateDamage(game.global.soldierCurrentAttack, true, true);
-	var badAttackElem = document.getElementById("badGuyAttack");
-	badAttackElem.innerHTML = calculateDamage(cell.attack, true, false, false, cell);
-	if (game.global.usingShriek) {
-		swapClass("dmgColor", "dmgColorRed", badAttackElem);
-		badAttackElem.innerHTML += '<span class="icomoon icon-chain"></span>';
-	}
+
+	elem = document.getElementById('goodGuyBlock');
+	if (elem.innerHTML !== blockDisplay.toString()) elem.innerHTML = blockDisplay;
+
+	elem = document.getElementById('goodGuyAttack');
+	elemText = calculateDamage(game.global.soldierCurrentAttack, true, true);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
+
+	elem = document.getElementById('badGuyAttack');
+	const badGuyAttack = calculateDamage(cell.attack, true, false, false, cell);
+	elemText = `${badGuyAttack}${game.global.usingShriek ? ' <span class="icomoon icon-chain"></span>' : ''}`;
+	if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
+	if (game.global.usingShriek) swapClass('dmgColor', 'dmgColorRed', elem);
 }
 
 function toZalgo(string, seed, strength){
@@ -12188,42 +12201,69 @@ function displayTalents(){
 	updateTalentNumbers();
 }
 
-function updateTalentNumbers(){
-	var mainEssenceElem = document.getElementById('essenceOwned')
-	var nextCostElem = document.getElementById('talentsNextCost')
-	var talentsCostElem = document.getElementById('talentsCost');
-	var alertElem = document.getElementById('talentsAlert');
-	var countElem = document.getElementById('talentsEssenceTotal');
-	var affordableElem = document.getElementById('talentsAffordable');
-	//Check primary elements, update
-	if (mainEssenceElem == null || nextCostElem == null) {return;}
+function updateTalentNumbers() {
+	const mainEssenceElem = document.getElementById('essenceOwned');
+	const nextCostElem = document.getElementById('talentsNextCost');
+	const talentsCostElem = document.getElementById('talentsCost');
+	const alertElem = document.getElementById('talentsAlert');
+	const countElem = document.getElementById('talentsEssenceTotal');
+	const affordableElem = document.getElementById('talentsAffordable');
 
-	var nextCost = getNextTalentCost();
-	mainEssenceElem.innerHTML = prettify(game.global.essence);
-	var affordable = checkAffordableTalents() - countPurchasedTalents();
-	if (affordable > 0){
-		affordableElem.innerHTML = affordable + " Affordable";
+	if (!mainEssenceElem || !nextCostElem) return;
+
+	const nextCost = getNextTalentCost();
+	const affordable = checkAffordableTalents() - countPurchasedTalents();
+
+	if (mainEssenceElem.innerHTML != prettify(game.global.essence)) {
+		mainEssenceElem.innerHTML = prettify(game.global.essence);
 	}
-	else{
-		affordableElem.innerHTML = "";
+
+	if (affordable > 0 && affordableElem.innerHTML !== affordable + ' Affordable') {
+		affordableElem.innerHTML = affordable + ' Affordable';
+	} else if (affordable <= 0 && affordableElem.innerHTML !== '') {
+		affordableElem.innerHTML = '';
 	}
-	if (nextCost == -1){
-		talentsCostElem.style.display = 'none';
-		alertElem.innerHTML = "";
-		countElem.innerHTML = "";
+
+	if (nextCost === -1) {
+		if (talentsCostElem.style.display !== 'none') {
+			talentsCostElem.style.display = 'none';
+		}
+		if (alertElem.innerHTML !== '') {
+			alertElem.innerHTML = '';
+		}
+		if (countElem.innerHTML !== '') {
+			countElem.innerHTML = '';
+		}
 		return;
 	}
-	talentsCostElem.style.display = "block";
-	nextCostElem.innerHTML = prettify(nextCost);
-	//Check setting elements, update
-	if (alertElem == null || countElem == null) return;
-	if ((game.options.menu.masteryTab.enabled == 1 || game.options.menu.masteryTab.enabled == 3) && nextCost <= game.global.essence){
-		alertElem.innerHTML = "!";
-		countElem.innerHTML = "";
+
+	if (talentsCostElem.style.display !== 'block') {
+		talentsCostElem.style.display = 'block';
+	}
+	if (nextCostElem.innerHTML !== prettify(nextCost)) {
+		nextCostElem.innerHTML = prettify(nextCost);
+	}
+
+	if (!alertElem || !countElem) return;
+
+	if ((game.options.menu.masteryTab.enabled === 1 || game.options.menu.masteryTab.enabled === 3) && nextCost <= game.global.essence) {
+		if (alertElem.innerHTML !== '!') {
+			alertElem.innerHTML = '!';
+		}
+		if (countElem.innerHTML !== '') {
+			countElem.innerHTML = '';
+		}
 		return;
 	}
-	alertElem.innerHTML = "";
-	countElem.innerHTML = (game.options.menu.masteryTab.enabled >= 2) ? " (" + ((game.global.tabForMastery) ? prettify(game.global.essence) : prettify(game.global.mutatedSeeds)) + ")" : "";
+
+	const essence = game.options.menu.masteryTab.enabled >= 2 ? ' (' + (game.global.tabForMastery ? prettify(game.global.essence) : prettify(game.global.mutatedSeeds)) + ')' : '';
+
+	if (alertElem.innerHTML !== '') {
+		alertElem.innerHTML = '';
+	}
+	if (countElem.innerHTML !== essence) {
+		countElem.innerHTML = essence;
+	}
 }
 
 function respecTalents(confirmed, force){
