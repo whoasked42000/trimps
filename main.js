@@ -1699,6 +1699,25 @@ function getIndividualSquaredReward(challengeName, forceHighest, mesmerPreview){
 	return Math.round(bonus);
 }
 
+function calculateMapCost(plusLevel = 0) {
+	const mapPresets = game.global.universe === 2 ? game.global.mapPresets2 : game.global.mapPresets;
+	const { loot, difficulty, size, biome, perf, specMod } = mapPresets[`p${game.global.selectedMapPreset}`];
+
+	const mapLevel = Math.max(game.global.world, 6);
+	let baseCost = loot + difficulty + size;
+	baseCost *= game.global.world >= 60 ? 0.74 : 1;
+
+	if (perf && [loot, difficulty, size].reduce((a, b) => a + b) === 27) baseCost += 6;
+	if (plusLevel > 0) baseCost += plusLevel * 10;
+	if (specMod !== '0') baseCost += mapSpecialModifierConfig[specMod].costIncrease;
+
+	baseCost += mapLevel;
+	baseCost = Math.floor((baseCost / 150) * Math.pow(1.14, baseCost - 1) * mapLevel * 2 * Math.pow(1.03 + mapLevel / 50000, mapLevel));
+	baseCost *= biome !== 'Random' ? 2 : 1;
+
+	return baseCost;
+}
+
 var portalWindowOpen = false;
 var challengeSquaredMode = false;
 var savedBuyAmt = -1;
@@ -2677,37 +2696,67 @@ var offlineProgress = {
 		this.formationsElem.innerHTML = text;
 		this.formationsElem.style.display = 'block';
 	},
-	updateMapBtns: function(){
+	updateMapBtns: function() {
 		if (game.global.preMapsActive || game.global.mapsActive) {
-			this.zoneBtnsElem.style.display = 'block';
-			this.mapBtnsElem.style.display = 'none';
+			if (this.zoneBtnsElem.style.display !== 'block') {
+				this.zoneBtnsElem.style.display = 'block';
+				this.mapBtnsElem.style.display = 'none';
+			}
+		} else {
+			if (this.mapBtnsElem.style.display !== 'block') {
+				this.zoneBtnsElem.style.display = 'none';
+				this.mapBtnsElem.style.display = 'block';
+			}
 		}
-		else{
-			this.zoneBtnsElem.style.display = 'none';
-			this.mapBtnsElem.style.display = 'block';
-		}
-		if (this.mapsAllowed < 1){
-			this.mapBtnsInnerElem.style.display = 'none';
-			this.mapTextElem.innerHTML = "No maps available<br/>Gain 1 map for each 8 hours away";
+	
+		if (this.mapsAllowed < 1) {
+			if (this.mapBtnsInnerElem.style.display !== 'block') {
+				this.mapBtnsInnerElem.style.display = 'none';
+				const elemText = 'No maps available<br>Gain 1 map for each 8 hours away';
+				if (this.mapTextElem.innerHTML !== elemText) {
+					this.mapTextElem.innerHTML = elemText;
+				}
+			}
 			return;
 		}
+	
 		this.mapBtnsInnerElem.style.display = 'block';
-		var world = game.global.world;
-		var frags = game.resources.fragments.owned;
-		for (var x = 0; x < 4; x++){
-			var useWorld = world - x;
-			if (useWorld < 6){
+		const world = game.global.world;
+		const frags = game.resources.fragments.owned;
+		for (let x = 0; x < 4; x++) {
+			const useWorld = world - x;
+			if (useWorld < 6) {
 				this.mapBtns[x].style.display = 'none';
 				continue;
 			}
-			document.getElementById('mapLevelInput').value = useWorld;
-			var price = updateMapCost(true);
-			if (x == 4 && price > frags){
-				this.mapTextElem.innerHTML = "Oof, you don't have enough fragments to run a map."
+	
+			const price = calculateMapCost(0 - x);
+	
+			let mapText = '';
+			let displayStyle = '';
+			let innerHTML = '';
+	
+			if (x === 4 && price > frags) {
+				mapText = "Oof, you don't have enough fragments to run a map.";
+				displayStyle = 'none';
+			} else {
+				mapText = `You can run <b>${this.mapsAllowed} map${needAnS(this.mapsAllowed)}</b> while you wait!<br>Use ${this.mapsAllowed === 1 ? 'it' : 'them'} wisely...<br>You have ${prettify(frags)} Fragments.`;
+				displayStyle = 'inline-block';
 			}
-			else this.mapTextElem.innerHTML = "You can run <b>" + this.mapsAllowed + " map" + needAnS(this.mapsAllowed) + "</b> while you wait!<br/>Use " + ((this.mapsAllowed == 1) ? "it" : "them") + " wisely...<br/>You have " + prettify(frags) + " Fragments.";
-			this.mapBtns[x].style.display = (price > frags) ? 'none' : 'inline-block';		
-			this.mapBtns[x].innerHTML = "Z " + useWorld + " map<br/>" + prettify(price) + " Frags<br/>" + this.countMapItems(useWorld) + " items";
+	
+			innerHTML = `Z ${useWorld} map<br>${prettify(price)} Frags<br>${this.countMapItems(useWorld)} items`;
+	
+			if (this.mapTextElem.innerHTML !== mapText) {
+				this.mapTextElem.innerHTML = mapText;
+			}
+	
+			if (this.mapBtns[x].style.display !== displayStyle) {
+				this.mapBtns[x].style.display = displayStyle;
+			}
+	
+			if (this.mapBtns[x].innerHTML !== innerHTML) {
+				this.mapBtns[x].innerHTML = innerHTML;
+			}
 		}
 	},
 	countMapItems: function(useWorld){
