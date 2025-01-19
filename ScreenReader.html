@@ -177,7 +177,7 @@
 							</div>
 							<div class="row collectRow">
 								<div class="col-xs-6">
-									<div role="button" id="foodCollectBtn" class="workBtn workColorOff pointer noselect" onclick="setGather('food')">Gather</div>
+									<button id="foodCollectBtn" class="workBtn workColorOff pointer noselect" onclick="setGather('food')">Gather</button>
 								</div>
 								<div class="col-xs-6">
 									<span class="psText sizeSecRegular pointer noselect" id="foodPs" onclick="getPsString('food')">+0/sec</span>
@@ -199,7 +199,7 @@
 
 							<div class="row collectRow">
 								<div class="col-xs-6">
-									<div id="woodCollectBtn" role="button" class="workBtn workColorOff pointer noselect" onclick="setGather('wood')">Chop</div>
+									<button id="woodCollectBtn" class="workBtn workColorOff pointer noselect" onclick="setGather('wood')">Chop</button>
 								</div>
 								<div class="col-xs-6">
 									<span class="psText sizeSecRegular pointer noselect" id="woodPs" onclick="getPsString('wood')">+0/sec</span>
@@ -221,7 +221,7 @@
 							</div>
 							<div class="row collectRow">
 								<div class="col-xs-6">
-									<div id="metalCollectBtn" role="button" class="workBtn workColorOff pointer noselect" onclick="setGather('metal')">Mine</div>
+									<button id="metalCollectBtn" class="workBtn workColorOff pointer noselect" onclick="setGather('metal')">Mine</button>
 								</div>
 								<div class="col-xs-6">
 									<span class="psText sizeSecRegular pointer noselect" id="metalPs" onclick="getPsString('metal')">+0/sec</span>
@@ -236,7 +236,7 @@
 							<br/>
 							<div class="row collectRow">
 								<div class="col-xs-6">
-									<div id="scienceCollectBtn" role="button" class="workBtn workColorOff pointer noselect" onclick="setGather('science')">Research</div>
+									<button id="scienceCollectBtn" class="workBtn workColorOff pointer noselect" onclick="setGather('science')">Research</button>
 								</div>
 								<div class="col-xs-6">
 									<span class="psText sizeSecRegular pointer noselect" id="sciencePs" onclick="getPsString('science')">+0/sec</span>
@@ -303,7 +303,7 @@
 						<span id="trimpsEmployed">0</span>/<span id="maxEmployed">0</span> employed
 					</div>
 					<div id="trapArea">
-						<div id="trimpsCollectBtn" role="button" class="workBtn workColorOff pointer noSelect" onclick="setGather('trimps')">Check&nbsp;Traps&nbsp;(<span id="trimpTrapText">1</span>)</div>
+						<button id="trimpsCollectBtn" class="workBtn workColorOff pointer noSelect" onclick="setGather('trimps')">Check&nbsp;Traps&nbsp;(<span id="trimpTrapText">1</span>)</button>
 						<div id="trimpsCollecting" class="collecting" style="display: none">Trapping (<span id="trimpTrapText2">1</span>)</div>
 						<div class="progress" id="trappingProgress">
 							<div class="progress-bar" id="trappingBar" role="progressbar"></div>
@@ -315,19 +315,19 @@
 				<div id="logContainer">
 					<div class="btn-group btn-group-justified" id="logBtnGroup" role="group">
 						<div class="btn-group" role="group">
-							<button id="StoryFilter" onclick="filterMessage('Story')" type="button" class="btn btn-success logFlt">Story</button>
+							<button id="StoryFilter" onclick="filterMessage('Story')" class="btn btn-success logFlt">Story</button>
 						</div>
 						<div class="btn-group" role="group">
-							<button id="LootFilter" onclick="filterMessage('Loot')" type="button" class="btn btn-success logFlt">Loot</button>
+							<button id="LootFilter" onclick="filterMessage('Loot')" class="btn btn-success logFlt">Loot</button>
 						</div>
 						<div class="btn-group" role="group">
-							<button id="UnlocksFilter" onclick="filterMessage('Unlocks')" type="button" class="btn btn-success logFlt">Unlocks</button>
+							<button id="UnlocksFilter" onclick="filterMessage('Unlocks')" class="btn btn-success logFlt">Unlocks</button>
 						</div>
 						<div class="btn-group" role="group">
-							<button id="CombatFilter" type="button" onclick="filterMessage('Combat')" class="btn btn-success logFlt">Combat</button>
+							<button id="CombatFilter"  onclick="filterMessage('Combat')" class="btn btn-success logFlt">Combat</button>
 						</div>
 						<div id="logConfigHolder" class="btn-group" role="group">
-							<button aria-label="Configure Displayed Messages" id="logConfigBtn" type="button" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
+							<button aria-label="Configure Displayed Messages" id="logConfigBtn" onclick="tooltip('Message Config', null, 'update')" class="btn btn-default logFlt"><span class='glyphicon glyphicon-cog'></span></button>
 						</div>						
 					</div>
 					<div id="achievementTracker">
@@ -370,7 +370,7 @@
 							<div id="autoTrapBtn" style="display: none" onclick="toggleAutoTrap()" class="pointer noselect colorDanger autoUpgradeBtn">AutoTraps Off</div>
 						</div>
 						<div class="col-xs-3">
-							<h1><div role="button" id="buildingsCollectBtn" onclick="setGather('buildings')" class="workBtn workColorOff pointer noselect">Build Buildings</div></h1>
+							<h1><button id="buildingsCollectBtn" onclick="setGather('buildings')" class="workBtn workColorOff pointer noselect">Build Buildings</button></h1>
 						</div>
 					</div>
 					<div class="queue niceScroll" id="buildingsQueue">
@@ -456,9 +456,9 @@
 										</div>
 										<div class="col-xs-3 lowPad">
 											<div id="autoJobsBtn" onmouseover='tooltip("AutoJobs", null, event)' onmouseout='tooltip("hide")' class="toggleConfigBtn pointer noselect colorDanger autoUpgradeBtn">
-												<div id='autoJobsText' role="button" onclick="toggleAutoJobs()">AutoJobs</div><div role="button" aria-label="Configure AutoJobs" onclick="tooltip('Configure AutoJobs', null, 'update')">
+												<button id='autoJobsText' onclick="toggleAutoJobs()">AutoJobs</button><button aria-label="Configure AutoJobs" onclick="tooltip('Configure AutoJobs', null, 'update')">
 													<span class='glyphicon glyphicon-cog'>Configure Autojobs</span>
-												</div>
+												</button>
 											</div>
 											
 										</div>
@@ -694,9 +694,9 @@
 									<div class="col-xs-4 noPad pointer noselect bdHover" id="blockDiv" style="visibility: hidden" onclick="getBattleStatBd('block')">
 										<span id="goodGuyBlock">0</span> <span id='goodGuyBlockName'>BLK</span>
 									</div>
-									<div class="col-xs-2 pointer noselect" aria-label="Activate MagnetoShriek" role="button" style="padding-left: 0; visibility: hidden" id="roboTrimpBtn" onclick="magnetoShriek()">
+									<button class="col-xs-2 pointer noselect" aria-label="Activate MagnetoShriek" style="padding-left: 0; visibility: hidden" id="roboTrimpBtn" onclick="magnetoShriek()">
 										<span id="chainHolder" aria-label="Activate MagnetoShriek" class="shriekStateCooldown" onmouseover="tooltip('MagnetoShriek', null, event)" onmouseout="tooltip('hide')"><span id="roboTrimpTurnsLeft"></span> <span class="icomoon icon-chain" style="color: white"></span></span>
-									</div>
+									</button>
 								</div>
 								<div class="progress fightBar">
 									<h5 title="trimpHealth">
@@ -815,14 +815,14 @@
 									<span id='advMapsPreset1' role="button" aria-label="Load Preset 1" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(1)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">1</span>
 									<span id='advMapsPreset2' role="button" aria-label="Load Preset 2" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(2)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">2</span>
 									<span id='advMapsPreset3' role="button" aria-label="Load Preset 3" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(3)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">3</span>
-									<span id='advMapsPreset4' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(4)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">4</span>
-									<span id='advMapsPreset5' class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(5)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">5</span>
+									<span id='advMapsPreset4' role="button" aria-label="Load Preset 4" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(4)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">4</span>
+									<span id='advMapsPreset5' role="button" aria-label="Load Preset 5" class='pointer mapPreset presetSelectionOff' onclick='selectAdvMapsPreset(5)' onmouseover="tooltip('Map Preset', 'advMaps', event)" onmouseout="tooltip('hide')">5</span>
 									<span id='advMapsSaveBtn' role="button" aria-label="Save Settings to Selected Preset" class='icomoon icon-save pointer' onclick='saveAdvMaps()' onmouseover="tooltip('Save Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>	
 									<span id='advMapsResetBtn' role="button" aria-label="Reset The Selected Preset" class='icomoon icon-refresh pointer' onclick='resetAdvMaps(true)' onmouseover="tooltip('Reset Map Settings', 'advMaps', event)" onmouseout="tooltip('hide')">&nbsp;</span>											
 									<span id='advMapsRecycleBtn' role="button" aria-label="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</span>
 								</div>
 								<div id="mapLevelContainer" class="col-xs-4">
-									Level <span role="button" aria-label="Reduce map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" aria-label="Increase map level by 1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
+									Level <span role="button" aria-label="Map level -1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></span><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><span role="button" aria-label="Map level +1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></span>
 								</div>
 								<div id="mapCostContainer" class="col-xs-4 lowPad">
 									<h4 aria-description="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
@@ -1121,7 +1121,7 @@
 	</div>
 	<div id="achievementWrapper" style="display: none">
 		<div id="achievementMainButtons">
-			<span id="achievementHelp" style='display: none' onclick="toggleAchievementHelp()" class="icomoon icon-question-circle"></span>
+			<span id="achievementHelp" role="button" aria-label="Help?" style='display: none' onclick="toggleAchievementHelp()" class="icomoon icon-question-circle"></span>
 			<span id="achievementMainClose" role='button' aria-label='Close Achievement Screen' onclick="toggleAchievementWindow()" class="icomoon icon-close">Close</span>
 		</div>
 		<div class="row" id="achievementTopRow">
