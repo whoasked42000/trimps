@@ -725,6 +725,7 @@ var autoBattle = {
                 time: 0,
                 mod: 0,
                 count: 0,
+                timeApplied: 0
             }
         }
     },
@@ -2716,9 +2717,42 @@ var autoBattle = {
                 autoBattle.trimp.poisonRate *= 2;
             },
             dustType: "shards",
-            startPrice: 15e5,
+            startPrice: 1e10,
             priceMod: 20
         },
+        The_Fibrillator: {
+            owned: false,
+            equipped: false,
+            hidden: false,
+            level: 1,
+            zone: 270,
+            description: function(){
+                return "Multiplies Attack and Poison Damage by " + prettify(this.shockMod()) + "x. Adds " + prettify(this.shockMod() - 1) + " to this item's Attack and Poison Damage multplier for every 10 seconds the current shock on the enemy has lasted. Shocks last a minimum of 30 seconds (Overrides Sundering Scythe). Multiplies Health by " + prettify(this.healthMod()) + "x";
+            },
+            upgrade: "+0.05 to scaling Attack and Poison Multiplier, +0.25x Health",
+            shockMod: function(){
+                return 1.1 + ((this.level - 1) * 0.05);
+            },
+            healthMod: function(){
+                return 2 + ((this.level - 1) * 0.25);
+            },
+            doStuff: function(){
+                autoBattle.trimp.maxHealth *= this.healthMod();
+                var shockSeconds = 0;
+                if (autoBattle.enemy.shock.time > 0){
+                    shockSeconds = (autoBattle.battleTime - autoBattle.enemy.shock.timeApplied) / 1000;
+                    shockSeconds = Math.floor(shockSeconds / 10);
+                    var shockMod = this.shockMod();
+                    var toAdd = (shockMod - 1) * shockSeconds;
+                    toAdd += shockMod;
+                    autoBattle.trimp.attack *= toAdd;
+                    autoBattle.trimp.poisonMod *= toAdd;
+                }
+            },
+            dustType: "shards",
+            startPrice: 1e12,
+            priceMod: 20
+        }
 
     },
     bonuses: {
@@ -3007,6 +3041,7 @@ var autoBattle = {
         }
 
         if (this.items.Sundering_Scythe.equipped && this.trimp.shockTime > 10000) this.trimp.shockTime = 10000;
+        if (this.items.The_Fibrillator.equipped && this.trimp.shockTime > 0 && this.trimp.shockTime < 30000) this.trimp.shockTime = 30000;
         if (this.items.Blessed_Protector.equipped) this.items.Blessed_Protector.afterCheck(); //after anything that might hurt huffy
         if (this.items.Grounded_Crown.equipped) this.items.Grounded_Crown.afterCheck(); //just deals damage
         if (this.items.Haunted_Harpoon.equipped) this.items.Haunted_Harpoon.afterCheck(); //after anything that might increase the damage of huffy's bleeds
@@ -3141,6 +3176,7 @@ var autoBattle = {
             if (roll < shockChance){
                 if (attacker.isTrimp && this.items.Eelimp_in_a_Bottle.equipped) defender.lastAttack = 0;
                 defender.shock.time = attacker.shockTime;
+                defender.shock.timeApplied = autoBattle.battleTime;
                 defender.shock.mod = attacker.shockMod;
                 defender.shock.count++;
             }

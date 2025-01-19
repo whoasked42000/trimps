@@ -4380,7 +4380,6 @@ function gather() {
 				if (typeof game.global.dailyChallenge.famine !== 'undefined' && increase != "fragments" && increase != "science")
 					perSec *= dailyModifiers.famine.getMult(game.global.dailyChallenge.famine.strength);
 			}
-			if (game.global.challengeActive == "Desolation" && increase != "fragments") perSec *= game.challenges.Desolation.trimpResourceMult();
 			if (challengeActive("Watch")) perSec /= 2;
 			if (challengeActive("Lead") && ((game.global.world % 2) == 1)) perSec*= 2;
 			if (job != "Explorer" && getEmpowerment() == "Wind"){
