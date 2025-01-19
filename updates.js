@@ -5376,83 +5376,114 @@ function updateSkeleBtn(){
 	document.getElementById("boneBtnText").innerHTML = "Trade " + prettify(game.global.b) + " Bone" + (game.global.b == 1 ? "" : "s");
 }
 
-//
-//Number updates
-function updateLabels() { //Tried just updating as something changes, but seems to be better to do all at once all the time
-	if (usingRealTimeOffline) return;
-	var toUpdate;
-	//Resources (food, wood, metal, trimps, science). Per second will be handled in separate function, and called from job loop.
-	for (var item in game.resources){
-		toUpdate = game.resources[item];
-		if (!(toUpdate.owned > 0)){
-			toUpdate.owned = parseFloat(toUpdate.owned);
-			if (!(toUpdate.owned > 0)) toUpdate.owned = 0;
-		}
-		if (item == "radon") continue;
-		if (item == "helium" && game.global.universe == 2) toUpdate = game.resources.radon;
-		document.getElementById(item + "Owned").innerHTML = prettify(Math.floor(toUpdate.owned));
-		if (toUpdate.max == -1 || document.getElementById(item + "Max") === null) continue;
-		var newMax = toUpdate.max;
-		if (item != "trimps")
-			newMax = calcHeirloomBonus("Shield", "storageSize", (newMax * (game.portal.Packrat.modifier * getPerkLevel("Packrat") + 1)));
-		else if (item == "trimps") newMax = toUpdate.realMax();
-		document.getElementById(item + "Max").innerHTML = prettify(newMax);
-		var bar = document.getElementById(item + "Bar");
-		if (game.options.menu.progressBars.enabled){
-			var percentToMax = ((toUpdate.owned / newMax) * 100);
-			swapClass("percentColor", getBarColorClass(100 - percentToMax), bar);
-			bar.style.width = percentToMax + "%";
-		}
-	}
+function updateLabels(force) {
+	if (usingRealTimeOffline && !force) return;
+	// Resources (food, wood, metal, trimps, science). Per second will be handled in separate function, and called from job loop.
+	checkAndDisplayResources();
 	updateSideTrimps();
-	//Buildings, trap is the only unique building, needs to be displayed in trimp area as well
-	for (var itemA in game.buildings){
-		toUpdate = game.buildings[itemA];
-		if (toUpdate.locked == 1) continue;
-		var elem = document.getElementById(itemA + "Owned");
-		if (elem === null){
-			unlockBuilding(itemA);
-			elem = document.getElementById(itemA + "Owned");
-		}
-		elem.innerHTML = (game.options.menu.menuFormatting.enabled) ? prettify(toUpdate.owned) : toUpdate.owned;
-		if (itemA == "Trap") {
-			var trap1 = document.getElementById("trimpTrapText")
-			if (trap1) trap1.innerHTML = prettify(toUpdate.owned);
-			var trap2 = document.getElementById("trimpTrapText2")
-			if (trap2) trap2.innerHTML = prettify(toUpdate.owned);
-		}
-	}
-	//Jobs, check PS here and stuff. Trimps per second is handled by breed() function
-	for (var itemB in game.jobs){
-		toUpdate = game.jobs[itemB];
-		if (toUpdate.locked == 1 && toUpdate.increase == "custom") continue;
-		if (toUpdate.locked == 1) {
-			if (game.resources[toUpdate.increase].owned > 0)
-			updatePs(toUpdate, false, itemB);
-			continue;
-		}
-		if (document.getElementById(itemB) === null) unlockJob(itemB);
-		document.getElementById(itemB + "Owned").innerHTML = (game.options.menu.menuFormatting.enabled) ? prettify(toUpdate.owned) : toUpdate.owned;
-		var perSec = (toUpdate.owned * toUpdate.modifier);
-		updatePs(toUpdate, false, itemB);
-	}
-	//Upgrades, owned will only exist if 'allowed' exists on object
-	for (var itemC in game.upgrades){
-		toUpdate = game.upgrades[itemC];
-		if (toUpdate.allowed - toUpdate.done >= 1) toUpdate.locked = 0;
-		if (toUpdate.locked == 1) continue;
-		if (document.getElementById(itemC) === null) unlockUpgrade(itemC, true);
-	}
-	//Equipment
+	// Buildings, trap is the only unique building, needs to be displayed in trimp area as well.
+	checkAndDisplayBuildings();
+	// Jobs, check PS here and stuff. Trimps per second is handled by breed function.
+	checkAndDisplayJobs();
+	// Upgrades, owned will only exist if `allowed` exists on object.
+	checkAndDisplayUpgrades();
 	checkAndDisplayEquipment();
 }
 
- function checkAndDisplayEquipment() {
-	for (var itemD in game.equipment){
-		var toUpdate = game.equipment[itemD];
-		if (toUpdate.locked == 1) continue;
-		if (document.getElementById(itemD) === null) drawAllEquipment();
-		document.getElementById(itemD + "Owned").innerHTML = toUpdate.level;
+function checkAndDisplayResources() {
+	for (const item in game.resources) {
+		let toUpdate = game.resources[item];
+		if (toUpdate.owned <= 0) {
+			toUpdate.owned = parseFloat(toUpdate.owned);
+			if (toUpdate.owned <= 0) toUpdate.owned = 0;
+		}
+		if (item === 'radon') continue;
+		if (item === 'helium' && game.global.universe === 2) toUpdate = game.resources.radon;
+
+		let elem = document.getElementById(`${item}Owned`);
+		let elemText = prettify(Math.floor(toUpdate.owned));
+		if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
+		if (toUpdate.max === -1 || !document.getElementById(`${item}Max`)) continue;
+		let newMax = toUpdate.max;
+		if (item !== 'trimps') newMax = calcHeirloomBonus('Shield', 'storageSize', newMax * (game.portal.Packrat.modifier * getPerkLevel('Packrat') + 1));
+		else newMax = toUpdate.realMax();
+
+		elem = document.getElementById(`${item}Max`);
+		elemText = prettify(newMax);
+		if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
+		const bar = document.getElementById(`${item}Bar`);
+		if (game.options.menu.progressBars.enabled) {
+			const percentToMax = (toUpdate.owned / newMax) * 100;
+			swapClass('percentColor', getBarColorClass(100 - percentToMax), bar);
+			bar.style.width = `${percentToMax}%`;
+		}
+	}
+}
+
+function checkAndDisplayBuildings() {
+	for (const item in game.buildings) {
+		let toUpdate = game.buildings[item];
+		if (toUpdate.locked === 1) continue;
+		let elem = document.getElementById(`${item}Owned`);
+		if (!elem) {
+			unlockBuilding(item);
+			elem = document.getElementById(`${item}Owned`);
+		}
+		if (!elem) continue;
+		let elemText = game.options.menu.menuFormatting.enabled ? prettify(toUpdate.owned) : toUpdate.owned;
+		if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+		if (item === 'Trap') {
+			const trap1 = document.getElementById('trimpTrapText');
+			if (trap1 && trap1.innerHTML !== elemText) trap1.innerHTML = elemText;
+			const trap2 = document.getElementById('trimpTrapText2');
+			if (trap2 && trap2.innerHTML !== elemText) trap2.innerHTML = elemText;
+		}
+	}
+}
+
+function checkAndDisplayJobs() {
+	const jobs = game.jobs;
+	for (const item in jobs) {
+		let toUpdate = jobs[item];
+		if (toUpdate.locked === 1) {
+			if (toUpdate.increase === 'custom') continue;
+			if (game.resources[toUpdate.increase].owned > 0) updatePs(toUpdate, false, item);
+			continue;
+		}
+
+		if (document.getElementById(item) === null) {
+			unlockJob(item);
+			drawAllJobs(true);
+		}
+
+		let elem = document.getElementById(`${item}Owned`);
+		let elemText = game.options.menu.menuFormatting.enabled ? prettify(toUpdate.owned) : toUpdate.owned;
+		if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+		updatePs(toUpdate, false, item);
+	}
+}
+
+function checkAndDisplayUpgrades() {
+	const upgrades = game.upgrades;
+	for (const item in upgrades) {
+		let toUpdate = upgrades[item];
+		if (toUpdate.allowed - toUpdate.done >= 1) toUpdate.locked = 0;
+		if (toUpdate.locked === 1) continue;
+		if (!document.getElementById(item)) unlockUpgrade(item, true);
+	}
+}
+
+function checkAndDisplayEquipment() {
+	const equipment = game.equipment;
+	for (const item in equipment) {
+		let toUpdate = equipment[item];
+		if (toUpdate.locked === 1) continue;
+		if (!document.getElementById(item)) drawAllEquipment();
+		const elem = document.getElementById(`${item}Owned`);
+		const elemText = toUpdate.level;
+		if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
 	}
 }
 
