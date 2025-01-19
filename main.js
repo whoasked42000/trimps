@@ -10117,17 +10117,22 @@ function findHomeForSpecial(special, item, array, max){
 	}
 }
 
-function dropPrestiges(){
-	var toDrop = addSpecials(true, true, null, true);
-	for (var x = 0; x < toDrop.length; x++){
+function dropPrestiges() {
+	const toDrop = addSpecials(true, true, null, true);
+	const sci4 = getSLevel() >= 4 && !challengeActive('Mapology');
+
+	for (let x = 0; x < toDrop.length; x++) {
 		unlockUpgrade(toDrop[x]);
-		var prestigeUnlock = game.mapUnlocks[toDrop[x]];
-		if (getSLevel() >= 4 && !challengeActive("Mapology") && (Math.ceil(prestigeUnlock.last / 5) % 2 == 0)) {
+		let prestigeUnlock = game.mapUnlocks[toDrop[x]];
+		if (sci4 && Math.ceil(prestigeUnlock.last / 5) % 2 === 0) {
 			unlockUpgrade(toDrop[x]);
 			prestigeUnlock.last += 10;
+		} else {
+			prestigeUnlock.last += 5;
 		}
-		else prestigeUnlock.last += 5;
 	}
+
+	if (liquifiedZone()) drawAllUpgrades();
 }
 
 function drawGrid(maps) { //maps t or f. This function overwrites the current grid, be carefulz
