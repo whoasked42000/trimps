@@ -91,6 +91,7 @@ var toReturn = {
 		totalPortals: 0,
 		totalRadPortals: 0,
 		lastCustomAmt: 1,
+		clearingBuildingQueue: false,
 		trapBuildAllowed: false,
 		trapBuildToggled: false,
 		lastSkeletimp: 0,
@@ -9229,17 +9230,19 @@ var toReturn = {
 			health: 6,
 			fast: true,
 			loot: function (level) {
-				if (game.global.spireActive){
-					return;
+				/* fix for infinite breed speed issue post Spire completion that was caused by the Omnipotrimp explosion not occuring */
+				if (!game.global.spireActive) {
+					if (challengeActive('Eradicated') && game.global.world >= 59 && !game.global.brokenPlanet) planetBreaker();
+					if (!game.global.runningChallengeSquared) {
+						let amt = 30;
+						amt = rewardResource('helium', amt, level);
+						message('You managed to steal ' + prettify(amt) + ' ' + heliumOrRadon(true) + " from that Omnipotrimp. That'll teach it.", 'Loot', heliumIcon(true), 'helium', 'helium');
+					}
 				}
-				if (game.global.challengeActive == "Eradicated" && game.global.world >= 59 && !game.global.brokenPlanet) planetBreaker();
-				if (!game.global.runningChallengeSquared){
-					var amt = 30;
-					amt = rewardResource("helium", amt, level);
-					message("You managed to steal " + prettify(amt) + " " + heliumOrRadon(true) + " from that Omnipotrimp. That'll teach it.", "Loot", heliumIcon(true), 'helium', 'helium');
-				}
-				if (game.global.world % 5 == 0){
-					message("The Omnipotrimp explodes, killing all of your soldiers!", "Combat", null, null, 'trimp');
+			
+				if (game.global.world % 5 === 0) {
+					const enemyName = game.global.spireActive ? 'Echo of Druopitee' : 'Omnipotrimp';
+					message(`The ${enemyName} explodes, killing all of your soldiers!`, 'Combat', null, null, 'trimp');
 					game.stats.trimpsKilled.value += game.resources.trimps.soldiers;
 					game.global.soldierHealth = 0;
 					game.global.fighting = false;

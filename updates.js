@@ -1902,11 +1902,14 @@ function countAlertsIn(where){
 	return count;
 }
 
-function positionTooltip(elem, event, extraInf){
-	var cordx = 0;
-	var cordy = 0;
-	var e = event || window.event;
+/* check for if the tooltip is offscreen vertically and if so move to the left or right of the screen */
+function positionTooltip(elem, event, extraInf) {
+	const e = event || window.event;
 	if (!e) return;
+
+	let cordx = 0;
+	let cordy = 0;
+
 	if (e.pageX || e.pageY) {
 		cordx = e.pageX;
 		cordy = e.pageY;
@@ -1914,46 +1917,72 @@ function positionTooltip(elem, event, extraInf){
 		cordx = e.clientX;
 		cordy = e.clientY;
 	}
+
 	lastMousePos = [cordx, cordy];
-	var bodw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-		bodh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-		tiph = Math.max(elem.clientHeight, elem.scrollHeight, elem.offsetHeight),
-		tipw = bodw * .325,
-		center = cordx - (tipw / 2),
-		spacing = bodh * 0.04,
-		setLeft,
-		setTop,
-		setting;
-		if (extraInf == "Heirloom") setting = 1;
-		else setting = game.options.menu.tooltipPosition.enabled;
-	if (extraInf == "forceLeft") {
-		elem.style.left = Math.floor(cordx - (bodw * .55)) + "px";
-		elem.style.top = Math.floor(cordy - (tiph * 0.5)) + "px";
+	const bodw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+	const bodh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+	const tiph = Math.max(elem.clientHeight, elem.scrollHeight, elem.offsetHeight);
+	const tipw = Math.max(elem.clientWidth, elem.scrollWidth, elem.offsetWidth);
+	const center = cordx - tipw / 2;
+	const spacing = bodh * 0.04;
+
+	if (extraInf === 'forceLeft') {
+		elem.style.left = Math.floor(cordx - bodw * 0.55) + 'px';
+		elem.style.top = Math.floor(cordy - tiph * 0.5) + 'px';
 		return;
 	}
-	
-	if (setting == 0) {
+
+	const setting = extraInf === 'Heirloom' ? 1 : game.options.menu.tooltipPosition.enabled;
+	let setLeft;
+	let setTop;
+
+	if (setting === 0) {
 		setLeft = cordx + spacing;
-		if ((setLeft + tipw) > bodw) setLeft = (bodw - tipw);
+		if (setLeft + tipw > bodw) {
+			setLeft = bodw - tipw;
+		}
 		setTop = cordy - tiph - spacing;
 	}
-	if ((setting >= 1) || (setTop < 0)){
+
+	if (setting >= 1 || setTop < 0) {
 		setLeft = center;
-		if (setLeft < 0)
+		if (setLeft < 0) {
 			setLeft = 0;
-		else if (setLeft > (bodw - tipw))
+		} else if (setLeft > bodw - tipw) {
 			setLeft = bodw - tipw;
-		var maxAbove = (cordy - tiph - spacing);
-		if (setting == 1 ||  (maxAbove < 0)){
-			setTop = cordy + spacing;
-			if ((setTop + tiph) > bodh)
-				setTop = maxAbove;
 		}
-		else
+
+		const maxAbove = cordy - tiph - spacing;
+		if (setting === 1 || maxAbove < 0) {
+			setTop = cordy + spacing;
+			if (setTop + tiph > bodh) {
+				setTop = maxAbove;
+			}
+		} else {
 			setTop = maxAbove;
+		}
 	}
-	elem.style.left = Math.floor(setLeft) + "px";
-	elem.style.top = Math.floor(setTop) + "px";
+
+	/* check if the tooltip is offscreen vertically */
+	if (setTop < 0 || setTop + tiph > bodh) {
+		const spaceLeft = cordx;
+		const spaceRight = bodw - cordx;
+		if (spaceRight >= spaceLeft) {
+			setLeft = cordx + spacing;
+			if (setLeft + tipw > bodw) {
+				setLeft = bodw - tipw;
+			}
+		} else {
+			setLeft = cordx - tipw - spacing;
+			if (setLeft < 0) {
+				setLeft = 0;
+			}
+		}
+		setTop = Math.max(0, Math.min(cordy - tiph / 2, bodh - tiph));
+	}
+
+	elem.style.left = Math.floor(setLeft) + 'px';
+	elem.style.top = Math.floor(setTop) + 'px';
 }
 
 function addTooltipPricing(toTip, what, isItIn) {
@@ -6303,8 +6332,9 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 			else prog.innerHTML = "";
 	}
 
+	/* stop the Realtor achievement doing a checkHousing check if it's already been unlocked. useful TW speedup & fix */
 	function checkAchieve(id, evalProperty, doubleChecking, noDisplay) {
-		if (id == "housing" && checkHousing(false, true) >= 100) giveSingleAchieve("Realtor");
+		if (id === 'housing' && !game.achievements.oneOffs.finished[game.achievements.oneOffs.names.indexOf('Realtor')] && checkHousing(false, true) >= 100) giveSingleAchieve('Realtor');
 		var achievement = game.achievements[id];
 		if (typeof achievement.evaluate !== 'undefined') evalProperty = achievement.evaluate();
 		if (achievement.timed && evalProperty < 0) return;
@@ -6334,22 +6364,30 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		if (trimpAchievementsOpen && !doubleChecking) displayAchievements();
 	}
 
-	function giveSingleAchieve(index){
-		var name = index;
-		var area = (game.global.universe == 2) ? "oneOffs2" : "oneOffs";
-		if (index == "Huffstle" || index == "Just Smack It" || index == "Heavy Trinker" || index == "Peace") area = "oneOffs2"; //U2 achievements but completable in U1
-		else if (index == "Power Tower") area = "oneOffs"; //U1 achievements completable in U2
-		var achievement = game.achievements[area];
-		index = game.achievements[area].names.indexOf(index);
-		if (index == -1 || achievement.finished[index]) return;
-		if (typeof greenworks !== 'undefined'){
-			activateSteamAchieve(area, name);
-		}
-		displayAchievementPopup(area, false, index);
-		achievement.newStuff.push(index);
-		achievement.finished[index] = true;
-		calculateAchievementBonus();
-		if (trimpAchievementsOpen) displayAchievements();
+	/* checks for achievements in the alternate universe and awards them if completed */
+	function giveSingleAchieve(name) {
+	const u1Achievements = ['Defender', 'Power Tower'];
+	const u2Achievements = ['Huffstle', 'Just Smack It', 'Heavy Trinker', 'Peace'];
+
+	let area = game.global.universe === 2 ? 'oneOffs2' : 'oneOffs';
+	if (u1Achievements.includes(name)) area = 'oneOffs';
+	if (u2Achievements.includes(name)) area = 'oneOffs2';
+
+	const achievement = game.achievements[area];
+	const index = achievement.names.indexOf(name);
+
+	if (index === -1 || achievement.finished[index]) return;
+
+	if (typeof greenworks !== 'undefined') {
+		activateSteamAchieve(area, name);
+	}
+
+	displayAchievementPopup(area, false, index);
+	achievement.newStuff.push(index);
+	achievement.finished[index] = true;
+	calculateAchievementBonus();
+
+	if (trimpAchievementsOpen) displayAchievements();
 	}
 
 	function calculateAchievementBonus(){

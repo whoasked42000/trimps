@@ -1989,10 +1989,12 @@ function getScientistLevel() {
 	return game.global.sLevel;
 }
 
+/* bugfix for for foreman related text when Foremany has been unlocked */
 function getScientistInfo(number, reward){
 	switch (number){
 		case 1: {
-			return (reward) ? "start with 5000 Science, 100 Food, 100 Wood, 10 Traps, and 1 Foreman" : 11500;
+			const foreman = game.global.universe === 1 || !bwRewardUnlocked('Foremany') ? `, and 1 Foreman` : ``;
+			return reward ? `start with 5000 Science, 100 Food, 100 Wood, 10 Traps${foreman}` : 11500;
 		}
 		case 2: {
 			return (reward) ? "start with 5 Barns, 5 Sheds, 5 Forges, and T2 Equipment unlocked" : 8000;
@@ -2020,45 +2022,130 @@ function confirmAbandonChallenge(){
 	if (game.challenges[game.global.challengeActive].mustRestart) document.getElementById("confirmTipCost").innerHTML += '<div class="btn btn-success" onclick="abandonChallenge(true); cancelTooltip()">Restart Challenge</div>';
 }
 
-function abandonChallenge(restart){
-	var challengeName = game.global.challengeActive;
-	var challenge = game.challenges[challengeName];
-	if (game.global.universe == 2 && (game.global.runningChallengeSquared || challengeName == "Daily")) game.global.u2MutationSeed = game.global.ogU2MutationSeed;
-	if (game.global.runningChallengeSquared){
-		var challengeList;
+/* mandatory to have with updated abandonChallenge function */
+function abandonChallengeResetEnemy() {
+	const worldCell = game.global.gridArray[game.global.lastClearedCell + 1];
+	if (!worldCell) return;
+
+	let statChallenge = false;
+	let statMaps = false;
+
+	if (challengeActive('Daily')) {
+		if (typeof game.global.dailyChallenge.badHealth !== 'undefined') {
+			statChallenge = true;
+		}
+
+		if (typeof game.global.dailyChallenge.empower !== 'undefined') {
+			statChallenge = true;
+		}
+
+		if (typeof game.global.dailyChallenge.badMapHealth !== 'undefined' && game.global.currentMapId !== '') {
+			statMaps = true;
+		}
+
+		if (typeof game.global.dailyChallenge.empoweredVoid !== 'undefined' && game.global.voidBuff === 'Void') {
+			statMaps = true;
+		}
+	}
+
+	if (game.global.universe === 1) {
+		const challenges = ['Meditate', 'Scientist', 'Balance', 'Life', 'Toxicity', 'Coordinate', 'Corrupted', 'Domination', 'Obliterated', 'Eradicated', 'Frigid', 'Experience'];
+		statChallenge = challenges.some((challenge) => challengeActive(challenge));
+
+		if (challengeActive('Lead') && game.challenges.Lead.stacks > 0) {
+			statChallenge = true;
+		}
+
+		statMaps = statChallenge;
+	}
+
+	if (game.global.universe === 2) {
+		const challenges = ['Unbalance', 'Duel', 'Wither', 'Quest', 'Archaeology', 'Mayhem', 'Exterminate', 'Nurture', 'Pandemonium', 'Alchemy', 'Glass', 'Hypothermia', 'Desolation'];
+		statChallenge = challenges.some((challenge) => challengeActive(challenge));
+
+		if (challengeActive('Revenge') && game.global.world % 2 === 0) {
+			statChallenge = true;
+		}
+
+		statMaps = statChallenge;
+
+		if (challengeActive('Storm')) {
+			statChallenge = true;
+		} else if (challengeActive('Exterminate')) {
+			statChallenge = true;
+		} else if (challengeActive('Smithless') && game.global.world % 25 === 0 && worldCell.ubersmith && !worldCell.failedUber) {
+			statChallenge = true;
+		}
+	}
+
+	return [statChallenge, statMaps];
+}
+
+/* 	adds code to reset enemy stats when abandoning challenges.
+	useful for challenges like Quest/Frigid where enemy stats can be multiplied by over 1e10
+	need to take "abandonChallengeResetEnemy" function as well to tell it which enemies to reset */
+function abandonChallenge(restart) {
+	/* temp inclusion for graphs to still track this the way Quia intends if this file is loaded after graphs is. If GS takes this function it can just be removed. */
+	if (typeof Graphs !== 'undefined' && typeof Graphs.Push !== 'undefined' && typeof Graphs.Push.zoneData === 'function') Graphs.Push.zoneData();
+
+	let challengeName = game.global.challengeActive;
+	let challenge = game.challenges[challengeName];
+	const [resetWorld, resetMap] = abandonChallengeResetEnemy();
+	if (game.global.universe === 2 && (game.global.runningChallengeSquared || challengeName === 'Daily')) game.global.u2MutationSeed = game.global.ogU2MutationSeed;
+
+	if (game.global.runningChallengeSquared) {
+		let challengeList;
 		if (challenge.multiChallenge) challengeList = challenge.multiChallenge;
 		else challengeList = [challengeName];
-		game.global.challengeActive = "";
+
+		game.global.challengeActive = '';
 		game.global.multiChallenge = {};
-		for (var x = 0; x < challengeList.length; x++){
-			if (game.global.world > game.c2[challengeList[x]])
-			game.c2[challengeList[x]] = game.global.world;
+
+		for (let x = 0; x < challengeList.length; x++) {
+			if (game.global.world > game.c2[challengeList[x]]) game.c2[challengeList[x]] = game.global.world;
 			if (typeof game.challenges[challengeList[x]].abandon !== 'undefined' && game.challenges[challengeList[x]].fireAbandon) game.challenges[challengeList[x]].abandon();
 		}
+
 		if (game.global.capTrimp && game.c2.Trimp > 230) game.c2.Trimp = 230;
 		countChallengeSquaredReward();
+
 		if (!restart) {
-			fadeIn("helium", 10);
+			fadeIn('helium', 10);
 			game.global.runningChallengeSquared = false;
-			if (game.global.universe == 2 && (game.global.world > 30 || (game.global.world == 30 && game.global.lastClearedCell >= 29))) unlockJob("Meteorologist");
-		}	
-	}
-	else if (challenge.fireAbandon && typeof challenge.abandon !== 'undefined') {
-		game.global.challengeActive = "";
+			if (game.global.universe === 2 && (game.global.world > 30 || (game.global.world === 30 && game.global.lastClearedCell >= 29))) unlockJob('Meteorologist');
+		}
+	} else if (challenge.fireAbandon && typeof challenge.abandon !== 'undefined') {
+		game.global.challengeActive = '';
 		challenge.abandon();
 	}
-	game.global.challengeActive = "";
-	
+
+	game.global.challengeActive = '';
 	cancelPortal();
-	if (challengeName == "Scientist"){
-		document.getElementById("scienceCollectBtn").style.display = "block";
+
+	if (challengeName === 'Scientist') {
+		document.getElementById('scienceCollectBtn').style.display = 'block';
 	}
-	if (game.challenges[challengeName].mustRestart){
+
+	if (game.challenges[challengeName].mustRestart) {
 		if (restart) game.global.selectedChallenge = challengeName;
 		resetGame(true);
 	}
-	if (challengeName != "Daily")
-		message("Your challenge has been abandoned.", "Notices");
+
+	if (resetWorld || resetMap) {
+		if (resetWorld) {
+			const worldCell = game.global.gridArray[game.global.lastClearedCell + 1];
+			if (worldCell) worldCell.maxHealth = -1;
+		}
+
+		if (resetMap && game.global.currentMapId !== '') {
+			const mapCell = game.global.mapGridArray[game.global.lastClearedMapCell + 1];
+			mapCell.maxHealth = -1;
+		}
+
+		if (game.global.fighting) game.global.fighting = false;
+	}
+
+	if (challengeName !== 'Daily') message('Your challenge has been abandoned.', 'Notices');
 	refreshMaps();
 }
 
@@ -3786,15 +3873,25 @@ function checkHandleResourcefulRespec(){
 	if (getPerkLevel("Resourceful") > game.portal.Resourceful.levelTemp) clearQueue();
 }
 
-function clearQueue(specific) {
-	var existing = 0;
-	for (var x = 0; x < game.global.nextQueueId; x++){
-		if (!document.getElementById("queueItem" + x)) continue;
+/* 	adds clearingBuildingQueue variable to game.global. used in buyBuilding function
+	this fixes a game crash caused by continually adding and removing buildings from queue that was reported in ideas and bug channel */
+function clearQueue(specific = false) {
+	if (!specific) game.global.clearingBuildingQueue = true;
+	let existing = 0;
+
+	for (let x = 0; x < game.global.nextQueueId; x++) {
+		const queueItem = document.getElementById(`queueItem${x}`);
+		if (!queueItem) continue;
+
 		existing++;
-		if (specific && game.global.buildingsQueue[existing - 1].split('.')[0] != specific) continue;
+
+		if (specific && game.global.buildingsQueue[existing - 1].split('.')[0] !== specific) continue;
 		else existing--;
-		removeQueueItem("queueItem" + x, true);
+
+		removeQueueItem(`queueItem${x}`, true);
 	}
+
+	game.global.clearingBuildingQueue = false;
 }
 
 function activatePortal(){
@@ -4631,7 +4728,7 @@ function getBuildingItemPrice(toBuy, costItem, isEquipment, purchaseAmt){
 }
 
 function buyBuilding(what, confirmed, fromAuto, forceAmt) {
-	if (game.options.menu.pauseGame.enabled) return false;
+	if (game.options.menu.pauseGame.enabled || game.global.clearingBuildingQueue) return false;
 	if (what == "Hub") return;
 	if (!forceAmt && !confirmed && game.options.menu.lockOnUnlock.enabled == 1 && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return false;
 	var toBuy = game.buildings[what];
@@ -5600,29 +5697,61 @@ function testGymystic(oldPercent) {
 
 }
 
-function prestigeEquipment(what, fromLoad, noInc) {
-    var equipment = game.equipment[what];
+/* 	only update elems when there's a change
+	if used without calcBaseStats bugfix then that line needs removed as not a base game function */
+function prestigeEquipment(what, fromLoad = false, noInc = false) {
+	const equipment = game.equipment[what];
 	if (!fromLoad && !noInc) equipment.prestige++;
-	var resource = (what == "Shield") ? "wood" : "metal";
-	var cost = equipment.cost[resource];
-	var prestigeMod = 0;
-	if (equipment.prestige >= 4) prestigeMod = (((equipment.prestige - 3) * 0.85) + 2);
-	else prestigeMod = (equipment.prestige - 1);
-    cost[0] = Math.round(equipment.oc * Math.pow(1.069, ((prestigeMod) * game.global.prestige.cost) + 1));
-	var stat;
-	if (equipment.blockNow) stat = "block";
-	else stat = (typeof equipment.health !== 'undefined') ? "health" : "attack";
-	if (!fromLoad) game.global[stat] -= (equipment[stat + "Calculated"] * equipment.level);
-	if (!fromLoad) game.global.difs[stat] -= (equipment[stat + "Calculated"] * equipment.level);
-    equipment[stat + "Calculated"] = Math.round(equipment[stat] * Math.pow(1.19, ((equipment.prestige - 1) * game.global.prestige[stat]) + 1));
-	//No need to touch level if it's newNum
+
+	const prestigeMod = equipment.prestige >= 4 ? (equipment.prestige - 3) * 0.85 + 2 : equipment.prestige - 1;
+	const resource = what === 'Shield' ? 'wood' : 'metal';
+	const cost = equipment.cost[resource];
+	cost[0] = Math.round(equipment.oc * Math.pow(1.069, prestigeMod * game.global.prestige.cost + 1));
+
+	const stat = equipment.blockNow ? 'block' : typeof equipment.health !== 'undefined' ? 'health' : 'attack';
+	if (!fromLoad) game.global[stat] -= equipment[stat + 'Calculated'] * equipment.level;
+	if (!fromLoad) game.global.difs[stat] -= equipment[stat + 'Calculated'] * equipment.level;
+	equipment[stat + 'Calculated'] = Math.round(equipment[stat] * Math.pow(1.19, (equipment.prestige - 1) * game.global.prestige[stat] + 1));
+
+	// No need to touch level if it's newNum
 	if (fromLoad) return;
 	equipment.level = 0;
-	if (!noInc && !fromLoad) levelEquipment(what, 1);
-	var numeral = (usingScreenReader) ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
-    if (document.getElementById(what + "Numeral") !== null) document.getElementById(what + "Numeral").innerHTML = numeral;
+	if (!noInc) levelEquipment(what, 1);
+	if (game.global[stat] <= 0) game.global[stat] = calcBaseStats(stat);
+
+	const numeral = usingScreenReader ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
+	const equipElem = document.getElementById(`${what}Numeral`);
+	if (equipElem !== null) equipElem.innerHTML = numeral;
+
 	displayEfficientEquipment();
 }
+
+/* fixes a bug that caused player stats to go negative due to floating point issues */
+function calcBaseStats(equipType = 'attack') {
+	const equipmentTypes = {
+		attack: ['Dagger', 'Mace', 'Polearm', 'Battleaxe', 'Greatsword', 'Arbalest'],
+		health: ['Shield', 'Boots', 'Helmet', 'Pants', 'Shoulderguards', 'Breastplate', 'Gambeson'],
+		block: game.equipment.Shield.blockNow ? ['Shield'] : []
+	};
+
+	const bonusValues = {
+		attack: 6,
+		health: 50,
+		block: 0
+	};
+
+	let bonus = bonusValues[equipType] || 0;
+	let equipmentList = equipmentTypes[equipType] || [];
+
+	for (let i = 0; i < equipmentList.length; i++) {
+		const equip = game.equipment[equipmentList[i]];
+		if (equip.locked || (equip.blockNow && equipType === 'health')) continue;
+		bonus += equip[equipType + 'Calculated'] * equip.level;
+	}
+
+	return bonus;
+}
+	
 
 function getNextPrestigeCost(what){
 	var equipment = game.equipment[game.upgrades[what].prestiges];
@@ -7675,9 +7804,13 @@ function createHeirloom(zone, fromBones, spireCore, forceBest){
 	if (game.global.universe == 2 && u2Mutations.tree.Nullifium.purchased) buildHeirloom.nuMod *= 1.1;
 	buildHeirloom.nuMod *= u2SpireBonuses.nullifium();
 	game.global.heirloomsExtra.push(buildHeirloom);
-	if (game.options.menu.voidPopups.enabled != 2 || type == "Core" || (getHeirloomRarityRanges(zone, fromBones).length == (rarity + 1))){
-		displaySelectedHeirloom(false, 0, false, "heirloomsExtra", game.global.heirloomsExtra.length - 1, true);
+
+	/* fixes an issue where voidPopups setting displays cores on every spire clear as it's the highest available at that zone */
+	const displayCores = type === 'Core' && rarity >= game.global.spiresCompleted - 1;
+	if (game.options.menu.voidPopups.enabled !== 2 || displayCores || getHeirloomRarityRanges(zone, fromBones).length === rarity + 1) {
+		displaySelectedHeirloom(false, 0, false, 'heirloomsExtra', game.global.heirloomsExtra.length - 1, true);
 	}
+	
 	if ((game.stats.totalHeirlooms.value + game.stats.totalHeirlooms.valueTotal) == 0) document.getElementById("heirloomBtnContainer").style.display = "block";
 	game.stats.totalHeirlooms.value++;
 	checkAchieve("totalHeirlooms");
@@ -10391,6 +10524,7 @@ function mapsClicked(confirmed) {
 	game.global.switchToMaps = true;
 }
 
+/* fixes UI display when coming out of MAZ. Would previous stay at Repeat XX times */
 function mapsSwitch(updateOnly, fromRecycle) {
 	game.global.titimpLeft = 0;
 	updateGammaStacks(true);
@@ -10428,7 +10562,11 @@ function mapsSwitch(updateOnly, fromRecycle) {
 			recycleMap(-1, true, true);
 			currentMapObj = false;
 		}
-		game.global.mapCounterGoal = 0;
+		/* fixes UI display when coming out of MAZ. Would previous stay at Repeat XX times until it got toggled */
+		if (game.global.mapCounterGoal > 0) {
+			game.global.mapCounterGoal = 0;
+			toggleSetting('repeatUntil', null, false, true);
+		}
 		game.global.mapsActive = false;
 		setNonMapBox();
 		document.getElementById("battleHeadContainer").style.display = "none";
@@ -10587,7 +10725,8 @@ function selectMap(mapId, force) {
 	document.getElementById("recycleMapBtn").style.visibility = (map.noRecycle) ? "hidden" : "visible";
 }
 
-function runMap() {
+/* change is worthwhile incorporating either this or a later patch for MAZ lines as once you exit MAZ it won't run again on entering a map */
+function runMap(resetCounter = true) {
 	if (game.options.menu.pauseGame.enabled) return;
     if (game.global.lookingAtMap === "") return;
 	if (challengeActive("Watch")) game.challenges.Watch.enteredMap = true;
@@ -10614,7 +10753,7 @@ function runMap() {
     game.global.preMapsActive = false;
     game.global.mapsActive = true;
 	game.global.currentMapId = mapId;
-	game.global.mapRunCounter = 0;
+	if (resetCounter) game.global.mapRunCounter = 0;
 	mapsSwitch(true);
 	var mapObj = getCurrentMapObject();
 	if (mapObj.bonus){
@@ -13708,6 +13847,11 @@ function displayGoldenUpgrades(redraw) {
 	if (goldenUpgradesShown && !redraw) return false;
 	if (getAvailableGoldenUpgrades() <= 0) return false;
 	if (!goldenUpgradesShown) game.global.lastUnlock = new Date().getTime();
+
+	/* only add golden upgrades if the upgrades section doesn't have them inside of it */
+	const elem = document.getElementById('upgradesHere');
+	if (elem && elem.children[0] && elem.children[0].id.includes('Golden')) return false;
+
 	var html = "";
 	for (var item in game.goldenUpgrades){
 		var upgrade = game.goldenUpgrades[item];
@@ -13728,7 +13872,7 @@ function displayGoldenUpgrades(redraw) {
 			html += '<div onmouseover="tooltip(\'' + item + '\', \'goldenUpgrades\', event)" onmouseout="tooltip(\'hide\')" class="' + color + ' thing goldenUpgradeThing noselect pointer upgradeThing" id="' + item + 'Golden" onclick="buyGoldenUpgrade(\'' + item + '\'); tooltip(\'hide\')"><span class="thingName">Golden ' + displayName + ' ' + romanNumeral(game.global.goldenUpgrades + 1) + '</span><br/><span class="thingOwned" id="golden' + item + 'Owned">' + upgrade.purchasedAt.length + '</span></div>';
 		}
 	}
-	var elem = document.getElementById('upgradesHere');
+	
 	elem.innerHTML =  html + elem.innerHTML;
 	goldenUpgradesShown = true;
 	return true;
@@ -15846,13 +15990,16 @@ function getPlayerCritChance(){ //returns decimal: 1 = 100%
 	return critChance;
 }
 
-function getPlayerCritDamageMult(){
-	var relentLevel = getPerkLevel("Relentlessness");
-	var critMult = (((game.portal.Relentlessness.otherModifier * relentLevel) + (getHeirloomBonus("Shield", "critDamage") / 100)) + 1);
-	critMult += (getPerkLevel("Criticality") * game.portal.Criticality.modifier);
+/* bug: Elixir of Accuracy always returns 1 + (0.25 * amount owned) so it's been adding 100% extra crit damage since alchemy patch. Uncomment the eoaEffect > 1 line if you want to implement the fix */
+function getPlayerCritDamageMult() {
+	const relentLevel = getPerkLevel('Relentlessness');
+	const eoaEffect = alchObj.getPotionEffect('Elixir of Accuracy');
+
+	let critMult = game.portal.Relentlessness.otherModifier * relentLevel + getHeirloomBonus('Shield', 'critDamage') / 100 + 1;
+	critMult += getPerkLevel('Criticality') * game.portal.Criticality.modifier;
 	if (relentLevel > 0) critMult += 1;
 	if (game.challenges.Nurture.boostsActive() && game.challenges.Nurture.getLevel() >= 5) critMult += 0.5;
-	critMult += alchObj.getPotionEffect("Elixir of Accuracy");
+	/* if (eoaEffect > 1) */ critMult += eoaEffect;
 	return critMult;
 }
 
