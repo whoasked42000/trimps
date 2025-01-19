@@ -2210,15 +2210,18 @@ function viewPortalUpgrades() {
 	u2Mutations.toggleRespec(false, true);
 }
 
-function screwThisUniverse(confirmed){
-	if (!confirmed){
-		tooltip('confirm', null, 'update', 'Are you sure you want to return to Universe 1? You will lose any Radon and Scruffy Exp earned so far.', 'screwThisUniverse(true)', 'Abandon Scruffy', 'I\'m sure he\'ll be fine');
+function screwThisUniverse(confirmed) {
+	if (!confirmed) {
+		tooltip('confirm', null, 'update', 'Are you sure you want to return to Universe 1? You will lose any Radon and Scruffy Exp earned so far.', 'screwThisUniverse(true)', 'Abandon Scruffy', "I'm sure he'll be fine");
 		return;
 	}
+
 	game.global.totalRadonEarned -= game.resources.radon.owned;
 	game.resources.radon.owned = 0;
 	game.global.fluffyExp2 -= Fluffy.getBestExpStat().value;
 	Fluffy.getBestExpStat().value = 0;
+	portalClicked();
+	swapPortalUniverse();
 	portalUniverse = 1;
 	resetGame(true);
 	checkEquipPortalHeirlooms();
