@@ -17248,30 +17248,41 @@ function givePresimptLoot(){
 	message(success[messageNumber] + prettify(amt) + " " + item + "!", "Loot", "*gift", "presimpt", "events");
 }
 
-function updateTurkimpTime() {
-	if (game.global.turkimpTimer > 0)
-		game.global.turkimpTimer -= 100;
-	var timeRemaining = game.global.turkimpTimer;
-	var elem = document.getElementById("turkimpTime");
-	if (game.talents.turkimp2.purchased){
-		elem.innerHTML = "<span class='icomoon icon-infinity'></span>";
+function updateTurkimpTime(drawIcon = false) {
+	const elem = document.getElementById('turkimpTime');
+
+	if (game.talents.turkimp2.purchased) {
+		const icon = `<span class="icomoon icon-infinity"></span>`;
+		if (elem && elem.innerHTML !== icon) elem.innerHTML = icon;
 		return;
 	}
+
+	if (game.global.turkimpTimer <= 0) return;
+
+	if (!drawIcon) game.global.turkimpTimer -= 100;
+	let timeRemaining = game.global.turkimpTimer;
+
 	if (timeRemaining <= 0) {
 		game.global.turkimpTimer = 0;
-		document.getElementById("turkimpBuff").style.display = "none";
+		document.getElementById('turkimpBuff').style.display = 'none';
 		if (game.global.playerGathering) setGather(game.global.playerGathering);
+		elem.innerHTML = '00:00';
+		return;
 	}
+
 	timeRemaining /= 1000;
-	var mins = Math.floor(timeRemaining / 60);
-	var seconds = Math.ceil(timeRemaining % 60);
-	if (seconds <= 9) seconds = "0" + seconds;
-	if (seconds == 60){
-		seconds = "00";
+	let mins = Math.floor(timeRemaining / 60);
+	let seconds = Math.ceil(timeRemaining % 60);
+
+	if (seconds === 60) {
+		seconds = 0;
 		mins++;
 	}
-	if (mins < 10) mins = "0" + mins;
-	elem.innerHTML = mins + ":" + seconds;
+
+	const formattedMins = mins < 10 ? `0${mins}` : mins;
+	const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+	const formattedTime = `${formattedMins}:${formattedSeconds}`;
+	if (elem && elem.innerHTML !== formattedTime) elem.innerHTML = formattedTime;
 }
 
 function formatMinutesForDescriptions(number){
