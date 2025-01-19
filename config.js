@@ -22,11 +22,11 @@ function newGame () {
 var toReturn = {
 	global: {
 		//New and accurate version
-		stringVersion: '5.9.2',
+		stringVersion: '5.10.0',
 		//Leave 'version' at 4.914 forever, for compatability with old saves
 		version: 4.914,
-		isBeta: false,
-		betaV: 0,
+		isBeta: true,
+		betaV: 5,
 		killSavesBelow: 0.13,
 		uniqueId: new Date().getTime() + "" + Math.floor(Math.random() * 1e10),
 		playerGathering: "",
@@ -251,6 +251,10 @@ var toReturn = {
 		passive: true,
 		spiresCompleted: 0,
 		lastSpireCleared: 0,
+		spireLevel: 1,
+		spireMutStacks: 0,
+		u2SpireCells: 0,
+		u2SpireCellsBest: 0,
 		sugarRush: 0,
 		holidaySeed: Math.floor(Math.random() * 100000),
 		hideMapRow: false,
@@ -1535,131 +1539,7 @@ var toReturn = {
 						if (times != -1 && times != 1 && times != 2 && times != 3 && times != 5 && times != 10 && times != 30 && times != -2) times = -1;
 						if (cell < 1) cell = 1;
 						if (cell > 100) cell = 100;
-						// for (var y = 0; y < setting.length; y++){
-						// 	//No reason to run if one finishes before the other starts
-						// 	if (through < setting[y].start || setting[y].through < world) continue;
-						// 	//Only run conflict detection if both presets match on cell
-						// 	if (setting[y].cell == cell){
-						// 		var errorText = " Preset " + (x + 1) + " and Preset " + (y + 1) + " would conflict with this setup."
-						// 		//If both presets repeat, check for conflicts
-						// 		if (times != -1 && setting[y].times != -1){
-						// 			//Repeat every zone always conflicts
-						// 			if (times == 1 || setting[y].times == 1){
-						// 				error += errorText;
-						// 				continue loop1;
-						// 			}
-						// 			//Repeat every 2 zones always conflicts with 1, 3, and 5. Conflicts with 2 and 10 if both starts are odd or even.
-						// 			else if (times == 2){
-						// 				//If preset y repeats every 2, 10 or 30, check that one world is odd and one is even
-						// 				if (setting[y].times == 10 || setting[y].times == 2 || setting[y].times == 30){
-						// 					if ((world % 2) == (setting[y].world % 2)){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				//If preset y repeats at anything other than 0, 2, 10 or 30, it fails
-						// 				else {
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 			}
-						// 			//Repeat every 3 zones always conflicts with anything that doesn't repeat every 3 or 30 zones
-						// 			else if (times == 3){
-						// 				//If both presets repeat every 3 zones, see if they would intersect
-						// 				if (setting[y].times == 3 || setting[y].times == 30){
-						// 					if (setting[y].world % 3 == world % 3) {
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				//If preset y repeats at anything other than 3, it will conflict
-						// 				else{
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 			}
-						// 			//Repeat every 5 zones always conflicts with 1, 2, 3.
-						// 			else if (times == 5){
-						// 				//If preset y doesn't repeat, or repeats at 5 or 10 or 30, check if both worlds % 5 match
-						// 				if (setting[y].times == 5 || setting[y].times == 10 || setting[y].times == 30){
-						// 					var intersect = ((world - setting[y].world) % 5);
-						// 					if (intersect == 0) {
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				//Anything else fails
-						// 				else {
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 			}
-						// 			//Repeat every 10 zones conflicts with 2 if both are even or odd, conflicts with 3 always, conflicts with 5 if both % 5 match, conflicts with 10 or 30 if both % 10 match
-						// 			//Repeat every 30 zones conflicts with 2 if both are even or odd, conflicts with 3 if both % 3 match, conflicts with 5 if both % 5 match, conflicts with 10 if both % 10 match, and 30 if both % 30 match
-						// 			else if (times == 10 || times == 30){
-						// 				if (setting[y].times == 2){
-						// 					if ((world % 2) == (setting[y].world % 2)){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				//3 For 10
-						// 				else if (times == 10 && setting[y].times == 3){
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 				//3 For 30
-						// 				else if (setting[y].times == 3){
-						// 					if (setting[y].world % 3 == world % 3){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				else if (setting[y].times == 5){
-						// 					if ((world % 5) == (setting[y].world % 5)){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				//10 for 10 and 30, and 30 for 10
-						// 				else if (setting[y].times == 10 || (setting[y].times == 30 && times == 10)){
-						// 					if ((world % 10) == (setting[y].world % 10)){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 				else if (setting[y].times == 30){
-						// 					if ((world % 30) == (setting[y].world % 30)){
-						// 						error += errorText;
-						// 						continue loop1;
-						// 					}
-						// 				}
-						// 			}
-						// 		}
-						// 		else {
-						// 			//Either none repeats or only 1 repeats
-						// 			if (setting[y].world == world) {
-						// 				error += " Preset " + (x + 1) + " and Preset " + (y + 1) + " cannot exit at the same Zone and Cell number.";
-						// 				continue loop1;
-						// 			}
-						// 			//If this preset doesn't repeat and y does, and if y starts on a lower zone than this preset, check for conflict
-						// 			if (setting[y].times != -1 && times == -1 && setting[y].world < world){
-						// 				if ((world - setting[y].world) % setting[y].times == 0){
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 			}
-						// 			//If this preset repeats and y does not, and if this preset starts at a lower zone than y, check for conflict
-						// 			if (setting[y].times == -1 && times != -1 && world < setting[y].world){
-						// 				if ((setting[y].world - world) % times == 0){
-						// 					error += errorText;
-						// 					continue loop1;
-						// 				}
-						// 			}
-						// 		}
-						// 	}
-						// }
-						var presetMax = 9;
+						var presetMax = 10;
 						if (preset == 5 && (game.global.universe != 2 || game.global.highestRadonLevelCleared < 69)) preset = 0;
 						if (preset < 0 || preset > presetMax) preset = 0;
 						if (repeat < 0 || repeat > 2) repeat = 0;
@@ -1904,6 +1784,15 @@ var toReturn = {
 				},
 				onToggle: function(){
 					playerSpire.openPopup();
+				}
+			},
+			sealedAutoBattle: {
+				enabled: 0,
+				extraTags: "other",
+				description: "Your Spire is Sealed, but you can look at it here if you want to.",
+				titles: ["View Spire Assault"],
+				lockUnless: function(){
+					return (autoBattle.sealed);
 				}
 			},
 			saveOnPause: {
@@ -2851,6 +2740,7 @@ var toReturn = {
 				return mult;
 			},
 			getTime: function(){
+				if (game.global.spireActive && !game.global.mapsActive) return 60;
 				var minutes = getZoneMinutes();
 				var lastZone = this.timeLastZone;
 				if (lastZone == -1) lastZone = 0;
@@ -2902,16 +2792,38 @@ var toReturn = {
 			},
 			getActiveLevels: function(){
 				var perkLevel = getPerkLevel("Equality");
-				if (this.scalingActive && this.scalingCount < perkLevel) return this.scalingCount;
-				if (!this.scalingActive && this.disabledStackCount > -1) return this.disabledStackCount;
+				if (this.getSetting('scalingActive') && this.scalingCount < perkLevel) return this.scalingCount;
+				if (!this.getSetting('scalingActive') && this.getSetting('disabledStackCount') > -1) return this.getSetting('disabledStackCount');
 				return perkLevel;
 			},
 			specialGrowth: 1.5,
-			scalingActive: false,
-			scalingSetting: 5,
-			reversingSetting: 5,
-			scalingReverse: true,
-			disabledStackCount: -1,
+			getObject: function(force){
+				if (force) return this.settings[force];
+				if (game.global.spireActive) return this.settings.spire;
+				return this.settings.reg;
+			},
+			getSetting: function(setting, force){
+				return this.getObject(force)[setting];
+			},
+			setSetting: function(setting,force,value){
+				this.getObject(force)[setting] = value;
+			},
+			settings: {
+				reg: {
+					scalingActive: false,
+					scalingSetting: 5,
+					reversingSetting: 5,
+					scalingReverse: true,
+					disabledStackCount: -1,
+				},
+				spire: {
+					scalingActive: false,
+					scalingSetting: 5,
+					reversingSetting: 5,
+					scalingReverse: true,
+					disabledStackCount: -1,
+				}
+			},
 			scalingCount: 0
 		},
 		Carpentry: {
@@ -6005,7 +5917,7 @@ var toReturn = {
 		},
 		Glass: {
 			get description() {
-				return "Travel to a dimension with fragile but dangerous Enemies. All Bad Guys are Fast and have x100 Attack. Hitting a Bad Guy without killing it creates a stack of Glass. Each Glass stack increases the base Enemy Attack multiplier by +1x. Every 100 Glass, Enemy Attack and Health doubles. Every " + prettify(1000) + " Glass, Enemies gain a Crystallized stack and Glass stacks reset to 0. Each Crystallized stack reduces Enemy Health by 20% (compounding) but also gives them a 10% chance to reflect an attack, and reaching 10 Crystallized stacks fails this Challenge. Killing an Enemy at or above World level removes two stacks of Glass plus one for every Crystallized stack on the Enemy, but Crystallized can never be removed. Completing <b>Z175</b> with this Challenge active will permanently cause all Radon earned to be increased by 10% (compounding) per Zone above Z175.";
+				return "Travel to a dimension with fragile but dangerous Enemies. All Bad Guys are Fast and have x100 Attack. Hitting a Bad Guy without killing it creates a stack of Glass. Each Glass stack increases the base Enemy Attack multiplier by +1x. Every 100 Glass, Enemy Attack and Health doubles. Every " + prettify(1000) + " Glass, Enemies gain a Crystallized stack and Glass stacks reset to 0. Each Crystallized stack reduces Enemy Health by 20% (compounding) but also gives them a 10% chance to reflect an attack, and reaching 10 Crystallized stacks fails this Challenge. Killing an Enemy at or above World level removes two stacks of Glass plus one for every Crystallized stack on the Enemy, but Crystallized can never be removed. Completing <b>Z175</b> with this Challenge active will permanently cause all Radon earned to be increased by 10% (compounding) per Zone between Z175 and the Glass ceiling at Z400.";
 			},
 			get squaredDescription() {
 				return "Travel to a dimension with fragile but dangerous Enemies. All Bad Guys are Fast and have x100 Attack. Hitting a Bad Guy without killing it creates a stack of Glass. Each Glass stack increases the base Enemy Attack multiplier by +1x. Every 100 Glass, Enemy Attack and Health doubles. Every " + prettify(1000) + " Glass, Enemies gain a Crystallized stack and Glass stacks reset to 0. Each Crystallized stack reduces Enemy Health by 20% (compounding) but also gives them a 10% chance to reflect an attack, and reaching 10 Crystallized stacks fails this Challenge. Killing an Enemy at or above World level removes two stacks of Glass plus one for every Crystallized stack on the Enemy, but Crystallized can never be removed.";
@@ -6203,7 +6115,7 @@ var toReturn = {
 			get description(){
 				var text = "";
 				if (game.global.desoCompletions >= this.maxRuns) text += "<b>NOTICE: You have already completed Desolation " + this.maxRuns + " times, and will no longer gain a bonus for future runs.</b><br/>";
-				text += "Travel to a bitterly cold dimension. Every completed Zone reduces the temperature of the world, lowering your Trimps' attack, health, and resources (gathered and looted) by <b>" + prettify(this.getReducePercent() * 100) + "%</b>. The enemies in this dimension are even colder and will apply a stack of Chilled with every attack they land. Upon death Bad Guys explode, dealing 5x their attack in damage and applying another 20 stacks of Chilled to your Trimps. Each stack of Chilled reduces your Trimps' attack by 0.2% and their health by 0.1%. Fortunately maps are still nice and warm in this dimension, and attacking map enemies at world level or above will cause 1 stack of Chilled to be lost, plus another stack for each map level above world level. Additionally, if a map above world level is cleared, 1% of all Chilled stacks will be cleared for each level. All enemies within maps are fast.";
+				text += "Travel to a bitterly cold dimension. Every completed Zone reduces the temperature of the world, lowering your Trimps' attack, health, and resources (gathered and looted) by <b>" + prettify(this.getReducePercent() * 100) + "%</b>. The enemies in this dimension are even colder and will apply a stack of Chilled with every attack they land. Upon death Bad Guys explode, dealing 5x their attack in damage and applying another 20 stacks of Chilled to your Trimps. Each stack of Chilled reduces your Trimps' attack by 0.2% and their health by 0.1%. Fortunately maps are still nice and warm in this dimension, and attacking map enemies at world level or above will cause 1 stack of Chilled to be lost, plus another stack for each map level above world level. Additionally, if a map above world level is cleared, 1% of all Chilled stacks will be cleared for each level.";
 				text += " Completing <b>Z" + this.completeAfterZone + "</b> with this Challenge active will grant your Trimps a permanent, stacking, additive <b>" + prettify(10 + (10 * game.global.desoCompletions)) + "%</b> bonus to Helium or Radon, Trimp Attack, Trimp Health, Resources Gathered, <b>and Mutated Seeds earned</b> in Universe 1 and 2. Each time Desolation is completed, the reward for next time increases by an additional 10%, 2 more Zones will need to be completed for all future runs of Desolation, and Desolation enemies will gain 10x Attack and Health, and the Trimp stat reduction for each completed Zone increases by 0.2%."
 				var scaleMult = this.getEnemyMult();
 				text += " <b>You have completed Desolation " + game.global.desoCompletions + " / " + this.maxRuns + " maximum times. Your Trimps have +" + prettify((this.getTrimpMult() - 1) * 100) + "% Attack, Health, Radon or Helium, gathered resources, and Mutated Seeds in U1 and U2, and your next run of Desolation will spawn Bad Guys with " + prettify(scaleMult) + "x Attack and Health";
@@ -6879,6 +6791,22 @@ var toReturn = {
 			display: function(){
 				return (game.global.highestRadonLevelCleared >= 200);
 			},
+			hidden: false
+		},
+		mostU2Voids: {
+			get title () {
+				return "Most U2 Void Maps in one Run";
+			},
+			display: function () {
+				return (this.value > 0 || this.valueTotal > 0)
+			},
+			displayCurrent: function(){
+				return false;
+			},
+			value: 0,
+			valueTotal: 0,
+			noAdd: true,
+			keepHighest: true,
 			hidden: false
 		}
 	},
@@ -7930,19 +7858,19 @@ var toReturn = {
 
 	heirlooms: { //Basic layout for modifiers. Steps can be set specifically for each modifier, or else default steps will be used
 		//NOTE: currentBonus is the only thing that will persist!
-		values: [10, 20, 30, 50, 150, 300, 800, 2000, 5000, 15000, 100000, 750000],
-		recycleOverride: [-1,-1,-1,-1,-1,-1,-1,-1,-1,25e4,1e6, 7.5e7],
+		values: [10, 20, 30, 50, 150, 300, 800, 2000, 5000, 15000, 100000, 750000, 5.5e6],
+		recycleOverride: [-1,-1,-1,-1,-1,-1,-1,-1,-1,25e4,1e6, 7.5e7, 2e9],
 		coreValues: function(tier){
 			return Math.floor(Math.pow(10, tier) * 20) * 2;
 		},
-		slots: [1,2,3,3,3,4,4,5,5,6,6,7],
-		defaultSteps: [[3, 6, 1], [3, 6, 1], [3, 6, 1], [6, 12, 1], [16, 40, 2], [32, 80, 4], [64, 160, 8], [128, 320, 16], [256, 640, 32], [512, 1280, 64], [1024, 2560, 128], [2048, 5120, 256]],
-		rarityNames: ['Basic', 'Common', 'Rare', 'Epic', 'Legendary', 'Magnificent', 'Ethereal', 'Magmatic', 'Plagued', 'Radiating', 'Hazardous', 'Enigmatic'],
-		rarities:[[-1,6000,4000],[-1,5000,5000],[-1,2500,5500,2000],[-1,2000,4000,4000],[-1,1500,3000,5000,500],[-1,800,2000,6000,1000,200],[-1,400,1000,7000,1000,500,100],[-1,200,500,6000,2200,800,300],[-1,-1,-1,5000,3000,1700,300],[-1,-1,-1,2500,5000,2000,500],[-1,-1,-1,-1,7000,2400,500,100],[-1,-1,-1,-1,6000,3170,680,150],[-1,-1,-1,-1,3000,5000,1650,350],[-1,-1,-1,-1,-1,4500,3000,2000,500],[-1,-1,-1,-1,-1,1500,2000,5000,1500],[-1,-1,-1,-1,-1,-1,1000,6000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,7500,2500],[-1,-1,-1,-1,-1,-1,-1,-1,5000,5000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,10000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,8500,1500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,7000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,3000,7000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,1000,8500,500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9000,1000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5000,5000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2500,7500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10000]],
-		rarityBreakpoints:[41,60,80,100,125,146,166,181,201,230,300,400,500,600,700,1,40,80,100,135,175,200,225,250,275,300,999], //don't forget to update the 999 bracket when adding a new rarity!
-		universeBreakpoints: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2],
-		priceIncrease: [1.5, 1.5, 1.25, 1.19, 1.15, 1.12, 1.1, 1.06, 1.04, 1.03, 1.02, 1.015],
-		canReplaceMods: [true, true, true, true, true, true, true, true, false, false, false, false],
+		slots: [1,2,3,3,3,4,4,5,5,6,6,7,7],
+		defaultSteps: [[3, 6, 1], [3, 6, 1], [3, 6, 1], [6, 12, 1], [16, 40, 2], [32, 80, 4], [64, 160, 8], [128, 320, 16], [256, 640, 32], [512, 1280, 64], [1024, 2560, 128], [2048, 5120, 256], [4096, 10240, 512]],
+		rarityNames: ['Basic', 'Common', 'Rare', 'Epic', 'Legendary', 'Magnificent', 'Ethereal', 'Magmatic', 'Plagued', 'Radiating', 'Hazardous', 'Enigmatic', 'Mutated'],
+		rarities:[[-1,6000,4000],[-1,5000,5000],[-1,2500,5500,2000],[-1,2000,4000,4000],[-1,1500,3000,5000,500],[-1,800,2000,6000,1000,200],[-1,400,1000,7000,1000,500,100],[-1,200,500,6000,2200,800,300],[-1,-1,-1,5000,3000,1700,300],[-1,-1,-1,2500,5000,2000,500],[-1,-1,-1,-1,7000,2400,500,100],[-1,-1,-1,-1,6000,3170,680,150],[-1,-1,-1,-1,3000,5000,1650,350],[-1,-1,-1,-1,-1,4500,3000,2000,500],[-1,-1,-1,-1,-1,1500,2000,5000,1500],[-1,-1,-1,-1,-1,-1,1000,6000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,7500,2500],[-1,-1,-1,-1,-1,-1,-1,-1,5000,5000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,10000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,8500,1500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,7000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,3000,7000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,1000,8500,500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,9000,1000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,5000,5000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2000,7500,500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1000,8000,1000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8500,1500],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,8000,2000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,7000,3000],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,10000]],
+		rarityBreakpoints:[41,60,80,100,125,146,166,181,201,230,300,400,500,600,700,1,40,80,100,135,175,200,225,250,275,300,325,350,375,400,999], //don't forget to update the 999 bracket when adding a new rarity!
+		universeBreakpoints: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+		priceIncrease: [1.5, 1.5, 1.25, 1.19, 1.15, 1.12, 1.1, 1.06, 1.04, 1.03, 1.02, 1.015, 1.013],
+		canReplaceMods: [true, true, true, true, true, true, true, true, false, false, false, false, false],
 		Core: {
 			fireTrap: {
 				name: "Fire Trap Damage",
@@ -7989,14 +7917,17 @@ var toReturn = {
 			metalDrop: {
 				name: "Metal Drop Rate",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			foodDrop: {
 				name: "Food Drop Rate",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			woodDrop: {
 				name: "Wood Drop Rate",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			gemsDrop: {
 				name: "Gem Drop Rate",
@@ -8009,14 +7940,17 @@ var toReturn = {
 			FarmerSpeed: {
 				name: "Farmer Efficiency",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			LumberjackSpeed: {
 				name: "Lumberjack Efficiency",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			MinerSpeed: {
 				name: "Miner Efficiency",
 				currentBonus: 0,
+				maxTier: 11
 			},
 			DragimpSpeed: {
 				name: "Dragimp Efficiency",
@@ -8030,18 +7964,38 @@ var toReturn = {
 				name: "Scientist Efficiency",
 				currentBonus: 0,
 			},
+			allMetal: {
+				name: "Metal Drop and Efficiency",
+				currentBonus: 0,
+				minTier: 12
+			},
+			allFood: {
+				name: "Food Drop and Efficiency",
+				currentBonus: 0,
+				minTier: 12
+			},
+			allWood: {
+				name: "Wood Drop and Efficiency",
+				currentBonus: 0,
+				minTier: 12
+			},
 			FluffyExp: {
 				heirloopy: true,
 				get name(){
 					return "Pet (" + Fluffy.getName() + ") Exp";
 				},
 				currentBonus: 0,
-				steps: [-1, -1, -1, -1, -1, -1, -1, -1, [25, 50, 1],[50,100,1],[75,200,1],[124,400,1.2]]
+				steps: [-1, -1, -1, -1, -1, -1, -1, -1, [25, 50, 1],[50,100,1],[75,200,1],[124,400,1.2],[174,600,1.5]]
 			},
 			ParityPower: {
 				name: "Parity Power",
 				currentBonus: 0,
-				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[200,500,10]]
+				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[200,500,10],[295,700,15]]
+			},
+			SeedDrop: {
+				name: "Seed Drop Rate",
+				currentBonus: 0,
+				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[1000,2000,4]]
 			},
 			empty: {
 				name: "Empty",
@@ -8052,42 +8006,42 @@ var toReturn = {
 			playerEfficiency: {
 				name: "Player Efficiency",
 				currentBonus: 0,
-				steps: [[8,16,1],[8,16,1],[8,16,1],[16,32,2],[32,64,4],[64,128,8],[128,256,16],[256,512,32],[512,1024,64],[1024,2048,128],[2048,4096,256],[4096,8192,512]]
+				steps: [[8,16,1],[8,16,1],[8,16,1],[16,32,2],[32,64,4],[64,128,8],[128,256,16],[256,512,32],[512,1024,64],[1024,2048,128],[2048,4096,256],[4096,8192,512],-1]
 			},
 			trainerEfficiency: {
 				name: "Trainer Efficiency",
 				currentBonus: 0,
-				steps: [[10,20,1],[10,20,1],[10,20,1],[20,40,2],[40,60,2],[60,80,2],[80,100,2],[100,120,2],[120,140,2],-1,-1,-1]
+				steps: [[10,20,1],[10,20,1],[10,20,1],[20,40,2],[40,60,2],[60,80,2],[80,100,2],[100,120,2],[120,140,2],-1,-1,-1,-1]
 			},
 			storageSize: {
 				name: "Storage Size",
 				currentBonus: 0,
-				steps: [[32,64,4],[32,64,4],[32,64,4],[64,128,4],[128,256,8],[256,512,16],[512,768,16],[768,1024,16],[1024,1280,16],-1,-1,-1]
+				steps: [[32,64,4],[32,64,4],[32,64,4],[64,128,4],[128,256,8],[256,512,16],[512,768,16],[768,1024,16],[1024,1280,16],-1,-1,-1,-1]
 			},
 			breedSpeed: {
 				name: "Breed Speed",
 				currentBonus: 0,
-				steps: [[5,10,1],[5,10,1],[5,10,1],[10,20,1],[70,100,3],[100,130,3],[130,160,3],[160,190,3],[190,220,3],[220,280,5],[260, 360, 10],[300,400,10]]
+				steps: [[5,10,1],[5,10,1],[5,10,1],[10,20,1],[70,100,3],[100,130,3],[130,160,3],[160,190,3],[190,220,3],[220,280,5],[260, 360, 10],[300,400,10],[400,550,15]]
 			},
 			trimpHealth: {
 				name: "Trimp Health",
 				currentBonus: 0,
-				steps: [[6,20,2],[6,20,2],[6,20,2],[20,40,2],[50,100,5],[100,150,5],[150,200,5],[200,260,6],[260,356,8],[360,460,10],[600,750,10],[800,1100,20]]
+				steps: [[6,20,2],[6,20,2],[6,20,2],[20,40,2],[50,100,5],[100,150,5],[150,200,5],[200,260,6],[260,356,8],[360,460,10],[600,750,10],[800,1100,20],[1200,1600,25]]
 			},
 			trimpAttack: {
 				name: "Trimp Attack",
 				currentBonus: 0,
-				steps: [[6,20,2],[6,20,2],[6,20,2],[20,40,2],[50,100,5],[100,150,5],[150,200,5],[200,260,6],[260,356,8],[360,460,10],[600,750,10],[800,1100,20]]
+				steps: [[6,20,2],[6,20,2],[6,20,2],[20,40,2],[50,100,5],[100,150,5],[150,200,5],[200,260,6],[260,356,8],[360,460,10],[600,750,10],[800,1100,20],[1200,1600,25]]
 			},
 			trimpBlock: {
 				name: "Trimp Block",
 				currentBonus: 0,
-				steps: [[4,7,1],[4,7,1],[4,7,1],[7,10,1],[28,40,1],[48,60,1],[68,80,1],[88,100,1],[108,120,1],-1,-1,-1]
+				steps: [[4,7,1],[4,7,1],[4,7,1],[7,10,1],[28,40,1],[48,60,1],[68,80,1],[88,100,1],[108,120,1],-1,-1,-1,-1]
 			},
 			critDamage: {
 				name: "Crit Damage, additive",
 				currentBonus: 0,
-				steps: [[40,60,5],[40,60,5],[40,60,5],[60,100,5],[100,200,10],[200,300,10],[300,400,10],[400,500,10],[500,650,15],[650,850,20],[850,1100,25],[1100,1700,50]],
+				steps: [[40,60,5],[40,60,5],[40,60,5],[60,100,5],[100,200,10],[200,300,10],[300,400,10],[400,500,10],[500,650,15],[650,850,20],[850,1100,25],[1100,1700,50],[1700,2450,75]],
 				filter: function () {
 					return (!game.portal.Relentlessness.locked);
 				}
@@ -8096,11 +8050,11 @@ var toReturn = {
 				name: "Crit Chance, additive",
 				currentBonus: 0,
 				heirloopy: true,
-				steps: [[1.4,2.6,0.2],[1.4,2.6,0.2],[1.4,2.6,0.2],[2.6,5,0.2],[5,7.4,0.2],[7.4,9.8,0.2],[9.8,12.2,0.2],[12.3,15.9,0.3],[20,30,0.5],[30,50,0.5],[50,80,0.25],[80,95,0.3]],
+				steps: [[1.4,2.6,0.2],[1.4,2.6,0.2],[1.4,2.6,0.2],[2.6,5,0.2],[5,7.4,0.2],[7.4,9.8,0.2],[9.8,12.2,0.2],[12.3,15.9,0.3],[20,30,0.5],[30,50,0.5],[50,80,0.25],[80,95,0.3],[95,115,0.4]],
 				filter: function () {
 					return (!game.portal.Relentlessness.locked);
 				},
-				max: [30,30,30,30,30,30,30,30,100,125,200,260]
+				max: [30,30,30,30,30,30,30,30,100,125,200,260,335]
 			},
 			voidMaps: {
 				name: "Void Map Drop Chance",
@@ -8109,8 +8063,8 @@ var toReturn = {
 				specialDescription: function(modifier){
 					return "*Void Map Drop Chance on Hazardous and higher Heirlooms has a lower percentage than previous Heirloom tiers, but also causes 1 extra Void Map to drop every 10th zone you clear."
 				},
-				steps: [[5,7,0.5],[5,7,0.5],[5,7,0.5],[8,11,0.5],[12,16,0.5],[17,22,0.5],[24,30,0.5],[32,38,0.5],[40,50,0.25],[50,60,0.25],[5,7,0.1],[8,12,0.1]],
-				max: [50,50,50,50,50,50,50,50,80,99,40,50]
+				steps: [[5,7,0.5],[5,7,0.5],[5,7,0.5],[8,11,0.5],[12,16,0.5],[17,22,0.5],[24,30,0.5],[32,38,0.5],[40,50,0.25],[50,60,0.25],[5,7,0.1],[8,12,0.1],[12,17,0.1]],
+				max: [50,50,50,50,50,50,50,50,80,99,40,50,60]
 			},
 			plaguebringer: {
 				name: "Plaguebringer",
@@ -8119,8 +8073,8 @@ var toReturn = {
 				specialDescription: function (modifier) {
 					return prettify(modifier) + "% of all non-lethal damage and nature stacks you afflict on your current enemy are copied onto the next enemy. Plaguebringer damage cannot bring an enemy below 5% health, but nature stacks will continue to accumulate."
 				},
-				steps: [-1, -1, -1, -1, -1, -1, -1, -1, [1, 15, 0.5],[15,30,0.5],[30,45,0.5],[40,50,0.5]],
-				max: [0,0,0,0,0,0,0,0,75,100,125,150]
+				steps: [-1, -1, -1, -1, -1, -1, -1, -1, [1, 15, 0.5],[15,30,0.5],[30,45,0.5],[40,50,0.5],[45,55,0.5]],
+				max: [0,0,0,0,0,0,0,0,75,100,125,150,175]
 			},
 			prismatic: {
 				name: "Prismatic Shield",
@@ -8129,8 +8083,8 @@ var toReturn = {
 				specialDescription: function(){
 					return "ADDS this amount on to your total Prismatic Shield. This modifier can only function in the Radon Universe."
 				},
-				steps: [-1,-1,-1,-1,-1,-1, -1,-1,-1,[10,50,1],[10,40,1],[30,60,2]],
-				max:[0,0,0,0,0,0,0,0,0,250,500,750]
+				steps: [-1,-1,-1,-1,-1,-1, -1,-1,-1,[10,50,1],[10,40,1],[30,60,2],[50,90,2]],
+				max:[0,0,0,0,0,0,0,0,0,250,500,750,1000]
 			},
 			gammaBurst: {
 				name: "Gamma Burst",
@@ -8140,7 +8094,7 @@ var toReturn = {
 					var triggerStacks = (autoBattle.oneTimers.Burstier.owned) ? 4 : 5;
 					return "Each attack by your Trimps adds 1 stack of Charging. When Charging reaches " + triggerStacks + " stacks, your Trimps will release a burst of energy, dealing " + prettify(modifier) + "% of their attack damage. Stacks reset after releasing a Burst or when your Trimps die.";
 				},
-				steps: [-1,-1,-1,-1,-1,-1, -1,-1,-1,[1000,2000,100],-1,-1],
+				steps: [-1,-1,-1,-1,-1,-1, -1,-1,-1,[1000,2000,100],-1,-1,-1],
 			},
 			inequality: {
 				name: "Inequality",
@@ -8148,8 +8102,18 @@ var toReturn = {
 				specialDescription: function(){
 					return "Reduces the Equality penalty on your Trimps by this amount without changing Enemy reduction.";
 				},
-				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[50,200,0.25]],
-				max:[0,0,0,0,0,0,0,0,0,0,0,400]
+				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[50,200,0.25],[99.9,300,0.3]],
+				max:[0,0,0,0,0,0,0,0,0,0,0,400,600]
+			},
+			doubleCrit: {
+				name: "Double Crit",
+				noScaleU2: true,
+				currentBonus: 0,
+				specialDescription: function(){
+					return "Gives your Trimps this chance to crit for 1 tier higher than they would have."
+				},
+				steps: [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,[0.1,0.3,0.02]],
+				max:[0,0,0,0,0,0,0,0,0,0,0,0,25]
 			},
 			empty: {
 				name: "Empty",
@@ -8200,6 +8164,7 @@ var toReturn = {
 				if (game.global.expandingTauntimp) num = Math.floor(num * game.badGuys.Tauntimp.expandingMult());
 				num = Math.floor(num * alchObj.getPotionEffect("Elixir of Crafting"));
 				if (autoBattle.bonuses.Scaffolding.level > 0) num = Math.floor(num * autoBattle.bonuses.Scaffolding.getMult());
+				if (game.global.universe == 2 && u2Mutations.tree.Trimps.purchased) num *= 1.5;
 				return num;
 			},
 			working: 0,
@@ -8872,6 +8837,10 @@ var toReturn = {
 				var totalCleared = (fromFluffy && fluffyCount) ? fluffyCount : 1;
 				game.stats.highestVoidMap.evaluate();
 				game.stats.totalVoidMaps.value += totalCleared;
+				if (game.global.universe == 2){ 
+					game.stats.mostU2Voids.value += totalCleared;
+					if (game.stats.mostU2Voids.valueTotal < game.stats.mostU2Voids.value) game.stats.mostU2Voids.valueTotal = game.stats.mostU2Voids.value;
+				}
 				if (game.global.challengeActive == "Frigid") game.challenges.Frigid.completedVoid(totalCleared);
 				var msg = "Cthulimp and the map it came from crumble into the darkness. You find yourself instantly teleported to ";				
 				if (fromFluffy && fluffyCount == 1){
@@ -9399,7 +9368,7 @@ var toReturn = {
 				if (game.global.expandingTauntimp) return "Gain +" + prettify(this.expandingBase() * 100) + "% Max Trimps"
 				return "Gain 0.3% of your current Trimps as extra housing"
 			},
-			loot: function (level, fromMagimp) {
+			loot: function (level, fromMagimp, getAmt) {
 				var name = (fromMagimp) ? "Randimp" : "Tauntimp";
 				var oldMax = game.resources.trimps.realMax();
 				game.unlocks.impCount.Tauntimp++;
@@ -9414,6 +9383,7 @@ var toReturn = {
 							game.resources.trimps.owned += added;
 						}
 					}
+					if (getAmt) return added;
 					message("You found an Expanding Tauntimp! The extra room is increasing your housing by " + prettify((this.expandingMult() - 1) * 100) + "%.", "Loot", "gift", "exotic", "exotic");
 				}
 				else{
@@ -9425,6 +9395,7 @@ var toReturn = {
 					}
 					game.unlocks.impCount.TauntimpAdded += amt;
 					amt = (game.global.challengeActive == "Trapper" || game.global.challengeActive == "Trappapalooza") ? addMaxHousing(amt, false) : addMaxHousing(amt, true);
+					if (getAmt) return amt;
 					var msg = "It's nice, warm, and roomy in that dead " + name + ". ";
 					if (game.global.challengeActive != "Trapper" && game.global.challengeActive != "Trappapalooza"){
 						msg += "You found ";
@@ -9454,7 +9425,7 @@ var toReturn = {
 			health: 1,
 			fast: false,
 			dropDesc: "Stacking x1.003 to resource gathering speed",
-			loot: function (level, fromMagimp) {
+			loot: function (level, fromMagimp, noMessage) {
 				var name = (fromMagimp) ? "Randimp" : "Whipimp";
 				game.unlocks.impCount.Whipimp++;
 				game.jobs.Farmer.modifier *= 1.003;
@@ -9463,6 +9434,7 @@ var toReturn = {
 				game.jobs.Scientist.modifier *= 1.003;
 				game.jobs.Dragimp.modifier *= 1.003;
 				game.jobs.Explorer.modifier *= 1.003;
+				if (noMessage) return;
 				var amt = Math.pow(1.003, game.unlocks.impCount.Whipimp);
 				amt = (amt - 1) * 100;
 				var s = (game.unlocks.impCount.Whipimp == 1) ? "" : "s";
@@ -9477,9 +9449,10 @@ var toReturn = {
 			health: 1,
 			fast: false,
 			dropDesc: "Stacking x1.003 to Trimp breed speed",
-			loot: function (level, fromMagimp) {
+			loot: function (level, fromMagimp, noMessage) {
 				var name = (fromMagimp) ? "Randimp" : "Venimp";
 				game.unlocks.impCount.Venimp++;
+				if (noMessage) return;
 				var amt = Math.pow(1.003, game.unlocks.impCount.Venimp);
 				amt = (amt - 1) * 100;
 				message("The ground up " + name + " now increases your Trimps' breed speed by " + amt.toFixed(2) + "%!", "Loot", "glass", "exotic", "exotic");
@@ -9564,9 +9537,10 @@ var toReturn = {
 			health: 1,
 			fast: false,
 			dropDesc: "Stacking x1.003 to looted resources (not Helium)",
-			loot: function (level, fromMagimp) {
+			loot: function (level, fromMagimp, noMessage) {
 				var name = (fromMagimp) ? "Randimp" : "Magnimp";
 				game.unlocks.impCount.Magnimp++;
+				if (noMessage) return;
 				var amt = Math.pow(1.003, game.unlocks.impCount.Magnimp);
 				amt = (amt - 1) * 100;
 				message("You killed a " + name + "! The strong magnetic forces now increase your loot by " + amt.toFixed(2) + "%!", "Loot", "magnet", "exotic", "exotic");
@@ -10973,8 +10947,8 @@ var toReturn = {
 			title: "Magmamancers",
 			fire: function () {
 				if (challengeActive("Metal") || game.global.challengeActive == "Transmute"){
-					var challenge = game.challenges[game.global.challengeActive];
-					challenge.holdMagma = true;
+					var cname = challengeActive("Metal") ? "Metal" : "Transmute";
+					game.challenges[cname].holdMagma = true;
 					message("This book really doesn't help too much while you're dealing with the minerlessness of this dimension. Better let your scientists hold this one for you for a bit.", "Notices");
 					return;
 				}
@@ -11321,6 +11295,7 @@ var toReturn = {
 			specialFilter: function (){
 				return checkIfSpireWorld();
 			},
+			blockU2: true,
 			title: "Spire Metal",
 			icon: "*safe",
 			addClass: "spireMetals"

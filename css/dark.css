@@ -498,6 +498,10 @@
  color: #fff;
 }
 
+#heirloomNameInput{
+	color: white !important;
+}
+
 #achievementMainClose:hover,
 #heirloomsPopupBtns .icon-close:hover,
 .achievementBtnClose:hover {
