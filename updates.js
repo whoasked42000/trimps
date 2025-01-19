@@ -5163,71 +5163,73 @@ function setMax(amount, forPortal){
 }
 
 function numTab(what, p) {
-	var num = 0;
-	if (what == 6 && game.global.buyAmt == "Max") tooltip('Max', null, 'update', p);
-	if (what == 5){
+	let num = 0;
+	if (what === 6 && game.global.buyAmt === 'Max') tooltip('Max', null, 'update', p);
+	if (what === 5) {
 		unlockTooltip();
 		tooltip('hide');
-		var numBox = document.getElementById("customNumberBox");
-		if (numBox){
+
+		const numBox = document.getElementById('customNumberBox');
+		if (numBox) {
 			num = numBox.value;
 			game.global.lastCustomExact = num;
-			if (game.global.firstCustomExact == -1) game.global.firstCustomExact = num;
-			if (num.split('%')[1] == ""){
+			if (game.global.firstCustomExact === -1) game.global.firstCustomExact = num;
+			if (num.split('%')[1] === '') {
 				num = num.split('%');
 				num[0] = parseFloat(num[0]);
-				if (num[0] <= 100 && num[0] >= 0){
-					var workspaces = game.workspaces;
+				if (num[0] <= 100 && num[0] >= 0) {
+					const workspaces = game.workspaces;
 					num = Math.floor(workspaces * (num[0] / 100));
-				}
-				else num = 1;
-			}
-			else if (num.split('/')[1]){
+				} else num = 1;
+			} else if (num.split('/')[1]) {
 				num = num.split('/');
 				num[0] = parseFloat(num[0]);
 				num[1] = parseFloat(num[1]);
-				var workspaces = game.workspaces;
+				const workspaces = game.workspaces;
 				num = Math.floor(workspaces * (num[0] / num[1]));
 				if (num < 0 || num > workspaces) num = 1;
-			}
-			else {
+			} else {
 				num = convertNotationsToNumber(num);
 			}
+		} else {
+			num = game.global.lastCustomAmt;
 		}
-		else num = game.global.lastCustomAmt;
-		if (num == 0) num = 1;
+
+		if (num === 0) num = 1;
 		if (!isNumberBad(num)) {
-			var text = "+" + prettify(num);
-			document.getElementById("tab5Text").innerHTML = text;
-			document.getElementById("ptab5Text").innerHTML = text;
+			const elemText = `+${prettify(num)}`;
+			let elem = document.getElementById('tab5Text');
+			if (elem && elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
+			elem = document.getElementById('ptab5Text');
+			if (elem && elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
 			game.global.buyAmt = num;
 			game.global.lastCustomAmt = num;
-			if (game.global.firstCustomAmt == -1) game.global.firstCustomAmt = num;
-		}
-		else {
-			if (numBox.value == "pants" && game.global.sLevel >= 4) {
+			if (game.global.firstCustomAmt === -1) game.global.firstCustomAmt = num;
+		} else {
+			if (numBox && numBox.value === 'pants' && game.global.sLevel >= 4) {
 				//Dedicated to Sleeves, who would be upset if I never added a pants easter egg.
 				pantsMode = true;
-				message("Get a leg up with PANTS! Until your next trou... browser refresh, you can enable the useless but stylish PANTS ONLY AutoPrestige setting! Denim-ite!", "Notices");
+				message('Get a leg up with PANTS! Until your next trou... browser refresh, you can enable the useless but stylish PANTS ONLY AutoPrestige setting! Denim-ite!', 'Notices');
 				return;
 			}
-			message("Please use a number greater than 0!", "Notices");
+			message('Please use a number greater than 0!', 'Notices');
 			return;
 		}
 	}
+
 	if (typeof what === 'undefined') what = game.global.numTab;
-	else
-	game.global.numTab = what;
-	var tabType = (p) ? "ptab" : "tab";
-	var count = 6;
-	for (var x = 1; x <= count; x++){
-		var thisTab = document.getElementById(tabType + x);
-		if(what == x)
-			thisTab.className = thisTab.className.replace("tabNotSelected", "tabSelected");
-		else
-			thisTab.className = thisTab.className.replace("tabSelected", "tabNotSelected");
-		if (x == 5) continue;
-		switch (x){
+	else game.global.numTab = what;
+
+	const tabType = p ? 'ptab' : 'tab';
+	const count = 6;
+	for (let x = 1; x <= count; x++) {
+		const thisTab = document.getElementById(tabType + x);
+		if (what === x) thisTab.className = thisTab.className.replace('tabNotSelected', 'tabSelected');
+		else thisTab.className = thisTab.className.replace('tabSelected', 'tabNotSelected');
+		if (x === 5) continue;
+		switch (x) {
 			case 1:
 				num = 1;
 				break;
@@ -5243,14 +5245,17 @@ function numTab(what, p) {
 			case 6:
 				num = 'Max';
 		}
-		if (x == what) game.global.buyAmt = num;
+
+		if (x === what) game.global.buyAmt = num;
 	}
-	document.getElementById(tabType + "6Text").innerHTML = (what == 6 && game.global.maxSplit != 1) ? game.global.maxSplit : "Max";
+	const elem = document.getElementById(tabType + '6Text');
+	const elemText = what === 6 && game.global.maxSplit !== 1 ? game.global.maxSplit : 'Max';
+	if (elem && elem.innerHTML != elemText) elem.innerHTML = elemText;
+
 	if (p) {
 		displayPortalUpgrades(true);
 	}
 }
-
 function convertNotationsToNumber(num){
 	num = num.toLowerCase();
 	if (num.split('e')[1]){
