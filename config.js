@@ -5874,9 +5874,18 @@ var toReturn = {
 				return 5;
 			},
 			bonfireTooltip: function(){
-				if (this.bonfires == 0) return "You have no Bonfires. Your Trimps are sad and cold. Next Bonfire will be constructed at " + prettify(this.bonfirePrice()) + " Wood.";
-				var bonfireLength = this.getBonfireLength();
-				return "You have " + this.bonfires + " Bonfire" + needAnS(this.bonfires) + ". Your Trimps will automatically construct another Bonfire once you start a Zone with " + prettify(this.bonfirePrice()) + " total Wood. Your next bonfire will expire at the start of Zone " + (this.lastBurn + bonfireLength) + ".";
+				let text = '';
+
+				if (this.bonfires === 0) {
+					text = 'You have no active Bonfires. Your Trimps are sad and cold. Next Bonfire will be constructed at ' + prettify(this.bonfirePrice()) + ' Wood.';
+				} else {
+					const bonfireLength = this.getBonfireLength();
+					text = 'You have ' + this.bonfires + ' active Bonfire' + needAnS(this.bonfires) + '. Your Trimps will automatically construct another Bonfire once you start a Zone with ' + prettify(this.bonfirePrice()) + ' total Wood. Your next Bonfire will expire at the start of Zone ' + (this.lastBurn + bonfireLength) + '.';
+				}
+				
+				text += `<br><br>You have constructed ${this.totalBonfires} Bonfire${needAnS(this.totalBonfires)} so far this run.`;
+				
+				return text;
 			},
 			emberTooltip: function(){
 				return "You have " + this.embers + " Ember" + needAnS(this.embers) + ", increasing your Radon gain by " + prettify((this.getRadonMult() - 1) * 100) + "% and Enemy stats by " + prettify((this.getEnemyMult() - 1) * 100) + "%. All wood gathered and looted from the World is reduced by " + prettifyTiny(this.getWoodMult(true)) + ", wood from Maps is reduced by the same amount but only when a Bonfire is burning.";
