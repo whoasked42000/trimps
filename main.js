@@ -6241,8 +6241,7 @@ function getRandomMapValue(what) { //sliders only. what can be loot, size or dif
 	}
 	min *= 100;
 	max *= 100;
-	var x;
-	var x = Math.floor(Math.random() * (max + 1 - min)) + min;
+	var x = randomIntInclusive(min, max);
 	return (x / 100).toFixed(3)
 }
 
@@ -11671,320 +11670,257 @@ function getBaseBlock(){
 	var baseBlock = Math.floor((game.global.block * (game.jobs.Trainer.owned * (calcHeirloomBonus("Shield", "trainerEfficiency", game.jobs.Trainer.modifier) / 100)) + game.global.block));
 	baseBlock = calcHeirloomBonus("Shield", "trimpBlock", baseBlock);
 	if (game.global.formation !== 0 && game.global.formation !== 5){
-		baseBlock *= (game.global.formation == 3) ? 4 : 0.5;
+		baseBlock *= (game.global.formation === 3) ? 4 : 0.5;
 	}
 	return baseBlock;
 }
 
-function calculateDamage(number, buildString, isTrimp, noCheckAchieve, cell, noFluctuation) { //number = base attack
-    var fluctuation = .2; //%fluctuation
-	var maxFluct = -1;
-	var minFluct = -1;
-	if (getPerkLevel("Equality")) number *= game.portal.Equality.getMult(isTrimp);
-	if (isTrimp){
-		//Situational Trimp damage increases
-		if (!game.portal.Observation.radLocked && game.global.universe == 2 && game.portal.Observation.trinkets > 0) {
-			number *= game.portal.Observation.getMult();
+function applyMultipliers(multipliers, stat, challenge, postChallengeCheck) {
+	Object.keys(multipliers).forEach((key) => {
+		const mult = multipliers[key]();
+		if (challenge && postChallengeCheck && key === 'Nurture' && game.challenges.Nurture.boostsActive()) stat *= mult;
+		else if (challenge) stat *= challengeActive(key) ? mult : 1;
+		else stat *= mult;
+	});
+
+	return stat;
+}
+
+function applyDailyMultipliers(modifier, value = 1) {
+	const dailyChallenge = game.global.dailyChallenge;
+	if (typeof dailyChallenge[modifier] === 'undefined') return value;
+	return dailyModifiers[modifier].getMult(dailyChallenge[modifier].strength, dailyChallenge[modifier].stacks);
+}
+
+function randomIntInclusive(min, max) {
+	// Return a random integer between min and max (inclusive on both ends).
+	return Math.floor(Math.random() * (max + 1 - min)) + min;
+}
+
+function calculateDamage(baseAttack = 1, buildString, isTrimp, noCheckAchieve, cell, noFluctuation) {
+	let fluctuation = 0.2; // % fluctuation
+	let maxFluct = -1;
+	let minFluct = -1;
+	if (getPerkLevel('Equality')) baseAttack *= game.portal.Equality.getMult(isTrimp);
+
+	if (isTrimp) { // Situational Trimp damage increases.
+		const fluctChallenge = challengeActive('Discipline') || challengeActive('Unlucky');
+		if (fluctChallenge) fluctuation = 0.995;
+		if (!fluctChallenge && getPerkLevel('Range') > 0) minFluct = fluctuation - 0.02 * getPerkLevel('Range');
+		const heirloomAttack = calcHeirloomBonus('Shield', 'trimpAttack', 1, false);
+
+		const multipliers = {
+			achievementBonus: () => 1 + game.global.achievementBonus / 100,
+			goldenBattle: () => 1 + game.goldenUpgrades.Battle.currentBonus,
+			heirloom: () => heirloomAttack,
+			challengeSquared: () => 1 + game.global.totalSquaredReward / 100,
+			titimp: () => (game.global.mapsActive && game.global.titimpLeft > 0 ? 2 : 1),
+			roboTrimp: () => 1 + 0.2 * game.global.roboTrimpLevel,
+			mapBonus: () => (game.global.mapsActive ? 1 : game.talents.mapBattery.purchased && game.global.mapBonus === 10 ? 5 : 1 + game.global.mapBonus * 0.2),
+			herbalist: () => (game.talents.herbalist.purchased ? game.talents.herbalist.getBonus() : 1),
+			bionic2: () => (game.global.mapsActive && game.talents.bionic2.purchased && getCurrentMapObject().level > game.global.world ? 1.5 : 1),
+			voidPower: () => (game.talents.voidPower.purchased && game.global.voidBuff ? 1 + game.talents.voidPower.getTotalVP() / 100 : 1),
+			voidMastery: () => (game.talents.voidMastery.purchased && game.global.voidBuff ? 5 : 1),
+			fluffy: () => (Fluffy.isActive() ? Fluffy.getDamageModifier() : 1),
+			mayhem: () => game.challenges.Mayhem.getTrimpMult(),
+			pandemonium: () => game.challenges.Pandemonium.getTrimpMult(),
+			desolation: () => game.challenges.Desolation.getTrimpMult(),
+			sugarRush: () => (game.global.sugarRush ? sugarRush.getAttackStrength() : 1),
+			strengthTowers: () => 1 + playerSpireTraps.Strength.getWorldBonus() / 100,
+			sharpTrimps: () => (game.singleRunBonuses.sharpTrimps.owned ? 1.5 : 1)
+		};
+
+		baseAttack = applyMultipliers(multipliers, baseAttack);
+
+		if (game.global.universe === 1) {
+			const worldCell = getCurrentWorldCell();
+			const scryerBonusActive = ['Corruption', 'Healthy'].includes(worldCell.mutation) && game.talents.scry.purchased && !game.global.mapsActive && isScryerBonusActive();
+
+			const multipliers = {
+				anticipation: () => (game.global.antiStacks > 0 ? game.global.antiStacks * getPerkLevel('Anticipation') * game.portal.Anticipation.modifier + 1 : 1),
+				stillRowing: () => (game.talents.stillRowing2.purchased ? game.global.spireRows * 0.06 + 1 : 1),
+				magmamancer: () => (game.talents.magmamancer.purchased ? game.jobs.Magmamancer.getBonusPercent() : 1),
+				kerfluffle: () => (Fluffy.isActive() && game.talents.kerfluffle.purchased ? game.talents.kerfluffle.mult() : 1),
+				strengthInHealth: () => (game.talents.healthStrength.purchased && mutations.Healthy.active() ? 0.15 * mutations.Healthy.cellCount() + 1 : 1),
+				voidSipon: () => (game.stats.totalVoidMaps.value && Fluffy.isRewardActive('voidSiphon') ? 1 + game.stats.totalVoidMaps.value * 0.05 : 1),
+				amalgamator: () => game.jobs.Amalgamator.getDamageMult(),
+				poisionEmpowerment: () => (getUberEmpowerment() === 'Poison' ? 3 : 1),
+				frigid: () => game.challenges.Frigid.getTrimpMult(),
+				scryerBonus: () => (scryerBonusActive ? 2 : 1),
+				iceEmpowerment: () => (getEmpowerment() === 'Ice' ? 1 + game.empowerments.Ice.getDamageModifier() : 1)
+			};
+
+			baseAttack = applyMultipliers(multipliers, baseAttack);
+
+			const challengeMultipliers = {
+				Decay: () => 5 * Math.pow(0.995, game.challenges.Decay.stacks),
+				Electricity: () => 1 - game.challenges.Electricity.stacks * 0.1,
+				Life: () => game.challenges.Life.getHealthMult(),
+				Lead: () => (game.global.world % 2 === 1 ? 1.5 : 1)
+			};
+
+			baseAttack = applyMultipliers(challengeMultipliers, baseAttack, true);
+
+			if (game.global.antiStacks > 0) updateAntiStacks();
 		}
-		if (game.global.universe == 2 && game.buildings.Smithy.owned > 0){
-			number *= game.buildings.Smithy.getMult();
+
+		if (game.global.universe === 2) {
+			const multipliers = {
+				smithy: () => game.buildings.Smithy.getMult(),
+				hunger: () => game.portal.Hunger.getMult(),
+				tenacity: () => game.portal.Tenacity.getMult(),
+				spireStats: () => autoBattle.bonuses.Stats.getMult(),
+				championism: () => game.portal.Championism.getMult(),
+				frenzy: () => (game.portal.Frenzy.frenzyActive() ? 1 + 0.5 * getPerkLevel('Frenzy') : 1),
+				observation: () => game.portal.Observation.getMult(),
+				mutatorAttack: () => (u2Mutations.tree.Attack.purchased ? 1.5 : 1),
+				geneAttack: () => (u2Mutations.tree.GeneAttack.purchased ? 10 : 1),
+				brainsToBrawn: () => (u2Mutations.tree.Brains.purchased ? u2Mutations.tree.Brains.getBonus() : 1),
+				novaStacks: () => (!game.global.mapsActive && game.global.novaMutStacks > 0 ? u2Mutations.types.Nova.trimpAttackMult() : 1),
+				spireDaily: () => (challengeActive('Daily') && Fluffy.isRewardActive('SADailies') ? Fluffy.rewardConfig.SADailies.attackMod() : 1),
+				spireStats: () => (game.global.u2SpireCellsBest > 0 ? u2SpireBonuses.basics() : 1),
+				spireAttack: () => (!game.global.mapsActive && game.global.spireActive && game.global.spireMutStacks > 0 ? u2Mutations.types.Spire1.trimpAttackMult() : 1)
+			};
+
+			baseAttack = applyMultipliers(multipliers, baseAttack);
+
+			const challengeMultipliers = {
+				Unbalance: () => game.challenges.Unbalance.getAttackMult(),
+				Duel: () => (game.challenges.Duel.trimpStacks > 50 ? 3 : 1),
+				Melt: () => 5 * Math.pow(0.99, game.challenges.Melt.stacks),
+				Quagmire: () => game.challenges.Quagmire.getExhaustMult(),
+				Revenge: () => game.challenges.Revenge.getMult(),
+				Quest: () => game.challenges.Quest.getAttackMult(),
+				Archaeology: () => game.challenges.Archaeology.getStatMult('attack'),
+				Storm: () => (game.global.mapsActive ? game.challenges.Storm.getMapMult() : 1),
+				Berserk: () => game.challenges.Berserk.getAttackMult(),
+				Nurture: () => game.challenges.Nurture.getStatBoost(),
+				Alchemy: () => alchObj.getPotionEffect('Potion of Strength'),
+				Desolation: () => game.challenges.Desolation.trimpAttackMult(),
+				Smithless: () => game.challenges.Smithless.getTrimpMult()
+			};
+			baseAttack = applyMultipliers(challengeMultipliers, baseAttack, true);
 		}
-		if (game.global.challengeActive == "Unbalance"){
-			number *= game.challenges.Unbalance.getAttackMult();
-		}
-		if (game.jobs.Amalgamator.owned > 0){
-			number *= game.jobs.Amalgamator.getDamageMult();
-		}
-		if (game.challenges.Electricity.stacks > 0) { //Electricity
-			number *= (1 - (game.challenges.Electricity.stacks * 0.1));
-		}
-		if (game.global.antiStacks > 0) {
-			number *= ((game.global.antiStacks * getPerkLevel("Anticipation") * game.portal.Anticipation.modifier) + 1);
-			updateAntiStacks();
-		}
-		if (!game.global.mapsActive && game.global.mapBonus > 0){
-			var mapBonus = game.global.mapBonus;
-			if (game.talents.mapBattery.purchased && mapBonus == 10) mapBonus *= 2;
-			number *= ((mapBonus * .2) + 1);
-		}
-		if (game.global.titimpLeft >= 1 && game.global.mapsActive){
-			number *= 2;
-		}
-		if (game.global.achievementBonus > 0){
-			number *= (1 + (game.global.achievementBonus / 100));
-		}
-		if (challengeActive("Discipline") || game.global.challengeActive == "Unlucky"){
-			fluctuation = .995;
-		}
-		else if (getPerkLevel("Range") > 0){
-			minFluct = fluctuation - (.02 * getPerkLevel("Range"));
-		}
-		if (game.global.challengeActive == "Decay" || game.global.challengeActive == "Melt"){
-			var challenge = game.challenges[game.global.challengeActive];
-			number *= 5;
-			number *= Math.pow(challenge.decayValue, challenge.stacks);
-		}
-		if (game.global.roboTrimpLevel > 0){
-			number *= ((0.2 * game.global.roboTrimpLevel) + 1);
-		}
-		if (challengeActive("Lead") && ((game.global.world % 2) == 1)){
-			number *= 1.5;
-		}
-		if (game.goldenUpgrades.Battle.currentBonus > 0){
-			number *= game.goldenUpgrades.Battle.currentBonus + 1;
-		}
-		if (game.talents.voidPower.purchased && game.global.voidBuff){
-			number *= ((game.talents.voidPower.getTotalVP() / 100) + 1);
-		}
-		if (game.global.totalSquaredReward > 0){
-			number *= ((game.global.totalSquaredReward / 100) + 1)
-		}
-		if (getEmpowerment() == "Ice"){
-			number *= 1 + game.empowerments.Ice.getDamageModifier();
-		}
-		if (game.talents.magmamancer.purchased){
-			number *= game.jobs.Magmamancer.getBonusPercent();
-		}
-		if (game.talents.stillRowing2.purchased){
-			number *= ((game.global.spireRows * 0.06) + 1);
-		}
-		if (game.talents.healthStrength.purchased && mutations.Healthy.active()){
-			number *= ((0.15 * mutations.Healthy.cellCount()) + 1);
-		}
-		if (game.global.voidBuff && game.talents.voidMastery.purchased){
-			number *= 5;
-		}
-		if (game.talents.scry.purchased && !game.global.mapsActive && isScryerBonusActive()){
-			var worldCell = getCurrentWorldCell();
-			if (worldCell.mutation == "Corruption" || worldCell.mutation == "Healthy"){
-				number *= 2;
-			}
-		}
-		if (game.talents.daily.purchased && game.global.challengeActive == "Daily"){
-			number *= 1.5;
-		}
-		if (game.global.sugarRush > 0){
-			number *= sugarRush.getAttackStrength();
-		}
-		if (game.global.challengeActive == "Life") {
-			number *= game.challenges.Life.getHealthMult();
-		}
-		if (game.singleRunBonuses.sharpTrimps.owned){
-			number *= 1.5;
-		}
-		if (game.global.mapsActive && game.talents.bionic2.purchased && getCurrentMapObject().level > game.global.world){
-			number *= 1.5;
-		}
-		if (playerSpireTraps.Strength.owned){
-			var strBonus = playerSpireTraps.Strength.getWorldBonus();
-			number *= (1 + (strBonus / 100));
-		}
-		if (getUberEmpowerment() == "Poison"){
-			number *= 3;
-		}
-		if (Fluffy.isRewardActive('voidSiphon') && game.stats.totalVoidMaps.value){
-			number *= (1 + (game.stats.totalVoidMaps.value * 0.05));
-		}
-		if (getPerkLevel("Tenacity")){
-			number *= game.portal.Tenacity.getMult();
-		}
-		if (getPerkLevel("Hunger")){
-			number *= game.portal.Hunger.getMult();
-		}
-		if (game.portal.Frenzy.frenzyActive()){
-			number *= game.portal.Frenzy.getAttackMult();
-		}
-		if (getPerkLevel("Championism")) number *= game.portal.Championism.getMult();
-		if (game.talents.herbalist.purchased){
-			number *= game.talents.herbalist.getBonus();
-		}
-		if (game.global.mayhemCompletions){
-			number *= game.challenges.Mayhem.getTrimpMult();
-		}
-		if (autoBattle.bonuses.Stats.level > 0 && game.global.universe == 2) number *= autoBattle.bonuses.Stats.getMult();
-		if (game.global.challengeActive == "Alchemy") number *= alchObj.getPotionEffect("Potion of Strength");
-		
-		if (game.global.pandCompletions){
-			number *= game.challenges.Pandemonium.getTrimpMult();
-		}
-		if (game.global.desoCompletions){
-			number *= game.challenges.Desolation.getTrimpMult();
-		}
-		if (game.global.frigidCompletions > 0 && game.global.universe == 1){
-			number *= game.challenges.Frigid.getTrimpMult();
-		}
-		if (game.global.universe == 2 && game.global.novaMutStacks > 0 && !game.global.mapsActive){
-			number *= u2Mutations.types.Nova.trimpAttackMult();
-		}
-		if (game.global.universe == 2 && game.global.spireActive && game.global.spireMutStacks > 0 && !game.global.mapsActive){
-			number *= u2Mutations.types.Spire1.trimpAttackMult();
-		}
-		number *= u2SpireBonuses.basics();
-		if (game.global.universe == 2 && u2Mutations.tree.Attack.purchased){
-			number *= 1.5;
-		}
-		if (game.global.universe == 2 && u2Mutations.tree.GeneAttack.purchased){
-			number *= 10;
-		}
-		if (game.global.universe == 2 && u2Mutations.tree.Brains.purchased){
-			number *= u2Mutations.tree.Brains.getBonus();
-		}
-		if (game.global.challengeActive == "Daily"){
-			if (typeof game.global.dailyChallenge.minDamage !== 'undefined'){
-				if (minFluct == -1) minFluct = fluctuation;
+
+		if (challengeActive('Daily')) {
+			if (game.talents.daily.purchased) baseAttack *= 1.5;
+
+			if (typeof game.global.dailyChallenge.minDamage !== 'undefined') {
+				if (minFluct === -1) minFluct = fluctuation;
 				minFluct += dailyModifiers.minDamage.getMult(game.global.dailyChallenge.minDamage.strength);
 			}
-			if (typeof game.global.dailyChallenge.maxDamage !== 'undefined'){
-				if (maxFluct == -1) maxFluct = fluctuation;
+
+			if (typeof game.global.dailyChallenge.maxDamage !== 'undefined') {
+				if (maxFluct === -1) maxFluct = fluctuation;
 				maxFluct += dailyModifiers.maxDamage.getMult(game.global.dailyChallenge.maxDamage.strength);
 			}
-			if (typeof game.global.dailyChallenge.weakness !== 'undefined'){
-				number *= dailyModifiers.weakness.getMult(game.global.dailyChallenge.weakness.strength, game.global.dailyChallenge.weakness.stacks);
-			}
-			if (typeof game.global.dailyChallenge.oddTrimpNerf !== 'undefined' && ((game.global.world % 2) == 1)){
-					number *= dailyModifiers.oddTrimpNerf.getMult(game.global.dailyChallenge.oddTrimpNerf.strength);
-			}
-			if (typeof game.global.dailyChallenge.evenTrimpBuff !== 'undefined' && ((game.global.world % 2) == 0)){
-					number *= dailyModifiers.evenTrimpBuff.getMult(game.global.dailyChallenge.evenTrimpBuff.strength);
-			}
-			if (typeof game.global.dailyChallenge.rampage !== 'undefined'){
-				number *= dailyModifiers.rampage.getMult(game.global.dailyChallenge.rampage.strength, game.global.dailyChallenge.rampage.stacks);
-			}
-			if (Fluffy.isRewardActive("SADailies")) number *= Fluffy.rewardConfig.SADailies.attackMod();
+
+			baseAttack *= applyDailyMultipliers('weakness', 1);
+			baseAttack *= applyDailyMultipliers('rampage', 1);
+			if (game.global.world % 2 === 1) baseAttack *= applyDailyMultipliers('oddTrimpNerf', 1);
+			if (game.global.world % 2 === 0) baseAttack *= applyDailyMultipliers('evenTrimpBuff', 1);
 		}
-		if (game.global.challengeActive == "Revenge") number *= game.challenges.Revenge.getMult();
-		if (game.global.challengeActive == "Duel" && game.challenges.Duel.trimpStacks > 50) number *= 3;
-		if (game.global.challengeActive == "Quest") number *= game.challenges.Quest.getAttackMult();
-		if (game.global.challengeActive == "Quagmire") number *= game.challenges.Quagmire.getExhaustMult();
-		if (game.global.challengeActive == "Archaeology") number *= game.challenges.Archaeology.getStatMult("attack");
-		if (game.global.challengeActive == "Storm" && game.global.mapsActive) number *= game.challenges.Storm.getMapMult();
-		if (game.global.challengeActive == "Berserk") number *= game.challenges.Berserk.getAttackMult();
-		if (game.global.challengeActive == "Smithless" && game.challenges.Smithless.fakeSmithies > 0) number *= game.challenges.Smithless.getTrimpMult();
-		if (game.global.challengeActive == "Desolation") number *= game.challenges.Desolation.trimpAttackMult();
-		if (game.challenges.Nurture.boostsActive()) number *= game.challenges.Nurture.getStatBoost();
-		number = calcHeirloomBonus("Shield", "trimpAttack", number);
-		if (Fluffy.isActive()){
-			number *= Fluffy.getDamageModifier();
-			if (game.talents.kerfluffle.purchased) number *= game.talents.kerfluffle.mult();
+	} else { // Situational Bad Guy damage increases.
+		if (game.global.universe === 1) {
+			const challengeMultipliers = {
+				Meditate: () => 1.5,
+				Coordinate: () => getBadCoordLevel(),
+				Nom: () => (typeof cell.nomStacks !== 'undefined' ? Math.pow(1.25, cell.nomStacks) : 1),
+				Watch: () => 1.25,
+				Lead: () => 1 + Math.min(game.challenges.Lead.stacks, 200) * 0.04,
+				Corrupted: () => 3,
+				Scientist: () => (getScientistLevel() === 5 ? 10 : 1)
+			};
+			baseAttack = applyMultipliers(challengeMultipliers, baseAttack, true, false);
+			if (game.global.usingShriek) baseAttack *= game.mapUnlocks.roboTrimp.getShriekValue();
 		}
 
+		if (game.global.universe === 2) {
+			fluctuation = 0.5;
+			const challengeMultipliers = {
+				Duel: () => (game.challenges.Duel.enemyStacks > 50 ? 3 : 1),
+				Wither: () => game.challenges.Wither.getEnemyAttackMult(),
+				Archaeology: () => game.challenges.Archaeology.getStatMult('enemyAttack'),
+				Mayhem: () => (!game.global.mapsActive && cell && cell.level === 100 ? game.challenges.Mayhem.getBossMult() : 1),
+				Nurture: () => 2 * game.buildings.Laboratory.getEnemyMult(),
+				Pandemonium: () => (!game.global.mapsActive && cell && cell.level === 100 ? game.challenges.Pandemonium.getBossMult() : game.challenges.Pandemonium.getPandMult()),
+				Glass: () => game.challenges.Glass.attackMult()
+			};
+			baseAttack = applyMultipliers(challengeMultipliers, baseAttack, true, false);
 
+			if (!game.global.mapsActive && game.global.novaMutStacks > 0) baseAttack *= u2Mutations.types.Nova.enemyAttackMult();
+			if (!game.global.mapsActive && game.global.spireActive && game.global.spireMutStacks > 0) baseAttack *= u2Mutations.types.Spire1.enemyAttackMult();
+			if (cell.u2Mutation && cell.u2Mutation.length && u2Mutations.types.Rage.hasRage(cell)) baseAttack *= u2Mutations.types.Rage.enemyAttackMult();
+		}
+
+		if (challengeActive('Daily')) {
+			baseAttack *= applyDailyMultipliers('bloodthirst', 1);
+			baseAttack *= applyDailyMultipliers('badStrength', 1);
+			if (game.global.mapsActive) baseAttack *= applyDailyMultipliers('badMapStrength', 1);
+			if (!game.global.mapsActive) baseAttack *= applyDailyMultipliers('empower', 1);
+		}
+
+		// Keep ice last for achievements.
+		if (getEmpowerment() === 'Ice') {
+			baseAttack *= game.empowerments.Ice.getCombatModifier();
+			if (baseAttack >= 0 && baseAttack < 1 && !game.global.mapsActive) giveSingleAchieve('Brr');
+		}
+
+		if (game.global.world >= getObsidianStart() && !game.global.mapsActive) baseAttack = Infinity;
 	}
-	else {
-		//Situational Bad Guy damage increases
-		if (game.global.universe == 2) fluctuation = 0.5;
-		if (game.global.universe == 2 && game.global.novaMutStacks > 0 && !game.global.mapsActive) number *= u2Mutations.types.Nova.enemyAttackMult();
-		if (game.global.universe == 2 && game.global.spireActive && game.global.spireMutStacks > 0 && !game.global.mapsActive) number *= u2Mutations.types.Spire1.enemyAttackMult();
-		if (game.global.universe == 2 && cell.u2Mutation && cell.u2Mutation.length && u2Mutations.types.Rage.hasRage(cell)) number *= u2Mutations.types.Rage.enemyAttackMult();
-		if (game.global.challengeActive){
-			//Challenge bonuses here
-			if (game.global.challengeActive == "Nurture"){
-				number *= 2;
-				number *= game.buildings.Laboratory.getEnemyMult();
-			}
-			else if (game.global.challengeActive == "Coordinate"){
-				number *= getBadCoordLevel();
-			}
-			else if (challengeActive("Meditate")){
-				number *= 1.5;
-			}
-			else if (challengeActive("Nom") && typeof cell.nomStacks !== 'undefined'){
-				number *= Math.pow(1.25, cell.nomStacks);
-			}
-			else if (challengeActive("Watch")) {
-				number *= 1.25;
-			}
-			else if (challengeActive("Lead")){
-				number *= (1 + (Math.min(game.challenges.Lead.stacks, 200) * 0.04));
-			}
-			else if (game.global.challengeActive == "Scientist" && getScientistLevel() == 5) {
-				number *= 10;
-			}
-			else if (game.global.challengeActive == "Corrupted"){
-				number *= 3;
-			}
-			if (game.global.challengeActive == "Daily"){
-				if (typeof game.global.dailyChallenge.badStrength !== 'undefined'){
-					number *= dailyModifiers.badStrength.getMult(game.global.dailyChallenge.badStrength.strength);
-				}
-				if (typeof game.global.dailyChallenge.badMapStrength !== 'undefined' && game.global.mapsActive){
-					number *= dailyModifiers.badMapStrength.getMult(game.global.dailyChallenge.badMapStrength.strength);
-				}
-				if (typeof game.global.dailyChallenge.bloodthirst !== 'undefined'){
-					number *= dailyModifiers.bloodthirst.getMult(game.global.dailyChallenge.bloodthirst.strength, game.global.dailyChallenge.bloodthirst.stacks)
-				}
-				if (typeof game.global.dailyChallenge.empower !== 'undefined' && !game.global.mapsActive){
-					number *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
-				}
-			}
-			if (game.global.challengeActive == "Duel" && game.challenges.Duel.enemyStacks > 50) number *= 3;
-			if (game.global.challengeActive == "Wither") number *= game.challenges.Wither.getEnemyAttackMult();
-			if (game.global.challengeActive == "Archaeology") number *= game.challenges.Archaeology.getStatMult("enemyAttack");
-			if (game.global.challengeActive == "Mayhem" && !game.global.mapsActive && cell && cell.level == 100) number *= game.challenges.Mayhem.getBossMult();
-			if (game.global.challengeActive == "Glass") number *= game.challenges.Glass.attackMult();
-			if (game.global.challengeActive == "Pandemonium"){
-				if (!game.global.mapsActive && cell && cell.level == 100) number *= game.challenges.Pandemonium.getBossMult();
-				else number *= game.challenges.Pandemonium.getPandMult();
-			}
-		}
-		if (game.global.usingShriek) {
-			number *= game.mapUnlocks.roboTrimp.getShriekValue();
-		}
-		//Keep ice last for achievements
-		if (getEmpowerment() == "Ice"){
-			number *= game.empowerments.Ice.getCombatModifier();
-			if (number >= 0 && number < 1 && !game.global.mapsActive) giveSingleAchieve("Brr");
-		}
-		if (game.global.world >= getObsidianStart() && !game.global.mapsActive) number = Infinity;
-	}
+
 	if (minFluct > 1) minFluct = 1;
-	if (maxFluct == -1) maxFluct = fluctuation;
-	if (minFluct == -1) minFluct = fluctuation;
-	var min = Math.floor(number * (1 - minFluct));
+	else if (minFluct < 0) minFluct = fluctuation;
+	if (maxFluct < 0) maxFluct = fluctuation;
+
+	const min = Math.floor(baseAttack * (1 - minFluct));
 	if (noFluctuation) return min;
-	var max = Math.ceil(number + (number * maxFluct));
-	var runningUnlucky = game.global.challengeActive == "Unlucky";
-	var actuallyLucky = false;
-    if (buildString || runningUnlucky) {
-		var critMin = min;
-		var critMax = max;
+
+	const max = Math.ceil(baseAttack + baseAttack * maxFluct);
+	const runningUnlucky = challengeActive('Unlucky');
+	let actuallyLucky = false;
+
+	if (buildString || runningUnlucky) {
+		let critMin = min;
+		let critMax = max;
 		if (isTrimp) {
 			if (noCheckAchieve) return max;
-			var critChance = getPlayerCritChance();
-			if (critChance >= 1){
-				var critDamage = getPlayerCritDamageMult();
-				number *= critDamage;
-				if (Math.floor(critChance) >= 2) number *= getMegaCritDamageMult(Math.floor(critChance));
-				critMin = Math.floor(number * (1 - minFluct));
-				critMax = Math.ceil(number + (number * maxFluct));
+			const critChance = getPlayerCritChance();
+
+			if (critChance >= 1) {
+				const critDamage = getPlayerCritDamageMult();
+				baseAttack *= critDamage;
+				if (Math.floor(critChance) >= 2) baseAttack *= getMegaCritDamageMult(Math.floor(critChance));
+				critMin = Math.floor(baseAttack * (1 - minFluct));
+				critMax = Math.ceil(baseAttack + baseAttack * maxFluct);
 			}
-			if (!buildString && isTrimp) {//Aka running unlucky but not building a string
-				if (Number(critMin.toString()[0]) % 2 == 0) actuallyLucky = true;
+
+			if (!buildString && isTrimp) { // Running unlucky, but not building a string.
+				if (Number(critMin.toString()[0]) % 2 === 0) actuallyLucky = true;
 				game.challenges.Unlucky.lastHitLucky = actuallyLucky;
-			}
-			else{
-				checkAchieve("damage", critMax);
+			} else {
+				checkAchieve('damage', critMax);
 			}
 		}
-		if (buildString){ //Aka maybe running Unlucky but probably not but just building a string anyways
-			return prettify(critMin) + "-" + prettify(critMax);
+
+		if (buildString) { // Maybe running Unlucky, building a string anyways.
+			return prettify(critMin) + '-' + prettify(critMax);
 		}
-	}
-	function rollMax(){
-		return Math.floor(Math.random() * ((max + 1) - min)) + min;
-	}
-	if (runningUnlucky && isTrimp){
-		var worst = rollMax();
-		var best = worst;
-		for (var x = 0; x < 4; x++){
-			var roll = rollMax();
+	}2
+
+	if (runningUnlucky && isTrimp) {
+		let worst = randomIntInclusive(min, max);
+		let best = worst;
+		for (let x = 0; x < 4; x++) {
+			const roll = randomIntInclusive(min, max);
 			if (roll < worst) worst = roll;
 			if (roll > best) best = roll;
 		}
 		if (actuallyLucky) return best;
 		return worst;
 	}
-    return rollMax();
+
+	return randomIntInclusive(min, max);
 }
 
 function updateForemenCount(){
