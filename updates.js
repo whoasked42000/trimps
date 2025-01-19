@@ -7222,19 +7222,21 @@ if (elem == null) {
   elem.className = className;
 }
 
-function goRadial(elem, currentSeconds, totalSeconds, frameTime){
-		if (!elem) return;
-        if (currentSeconds <= 0) currentSeconds = 0;
-        elem.style.transition = "";
-        elem.style.transform = "rotate(" + timeToDegrees(currentSeconds, totalSeconds) + "deg)";
-        setTimeout(
-            (function(ft, cs, ts) {
-                return function() {
-                    elem.style.transform = "rotate(" + timeToDegrees(cs + ft / 1000, ts) + "deg)";
-                    elem.style.transition = cs < 0.1 ? "" : "transform " + ft + "ms linear";
-                }
-            })(frameTime, currentSeconds, totalSeconds).bind(this)
-        , 0);
+function goRadial(elem, currentSeconds, totalSeconds, frameTime) {
+	if (!elem || usingRealTimeOffline) return;
+	if (currentSeconds <= 0) currentSeconds = 0;
+
+	elem.style.transition = '';
+	elem.style.transform = 'rotate(' + timeToDegrees(currentSeconds, totalSeconds) + 'deg)';
+	setTimeout(
+		(function (ft, cs, ts) {
+			return function () {
+				elem.style.transform = 'rotate(' + timeToDegrees(cs + ft / 1000, ts) + 'deg)';
+				elem.style.transition = cs < 0.1 ? '' : 'transform ' + ft + 'ms linear';
+			};
+		})(frameTime, currentSeconds, totalSeconds).bind(this),
+		0
+	);
 }
 
 function isObjectEmpty(obj){
