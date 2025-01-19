@@ -2679,17 +2679,26 @@ var offlineProgress = {
 	},
 	updateFormations: function(force){
 		if (!game.upgrades.Formations.done && !force) {
-			this.formationsElem.style.display = 'none';
+			if (this.formationsElem.style.display !== 'none') {
+				this.formationsElem.style.display = 'none';
+			}
 			return;
 		}
-		var text = "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 0) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"0\")'>X</div>";
-		text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 1) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"1\")'>H</div>";
-		if (game.upgrades.Dominance.done) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 2) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"2\")'>D</div>";
-		if (game.upgrades.Barrier.done) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 3) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"3\")'>B</div>";
-		if (getHighestLevelCleared() >= 180) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 4) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"4\")'>S</div>";
-		if (game.global.uberNature == "Wind") text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 5) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"5\")'>W</div>";
-		this.formationsElem.innerHTML = text;
-		this.formationsElem.style.display = 'block';
+	
+		let text = `<div class='formationBtn offlineForm pointer ${game.global.formation === 0 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("0")'>X</div>`;
+		text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 1 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("1")'>H</div>`;
+		if (game.upgrades.Dominance.done) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 2 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("2")'>D</div>`;
+		if (game.upgrades.Barrier.done) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 3 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("3")'>B</div>`;
+		if (getHighestLevelCleared() >= 180) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 4 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("4")'>S</div>`;
+		if (game.global.uberNature === 'Wind') text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 5 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("5")'>W</div>`;
+	
+		if (this.formationsElem.innerHTML !== text) {
+			this.formationsElem.innerHTML = text;
+		}
+	
+		if (this.formationsElem.style.display !== 'block') {
+			this.formationsElem.style.display = 'block';
+		}
 	},
 	updateMapBtns: function(){
 		if (game.global.preMapsActive || game.global.mapsActive) {
