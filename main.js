@@ -9686,14 +9686,17 @@ function getAmountInRange(maxRange, toKeep, useU2Seed)
     return toShuffle.slice(0, toKeep);
 }
 
-function setMutationTooltip(which, mutation){
-	var elem = document.getElementById('corruptionBuff');
-	var effect = mutationEffects[which];
-	if (typeof effect === 'undefined') return;
-	if (typeof mutations[mutation].tooltip === 'undefined') return;
-	elem.innerHTML = '<span class="badge badBadge ' + mutation + '" onmouseover="tooltip(\'' + effect.title + '\', \'customText\', event, \'' + mutations[mutation].tooltip(which) + '\')" onmouseout="tooltip(\'hide\')"><span class="' + effect.icon + '"></span></span>&nbsp;';
-}
+function setMutationTooltip(which, mutation) {
+	if (usingRealTimeOffline) return;
 
+	const effect = mutationEffects[which];
+	if (typeof effect === 'undefined') return;
+	const elem = document.getElementById('corruptionBuff');
+	if (typeof mutations[mutation].tooltip === 'undefined') return;
+
+	const elemText = `<span class="badge badBadge ${mutation}" onmouseover="tooltip('${effect.title}', 'customText', event, '${mutations[mutation].tooltip(which)}')" onmouseout="tooltip('hide')"><span class="${effect.icon}"></span></span>&nbsp;`;
+	if (elem && elem.innerHTML !== elemText) elem.innerHTML = elemText;
+}
 function setVoidCorruptionIcon(regularMap) {
 	if (usingRealTimeOffline) return;
 
