@@ -9694,25 +9694,23 @@ function setMutationTooltip(which, mutation){
 	elem.innerHTML = '<span class="badge badBadge ' + mutation + '" onmouseover="tooltip(\'' + effect.title + '\', \'customText\', event, \'' + mutations[mutation].tooltip(which) + '\')" onmouseout="tooltip(\'hide\')"><span class="' + effect.icon + '"></span></span>&nbsp;';
 }
 
-function setVoidCorruptionIcon(regularMap){
-	var attackScale = "";
-	var healthScale = "";
-	if (regularMap || !mutations.Magma.active()){
-		attackScale = (mutations.Corruption.statScale(3) / 2);
-		healthScale = (mutations.Corruption.statScale(10) / 2);
+function setVoidCorruptionIcon(regularMap) {
+	if (usingRealTimeOffline) return;
+
+	const scaleDivider = regularMap || !mutations.Magma.active() ? 2 : 1;
+	const attackScale = mutations.Corruption.statScale(3) / scaleDivider;
+	const healthScale = mutations.Corruption.statScale(10) / scaleDivider;
+
+	const title = regularMap ? 'Map Corruption' : 'Void Corruption';
+	let text = `This ${regularMap ? 'map' : 'Void Map'} has become unstable due to Corruption. Enemy attack increased by ${prettify(attackScale)}X, and health increased by ${prettify(healthScale)}X.`;
+
+	if (!regularMap) {
+		text += ' Helium at the end of the map is now double what you would earn from a World Zone, including Corrupted cells!';
 	}
-	else {
-		attackScale = (mutations.Corruption.statScale(3));
-		healthScale = (mutations.Corruption.statScale(10));
-	}
-	var text = "This " + ((regularMap) ? "map" : "Void Map") + " has become unstable due to Corruption. Enemy attack increased by " + prettify(attackScale) + "X, and health increased by " + prettify(healthScale) + "X.";
-	var title = "";
-	if (!regularMap){
-		text += " Helium at the end of the map is now double what you would earn from a World Zone, including Corrupted cells!";
-		title = "Void Corruption";
-	}
-	else title = "Map Corruption";
-	document.getElementById('corruptionBuff').innerHTML = '<span class="badge badBadge voidBadge" onmouseover="tooltip(\'' + title + '\', \'customText\', event, \'' + text + '\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;';
+
+	const corruptionElem = document.getElementById('corruptionBuff');
+	const elemText = `<span class="badge badBadge voidBadge" onmouseover="tooltip('${title}', 'customText', event, '${text}')" onmouseout="tooltip('hide')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;`;
+	if (corruptionElem.innerHTML !== elemText) corruptionElem.innerHTML = elemText;
 }
 
 function getRandomBadGuy(mapSuffix, level, totalCells, world, imports, mutation, visualMutation, fastOnly) {
