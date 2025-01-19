@@ -2449,36 +2449,39 @@ function toggleEqualityScale(fromTip){
 	updateEqualityScaling(fromTip);
 }
 
-function manageEqualityStacks(){
-	if (game.global.universe != 2) return;
-	if (game.portal.Equality.radLocked) return;
+function manageEqualityStacks() {
+	if (game.global.universe !== 2 || game.portal.Equality.radLocked) return;
+	const equality = getPerkLevel('Equality');
+
 	if (game.portal.Equality.scalingCount < 0) game.portal.Equality.scalingCount = 0;
-	if (game.portal.Equality.scalingCount > game.portal.Equality.radLevel) game.portal.Equality.scalingCount = game.portal.Equality.radLevel;
-	var tabElem = document.getElementById('equalityTab');
-	var tabTextElem = document.getElementById('equalityA');
-	var activeStacks = game.portal.Equality.getActiveLevels();
-	var text = activeStacks + " stack" + needAnS(activeStacks) + " of Equality are active, multiplying the Attack of Trimps ";
-	var enemyMult = game.portal.Equality.getMult(false);
-	if (game.heirlooms.Shield.inequality.currentBonus > 0){
-		var trimpMult = game.portal.Equality.getMult(true);
-		
-		text += " by " + prettifyTiny(trimpMult) + " and Enemies by " + prettifyTiny(enemyMult);
-	}
-	else {
-		text += " and Enemies by " + prettifyTiny(enemyMult);
+	if (game.portal.Equality.scalingCount > equality) game.portal.Equality.scalingCount = equality;
+	const tabElem = document.getElementById('equalityTab');
+	const tabTextElem = document.getElementById('equalityA');
+	const activeStacks = game.portal.Equality.getActiveLevels();
+	let text = activeStacks + ' stack' + needAnS(activeStacks) + ' of Equality are active, multiplying the Attack of Trimps ';
+	let elemText = 'Equality (Scaling ';
+	const enemyMult = game.portal.Equality.getMult(false);
+	if (game.heirlooms.Shield.inequality.currentBonus > 0) {
+		const trimpMult = game.portal.Equality.getMult(true);
+		text += ' by ' + prettifyTiny(trimpMult) + ' and Enemies by ' + prettifyTiny(enemyMult);
+	} else {
+		text += ' and Enemies by ' + prettifyTiny(enemyMult);
 	}
 
-	if (game.global.universe == 2 && !game.portal.Equality.radLocked && game.portal.Equality.getSetting('scalingActive')){
+	if (game.portal.Equality.getSetting('scalingActive')) {
 		swapClass('equalityTabScaling', 'equalityTabScalingOn', tabElem);
-		tabTextElem.innerHTML = "Equality (Scaling On)";
-		text += ". Scaling is on.";
+		elemText += 'On)';
+		text += '. Scaling is on.';
+		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
+	} else {
+		swapClass('equalityTabScaling', 'equalityTabScalingOff', tabElem);
+		elemText += 'Off)';
+		text += '. Scaling is off.';
 		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
 	}
-	else{
-		text += ". Scaling is off.";
-		swapClass('equalityTabScaling', 'equalityTabScalingOff', tabElem);
-		tabTextElem.innerHTML = "Equality (Scaling Off)";
-		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
+
+	if (tabTextElem.innerHTML !== elemText) {
+		tabTextElem.innerHTML = elemText;
 	}
 }
 
