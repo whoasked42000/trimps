@@ -20418,14 +20418,14 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		natureTab: ['Empowerments of Nature', null],
 		tab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your resources with each purchase. Click twice to customize.'],
 
-		autoStructureBtn: ["AutoStructure", null],
+		autoStructureText: ["AutoStructure", null],
 		autoStorageBtn: ['AutoStorage', 'customText', 'Enabling this will cause your Trimps to automatically add a storage building to the queue if you reach max capacity. This will work on and offline if enabled.'],
-		autoJobsBtn: ["AutoJobs", null],
+		autoJobsText: ["AutoJobs", null],
 		fireBtn: ['Fire Trimps', null],
-		autoGoldenBtn: ['AutoGold', null],
+		autoGoldenText: ['AutoGold', null],
 		autoPrestigeBtn: ['AutoPrestige', null],
 		autoUpgradeBtn: ['AutoUpgrade', null],
-		autoEquipBtn: ["AutoEquip", null],
+		autoEquipText: ["AutoEquip", null],
 		talentRespecBtn: ["Respec Masteries", null],
 
 		formation0: ['No Formation', 'customText', 'Clear your formations, return to normal stats, and derp around the battlefield. (Hotkeys: X or 1)'],
