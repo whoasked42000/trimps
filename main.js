@@ -2874,42 +2874,63 @@ var offlineProgress = {
 		var cell = game.global.gridArray[game.global.lastClearedCell + 1];
 		if (cell && cell.health > cell.maxHealth) cell.health = cell.maxHealth;
 	},
-	updateBar: function(current){
-		var width = ((current / this.progressMax) * 100).toFixed(1) + "%";
+	updateBar: function(current) {
+		const width = ((current / this.progressMax) * 100).toFixed(1) + '%';
 		this.progressElem.style.width = width;
-		this.cellElem.innerHTML = "Cell " + (game.global.lastClearedCell + 2);
-		this.zoneElem.innerHTML = "Zone " + game.global.world;
-		this.progressTextElem.innerHTML = prettify(current) + " / " + prettify(this.progressMax) + " ticks (" + width + ")";
-		this.updateMapBtns();
-		if (game.global.mapsActive){
-			var map = getCurrentMapObject();
-			var mapDesc = "<span style='font-size: 0.8em'>Mapping in " + map.name + " (" + map.level + ")<br/>Cell " + (game.global.lastClearedMapCell + 2) + "<br/>" + this.countMapItems(map.level) + " items remain</span>";
-			if (this.countThisMap) mapDesc += "<br/><span style='font-size: 0.6em'>Looks like you still haven't cleared this map. If you want to leave and make an easier one, I won't count it against you!</span>"
-			this.inMapDescriptionElem.innerHTML = mapDesc;
+		let newCellHTML = `Cell ${game.global.lastClearedCell + 2}`;
+		let newZoneHTML = `Zone ${game.global.world}`;
+		let newProgressTextHTML = `${prettify(current)} / ${prettify(this.progressMax)} ticks (${width})`;
+	
+		if (this.cellElem.innerHTML !== newCellHTML) {
+			this.cellElem.innerHTML = newCellHTML;
 		}
-		else if (game.global.preMapsActive)
-			this.inMapDescriptionElem.innerHTML = "Sitting in the Map Chamber (lame)";
-		if (current == 0){
-			this.extraInfoElem.innerHTML = "Starting Offline Progress... (Updates every 2000 processed loops)";
+	
+		if (this.zoneElem.innerHTML !== newZoneHTML) {
+			this.zoneElem.innerHTML = newZoneHTML;
+		}
+	
+		if (this.progressTextElem.innerHTML !== newProgressTextHTML) {
+			this.progressTextElem.innerHTML = newProgressTextHTML;
+		}
+		this.updateMapBtns();
+		let newMapDesc = '';
+		if (game.global.mapsActive) {
+			const map = getCurrentMapObject();
+			newMapDesc = `<span style='font-size: 0.8em'>Mapping in ${map.name} (${map.level})<br/>Cell ${game.global.lastClearedMapCell + 2}<br/>${this.countMapItems(map.level)} items remain</span>`;
+			if (this.countThisMap) newMapDesc += "<br/><span style='font-size: 0.6em'>Looks like you still haven't cleared this map. If you want to leave and make an easier one, I won't count it against you!</span>";
+		} else if (game.global.preMapsActive) {
+			newMapDesc = 'Sitting in the Map Chamber (lame)';
+		}
+	
+		if (this.inMapDescriptionElem.innerHTML !== newMapDesc) {
+			this.inMapDescriptionElem.innerHTML = newMapDesc;
+		}
+	
+		if (current === 0) {
+			this.extraInfoElem.innerHTML = 'Starting Offline Progress... (Updates every 2000 processed loops)';
 			return;
 		}
-		var timeSpent = Math.floor((new Date().getTime() - this.startTime) / 1000);
-		if (timeSpent > this.nextFluffIn){
+		const timeSpent = Math.floor((new Date().getTime() - this.startTime) / 1000);
+		if (timeSpent > this.nextFluffIn) {
 			this.fluff();
 			this.nextFluffIn = timeSpent + 30;
 		}
-		var speed = (current / (timeSpent * 10));
-		var remaining = Math.floor(((this.progressMax - current) / speed) / 10);
-		var extraText = prettify(current / 10) + " seconds processed in " + prettify(timeSpent) + " seconds (" + this.loopTicks + "L/F, " + prettify(speed) + "x speed)<br/>Estimated completion in " + this.formatTimeClock(remaining);
-		extraText += "<br/>" + this.currentFluff;
-		this.extraInfoElem.innerHTML = extraText;
+		const speed = current / (timeSpent * 10);
+		const remaining = Math.floor((this.progressMax - current) / speed / 10);
+		let newExtraText = `${prettify(current / 10)} seconds processed in ${prettify(timeSpent)} seconds (${this.loopTicks}L/F, ${prettify(speed)}x speed)<br>Estimated completion in ${this.formatTimeClock(remaining)}<br>${this.currentFluff}`;
+	
+		if (this.extraInfoElem.innerHTML !== newExtraText) {
+			this.extraInfoElem.innerHTML = newExtraText;
+		}
+		let newEffectiveHTML = '';
 		if (this.ticksProcessed - this.lastEnemyKilled > 25000) {
-			this.effectiveElem.innerHTML = "Progress has slowed to a crawl!"
-			var cell = game.global.gridArray[game.global.lastClearedCell + 1];
+			newEffectiveHTML = 'Progress has slowed to a crawl!';
+			const cell = game.global.gridArray[game.global.lastClearedCell + 1];
 			if (cell && cell.health > cell.maxHealth) cell.health = cell.maxHealth;
 		}
-		else{
-			this.effectiveElem.innerHTML = "";
+	
+		if (this.effectiveElem.innerHTML !== newEffectiveHTML) {
+			this.effectiveElem.innerHTML = newEffectiveHTML;
 		}
 	},
 	leaveMap: function(){
