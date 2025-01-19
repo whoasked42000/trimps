@@ -183,6 +183,32 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		elem.style.top = "25%";
 		noExtraCheck = true;
 	}
+	if (what == "Mastery Info"){
+		tooltipText = "U" + game.global.universe + " Masteries and Helpful Info:<br/><br/>";
+		
+		var highTalent = (game.talents.blacksmith3.purchased) ? "blacksmith3" : (game.talents.blacksmith2.purchased) ? "blacksmith2" : (game.talents.blacksmith.purchased) ? "blacksmith" : "none";
+		if (highTalent == "none") tooltipText += "<b>Blacksmithery Not Purchased</b>";
+		else tooltipText += "<b>Blacksmithery</b><br/>" + game.talents[highTalent].description;
+		tooltipText += "<br/><br/>";
+		highTalent = (game.talents.hyperspeed2.purchased) ? "hyperspeed2" : (game.talents.hyperspeed.purchased) ? "hyperspeed" : "none";
+		if (highTalent == "none") tooltipText += "<b>Hyperspeed Not Purchased</b>";
+		else tooltipText += "<b>Hyperspeed</b><br/>" + game.talents[highTalent].description;
+		tooltipText += "<br/><br/>";
+		var liqCap = checkIfLiquidZone(true);
+		if (!liqCap) tooltipText += "<b>Liquification not owned in this Universe</b>";
+		else tooltipText += "<b>Liquification</b><br/>You can Liquify in this Universe through Z" + Math.floor((getHighestLevelCleared(false, true) + 1) * liqCap) + " (" + Math.floor(liqCap * 100) + "% of your highest Zone reached).";
+		tooltipText += "<br/><br/>";
+		if ((game.global.universe == 1 && game.portal.Overkill.level == 0) || (game.global.universe == 2 && !u2Mutations.tree.Overkill1.purchased)) tooltipText += "<b>Overkill not owned in this Universe</b>";
+		else {
+			var okCells = getOverkillerCount(true) + 1;
+			tooltipText += "<b>Overkill</b><br/>You can Overkill " + okCells + " cell" + needAnS(okCells) + " in this Universe";
+			if (game.global.universe == 2){
+				var zmult = canU2Overkill(true);
+				tooltipText += " through Z" + Math.floor((game.global.highestRadonLevelCleared + 1) * zmult) + " (" + Math.floor(zmult  * 100) + "% of your highest Zone reached).";
+			}
+			else tooltipText += ".";
+		}
+	}
 	if (what == "Fluffy"){
 		if (event == 'update'){
 			//clicked
@@ -200,6 +226,9 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 				costText += " Info</span>"
 			}
 			costText += "<span onclick='Fluffy.pat()' id='fluffyPatBtn' style='display: " + ((Fluffy.cruffysTipActive()) ? "none" : "inline-block") + "' class='btn btn-lg btn-warning'>Pat</span>";
+			if (game.global.universe == 2 && game.global.u2SpireCellsBest > 0){
+				costText += "<span onclick='scruffySpireStory()' class='btn btn-lg btn-info'>Ask About Stuffy's Spire</span>"
+			}
 			openTooltip = "Fluffy";
 			setTimeout(Fluffy.refreshTooltip, 1000);
 			ondisplay = function(){
@@ -806,6 +835,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			}
 			else style = " style='display: none' ";
 			var presetDropdown = "<option value='0'" + ((vals.preset == 0) ? " selected='selected'" : "") + ">" + getPresetDescription(1) + "</option><option value='1'" + ((vals.preset == 1) ? " selected='selected'" : "") + ">" + getPresetDescription(2) + "</option><option value='2'" + ((vals.preset == 2) ? " selected='selected'" : "") + ">" + getPresetDescription(3) + "</option><option value='6'" + ((vals.preset == 6) ? " selected='selected'" : "") + ">" + getPresetDescription(4) + "</option><option value='7'" + ((vals.preset == 7) ? " selected='selected'" : "") + ">" + getPresetDescription(5) + "</option><option value='3'" + ((vals.preset == 3) ? " selected='selected'" : "") + ">Run Bionic</option><option value='4'" + ((vals.preset == 4) ? " selected='selected'" : "") + ">Run Void</option>";
+			if (game.global.universe == 2 && game.global.highestRadonLevelCleared >= 32) presetDropdown += "<option value='10'" + ((vals.preset == 10) ? " selected='selected'" : "") + ">Atlantrimp</option>";
 			if (game.global.universe == 2 && game.global.highestRadonLevelCleared >= 49) presetDropdown += "<option value='8'" + ((vals.preset == 8) ? " selected='selected'" : "") + ">Melting Point</option>";
 			if (game.global.universe == 2 && game.global.highestRadonLevelCleared >= 69) presetDropdown += "<option value='5'" + ((vals.preset == 5) ? " selected='selected'" : "") + ">Black Bog</option>";
 			if (game.global.universe == 2 && game.global.highestRadonLevelCleared >= 174) presetDropdown += "<option value='9'" + ((vals.preset == 9) ? " selected='selected'" : "") + ">Frozen Castle</option>";
@@ -851,9 +881,11 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		tooltipText = "<div style='width: 100%; height: 100%; background-color: black; text-align: center;'>";
 		if (heirloom.type == "Shield"){
 			icons = ["*shield3", "*shield", "*shield2",  "*heart3", "*star2", "*road2", "*fast-forward", "*trophy3", "*eraser"];
+			if (heirloom.rarity == 12) icons.push('*qrcode2');
 		}
 		if (heirloom.type == "Staff"){
 			icons = ["grain", "apple", "tree-deciduous", "*cubes", "*diamond", "*lab-flask", "*key", "*hour-glass", "*flag", "*feather", "*edit"];
+			if (heirloom.rarity == 12) icons.push('*i-cursor')
 		}
 		if (heirloom.type == "Core"){
 			icons = ["adjust", "*compass", "*cog", "*battery", "*adjust", "*cloud", "*yingyang"]
@@ -1157,10 +1189,19 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		if (portalUniverse == 1 && game.global.totalRadonEarned == 0) tooltipText += "<br/><br/><b>You will earn Radon instead of Helium in Universe 2. It's an entirely new Universe to explore!</b>"
 	}
 	if (what == "The Spire"){	
-		tooltipText = "<span class='planetBreakMessage'>The Spire looms menacingly above you, and you take in a deep breath of corruption. You take a look back at your Trimps to help gather some courage, and you push the door open. You slowly walk inside and are greeted by an incredibly loud, deep, human voice.<br/><br/><b>Do you know what you face? If you are defeated ten times in this place, you shall be removed from this space. If you succeed, then you shall see the light of knowledge that you seek.</b><span>";
-		tooltipText += "<br/><hr/><span class='planetBreakDescription'><span class='bad'>This Zone is considerably more difficult than the previous and next Zones. If 10 groups of Trimps die in combat while in the spire, the world will return to normal.</span> <span class='good'>Each cell gives more and more helium. Every 10th cell gives a larger reward, and increases all loot gained until your next portal by 2% (including helium).</span>";
+		tooltipText = "<span class='planetBreakMessage'>The Spire looms menacingly above you, and you take in a deep breath of corruption. You take a look back at your Trimps to help gather some courage, and you push the door open. You slowly walk inside and are greeted by an incredibly loud, deep, human voice.<br/><br/><b>Do you know what you face? If you are defeated ten times in this place, you shall be removed from this space. If you succeed, then you shall see the light of knowledge that you seek.</b></span>";
+		tooltipText += "<br/><hr/><span class='planetBreakDescription'><span class='bad'>This Zone is considerably more difficult than the previous and next Zones. If 10 groups of Trimps die in combat while in the spire, the world will return to normal.</span> <span class='good'>Each cell gives more and more helium. Every 10th cell gives a larger reward, and increases all loot gained until your next portal by 2% (including helium).</span></span>";
 		if (game.options.menu.mapsOnSpire.enabled) tooltipText += "<br/><hr/>You were moved to Maps to protect your limited chances at the spire. You can disable this in settings!";
 		costText = "<div class='maxCenter'><div class='btn btn-info' onclick='startSpire(true)'>The Universe Awaits</div></div>";
+		game.global.lockTooltip = true;
+		elem.style.left = "33.75%";
+		elem.style.top = "25%";
+	}
+	if (what == "Stuffy's Spire"){
+		tooltipText = "<span class='planetBreakMessage'>Stuffy's Spire looms menacingly above you, and you take in a deep breath of a new Mutation. You take a look back at your Trimps to help gather some courage, and you push the door open. You slowly walk inside and are greeted by an incredibly loud, deep, augmented Trimp voice.<br/><br/><b>Oh what a surprise! Scruffy the Betrayer and his little pet and their army of little pets are here on my doorstep. You may have numbers on your side, but I have Nature on mine. You will not take this Spire!</b></span>";
+		tooltipText += "<br/><hr/><span class='planetBreakDescription'><span class='bad'>OK, you know the deal. It's a Spire, it's hard, and you have 10 lives. But there's a twist! Each 100 cells is only one Floor of this massive 1000 cell behemoth of a Spire, and you'll need to reach the top of Floor 10 to face Stuffy himself. Also Tenacity is locked to 60 minutes while in the Spire and attacking or killing any 'Natural' enemies will release toxic spores, producing similar effects as the Nova mutation for the rest of the Floor.</span>";
+		tooltipText += "<span class='good'> However each cell cleared in this Spire grants a compounding 0.5% bonus to Trimp Attack, Health, and Radon gain until the next Portal. Completing a whole Floor causes all bonuses earned from that Floor to be permanent, and will cause you to skip that Floor on all following Portals. You've also unlocked the ability to use a custom Equality Scaling preset on the Spire!</span></span>"
+		costText = "<div class='maxCenter'><div class='btn btn-info' onclick='startSpire(true)'>Stuffy Awaits</div></div>";
 		game.global.lockTooltip = true;
 		elem.style.left = "33.75%";
 		elem.style.top = "25%";
@@ -1493,8 +1534,9 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		}
 	}
 	if (what == "Scale Equality Scaling"){
-		var state = game.portal.Equality.scalingActive ? "On" : "Off";
-		if (textString) tooltipText = '<div style="font-size: 1.7vh"><div class="maxCenter"><div style="width: 50%; margin-left: 25%" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColor' + state + '" id="equalityScaling2" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState2">' + state + '</span></span></div></div><br/>';
+		var state = game.portal.Equality.getSetting('scalingActive', equalitySlidersTip) ? "On" : "Off";
+
+		if (textString) tooltipText = '<div style="font-size: 1.7vh"><div class="maxCenter"><div style="width: 50%; margin-left: 25%" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColor' + state + '" id="equalityScaling2" onclick="toggleEqualityScale(true)"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState2">' + state + '</span></span></div></div><br/>';
 		else tooltipText = "";
 		tooltipText += getEqualitySliders();
 		if (textString) tooltipText += "</div>";
@@ -1502,14 +1544,19 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		elem.style.left = "4.5%";
 		elem.style.top = "1%";
 		swapClass('tooltipExtra', 'tooltipExtraEquality', elem);
-		costText = "<div class='maxCenter'><div class='btn btn-info' id='confirmTooltipBtn' onclick='cancelTooltip()'>Done</div></div>";
+		var spireBtn = "";
+		if (game.global.highestRadonLevelCleared >= 299) {
+			spireBtn = "<span id='spireEqualityToggle' onclick='toggleSpireEquality(" + textString + ")' class='btn btn-primary'>" + ((equalitySlidersTip == 'reg') ? "Show Spire Settings" : "Show Regular Settings") + "</span>";
+			what += (equalitySlidersTip == 'reg') ? " (Regular Settings)" : " (Spire Settings)";
+		}
+		costText = "<div class='maxCenter'><div class='btn btn-info' id='confirmTooltipBtn' onclick='cancelTooltip()'>Done</div>" + spireBtn + "</div>";
 		ondisplay = function(){
 			verticalCenterTooltip();
 		}
 	}
 	if (what == "Equality Scaling"){
 		var activeLevels = game.portal.Equality.getActiveLevels();
-		tooltipText = "<p>You can enable or disable Equality Scaling at any time.</p><p>With Equality Scaling On, each Portal starts with 0 levels of Equality active. If a group of Trimps dies after attacking <b>" + game.portal.Equality.scalingSetting + "</b> or fewer time" + needAnS(game.portal.Equality.scalingSetting) + ", one level of Equality will activate, up to your purchased level of Equality.";
+		tooltipText = "<p>You can enable or disable Equality Scaling at any time.</p><p>With Equality Scaling On, each Portal starts with 0 levels of Equality active. If a group of Trimps dies after attacking <b>" + game.portal.Equality.getSetting('scalingSetting') + "</b> or fewer time" + needAnS(game.portal.Equality.getSetting('scalingSetting')) + ", one level of Equality will activate, up to your purchased level of Equality.";
 		tooltipText += "</p><p><b>You currently have " + activeLevels + " stack" + needAnS(activeLevels) + " of Equality active.</b></p>";
 		if (!textString) tooltipText += "<p><b>Ctrl Click this button to customize your Equality settings.</b></p>"
 		else tooltipText += "<p>(Hotkey: E)</p>"
@@ -1604,6 +1651,11 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			elem.style.top = "0%";
 			elem.style.left = "5%";
 			swapClass('tooltipExtra', 'tooltipExtraBiggest', elem);
+		}
+		else if (numCheck == "Stuffy's Spire"){
+			elem.style.top = "25%";
+			elem.style.left = "25%";
+			swapClass('tooltipExtra', 'tooltipExtraLg', elem);
 		}
 		else{
 			if (renameBtn == 'Fire') {
@@ -1740,21 +1792,29 @@ function updateMazPreset(index){
 	swapClass('mazTx', newClass, row);
 }
 
+var equalitySlidersTip = "reg";
+function toggleSpireEquality(useBtn){
+	equalitySlidersTip = (equalitySlidersTip == "reg") ? "spire" : "reg";
+	cancelTooltip();
+	tooltip('Scale Equality Scaling', null, 'update', useBtn)
+}
 function getEqualitySliders(short){
 	var text = "";
 	if (!short) text += "Change this Slider to change the maximum amount of attacks Trimps need to make in order to not trigger Equality Scaling. Setting this slider to 0 will increase scaling whenever a group of Trimps is one-shot, 1 will increase if Trimps attack one or fewer times, 5 will only increase if they attack 5 or fewer times, etc.<br/><br/>";
-	text += "<b>Your current setting is <span id='equalityCurrentScale'>" + game.portal.Equality.scalingSetting + "</span>.</b>";
-	text += "<br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySlider' min='0' max='10' value='" + game.portal.Equality.scalingSetting + "' />";
+	text += "<b>Your current setting is <span id='equalityCurrentScale'>" + game.portal.Equality.getSetting('scalingSetting', equalitySlidersTip) + "</span>.</b>";
+	text += "<br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySlider' min='0' max='10' value='" + game.portal.Equality.getSetting('scalingSetting', equalitySlidersTip) + "' />";
 	if (!short) text += "<br/>If Reversing is allowed, Equality stacks will also decrease after the set amount of attacks against the same bad guy.<br/><br/>";
-	text += buildNiceCheckbox("equalityReversing", null, game.portal.Equality.scalingReverse, "scaleEqualityScale(this, \"reverse\")", "Equality Reversing") + " Allow Reversing<br/><b>Your current reversing setting is <span id='equalityCurrentScaleReverse'>" + game.portal.Equality.reversingSetting + "</span>.</b><br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySliderReverse' min='1' max='10' value='" + game.portal.Equality.reversingSetting + "' />"
-	var disabledStackCount = game.portal.Equality.disabledStackCount;
+	text += buildNiceCheckbox("equalityReversing", null, game.portal.Equality.getSetting('scalingReverse', equalitySlidersTip), "scaleEqualityScale(this, \"reverse\")", "Equality Reversing") + " Allow Reversing<br/><b>Your current reversing setting is <span id='equalityCurrentScaleReverse'>" + game.portal.Equality.getSetting('reversingSetting', equalitySlidersTip) + "</span>.</b><br/><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='scaleEqualitySliderReverse' min='1' max='10' value='" + game.portal.Equality.getSetting('reversingSetting', equalitySlidersTip) + "' />"
+	var disabledStackCount = game.portal.Equality.getSetting('disabledStackCount', equalitySlidersTip);
 	var max = (game.portal.Equality.radLevel + 1);
 	var stackText = disabledStackCount;
 	if (disabledStackCount == -1){
 		stackText = "Max (" + game.portal.Equality.radLevel + ")";
 		disabledStackCount = max;
 	}
-	if (!short) text += "<br/>You can also manually set how many stacks of Equality should be used if Scaling is disabled by changing the slider below. This allows you to customize exactly how many stacks of Equality to use without having to respec your Perks.<br/><br/>";
+	var spireNote = "";
+	if (equalitySlidersTip == "spire") spireNote = "<span style='color: #AD2A2A; font-weight: bold'> If Scale Equality is on, this setting will determine how many stacks to start the Spire with.</span>"
+	if (!short) text += "<br/>You can also manually set how many stacks of Equality should be used if Scaling is disabled by changing the slider below. This allows you to customize exactly how many stacks of Equality to use without having to respec your Perks." + spireNote + "<br/><br/>";
 	text += "<b>Your Equality stacks when Scaling is disabled will be <span id='equalityDisabledStackCount'>" + stackText + "</span>.</b><input oninput='scaleEqualityScale(this)' onchange='scaleEqualityScale(this)' type='range' id='equalityDisabledSlider' min='0' max='" + max + "' value='" + disabledStackCount + "' />";
 	return text;
 }
@@ -2698,6 +2758,11 @@ function getBattleStatBd(what) {
 		currentCalc *= 1.5;
 		textString += "<tr><td class='bdTitle'>" + Fluffy.getName() + " is Life</td><td>+ 50%</td><td>&nbsp;</td><td>+ 50%</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td></tr>";	
 	}
+	if (what == "health" && Fluffy.isRewardActive("scaledHealth")){
+		amt = Fluffy.rewardConfig.scaledHealth.mult();
+		currentCalc *= amt;
+		textString += "<tr><td class='bdTitle'>Scruffy Scaling Health</td><td>+ 50%</td><td>" + Fluffy.getLevel() + "</td><td>+ " + prettify((amt - 1) * 100) + "%</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td></tr>";	
+	}
 	//Add Geneticist
 	var geneticist = game.jobs.Geneticist;
 	if (game.global.lastLowGen > 0 && what == "health"){
@@ -3132,6 +3197,11 @@ function getBattleStatBd(what) {
 		currentCalc *= amt;
 		textString += "<tr style='color: red'><td class='bdTitle'>Blinded (Nova)</td><td>x 0.99</td><td>" + game.global.novaMutStacks + "</td><td class='bdPercent'>x " + prettify(amt) + "</td><td class='bdNumber'>" + prettify(currentCalc) + "</td>" + getFluctuation(currentCalc, minFluct, maxFluct) + "</tr>";
 	}
+	if (game.global.universe == 2 && game.global.spireActive && !game.global.mapsActive && game.global.spireMutStacks > 0 && what == "attack"){
+		amt = u2Mutations.types.Spire1.trimpAttackMult();
+		currentCalc *= amt;
+		textString += "<tr style='color: red'><td class='bdTitle'>Spore Cloud (Spire)</td><td>x 0.99</td><td>" + game.global.spireMutStacks.toFixed(1) + "</td><td class='bdPercent'>x " + prettify(amt) + "</td><td class='bdNumber'>" + prettify(currentCalc) + "</td>" + getFluctuation(currentCalc, minFluct, maxFluct) + "</tr>";
+	}
 	if (what == "attack" && game.global.challengeActive == "Unbalance"){
 		var mult = game.challenges.Unbalance.getAttackMult()
 		currentCalc *= mult;
@@ -3146,7 +3216,14 @@ function getBattleStatBd(what) {
 		var modDisplay = (modifier > 0.0001) ? modifier.toFixed(4) : modifier.toExponential(3);
 		textString += "<tr style='color: red'><td class='bdTitle'>Equality</td><td>x " + modDisplay + "</td><td>" + game.portal.Equality.getActiveLevels() + "</td><td class='bdPercent'>x " + display + "</td><td class='bdNumber'>" + prettify(currentCalc) + "</td>" + getFluctuation(currentCalc, minFluct, maxFluct) + "</tr>";
 	}
-
+	if (game.global.universe == 2 && what != "shield"){
+		var cellCredit = u2SpireBonuses.cellCredit();
+		if (cellCredit > 0){
+			amt = u2SpireBonuses.basics();
+			currentCalc *= amt;
+			textString += "<tr><td class='bdTitle'>Stuffy's Spire</td><td></td><td>" + cellCredit + "</td><td>x " + prettify(amt) + "</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td>" + ((what == "attack") ? getFluctuation(currentCalc, minFluct, maxFluct) : "") + "</tr>";
+		}
+	}
 
 	//Crit
 	if (what == "attack"){
@@ -3173,48 +3250,35 @@ function getBattleStatBd(what) {
 				if (critChance > 1) textString += " (" + (critChance * 100).toFixed(1) + "% Total)";
 				textString += "</td><td class='bdTitle'><span style='color: yellow;'>Crit!</span> Damage</td><td>+ " + prettify((critMult - 1) * 100) + "%</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
 			}
-			if (critChance > 1 && critChance < 3){
-				if (critChance >= 2) thisCritChance = 1 - (critChance % 1);
-				else thisCritChance = critChance - 1;
-				critMult = getMegaCritDamageMult(2);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span style='color: orange;'>CRIT!</span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span style='color: orange;'>CRIT!</span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
+			if (critChance > 1){
+				var max = 9;
+				var doubleChance = getPlayerDoubleCritChance();
+				var checkAdd = (doubleChance > 0) ? 1 : 0;
+				var doubleAdd = 0;
+				for (var check = 1; check < max; check++){
+					if (critChance + checkAdd > check && critChance < (check + 2)){
+						var finalTier = (check == max - 1);
+						if (!finalTier && critChance >= (check + 1)) thisCritChance = 1 - (critChance % 1);
+						else if (finalTier && critChance >= (check + 1)) thisCritChance = 1;
+						else thisCritChance = critChance - check;
+						if (doubleChance > 0){
+							if (finalTier && critChance > check) thisCritChance += doubleAdd;
+							else if (critChance <= check) thisCritChance = doubleAdd;
+							else{
+								var oldAdd = doubleAdd;
+								var doubleChange = thisCritChance * (1 - doubleChance);
+								doubleAdd = thisCritChance - doubleChange;
+								thisCritChance = doubleChange;
+								thisCritChance += oldAdd;
+							}
+						}
+						critMult = getMegaCritDamageMult(check + 1);
+						critCalc = currentCalc * critMult * baseCritMult;
+						textString += "<tr class='critRow'><td class='bdTitle'>" + getCritText(check + 1) + " Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'>" + getCritText(check + 1) + " Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
+					}
+				}
 			}
-			if (critChance > 2 && critChance < 4){
-				if (critChance >= 3) thisCritChance = 1 - (critChance % 1);
-				else thisCritChance = critChance - 2;
-				critMult = getMegaCritDamageMult(3);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span style='color: red;'>CRIT!!</span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span style='color: red;'>CRIT!!</span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
-			}
-			if (critChance > 3 && critChance < 5){
-				if (critChance >= 4) thisCritChance = 1 - (critChance % 1);
-				else thisCritChance = critChance - 3;
-				critMult = getMegaCritDamageMult(4);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span class='critTier4'>CRIT<span class='icomoon icon-atom'></span></span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span class='critTier4'>CRIT<span class='icomoon icon-atom'></span></span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
-			}
-			if (critChance > 4 && critChance < 6){
-				if (critChance >= 5) thisCritChance = 1 - (critChance % 1);
-				else thisCritChance = critChance - 4;
-				critMult = getMegaCritDamageMult(5);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span class='critTier5'><span class='icomoon icon-bomb'></span> CRIT</span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span class='critTier5'><span class='icomoon icon-bomb'></span> CRIT</span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
-			}
-			if (critChance > 5 && critChance < 7){
-				if (critChance >= 6) thisCritChance = 1 - (critChance % 1);
-				else thisCritChance = critChance - 5;
-				critMult = getMegaCritDamageMult(6);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span class='critTier6'><span class='icomoon icon-diamond'></span> CRIT!</span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span class='critTier6'><span class='icomoon icon-diamond'></span> CRIT!</span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
-			}
-			if (critChance > 6 && critChance < 8){
-				if (critChance >= 7) thisCritChance = 1;
-				else thisCritChance = critChance - 6;
-				critMult = getMegaCritDamageMult(7);
-				critCalc = currentCalc * critMult * baseCritMult;
-				textString += "<tr class='critRow'><td class='bdTitle'><span class='critTier7'><span class='icomoon icon-bolt'></span> CRIT!</span> Chance</td><td>" + (thisCritChance * 100).toFixed(1) + "%</td><td class='bdTitle'><span class='critTier7'><span class='icomoon icon-bolt'></span> CRIT!</span> Damage</td><td><span style='color: yellow;'>Crit!</span> x " + prettify(critMult) + "</td><td class='bdNumberSm'>" + prettify(critCalc) + "</td>" + getFluctuation(critCalc, minFluct, maxFluct) + "</tr>";
-			}
+
 		}
 	}
 	textString += "</tbody></table></div>";
@@ -3317,6 +3381,12 @@ function getMaxTrimps() {
 		currentCalc *= mult;
 		currentCalc = Math.floor(currentCalc);
 		textString += "<tr><td class='bdTitle'>Scaffolding</td><td class='bdPercent'>+ " + prettify((mult - 1) * 100) + "%</td><td class='bdNumber'>" + prettify(currentCalc) + "</td></tr>";
+	}
+	if (game.global.universe == 2 && u2Mutations.tree.Trimps.purchased){
+		var mult = 1.5;
+		currentCalc *= mult;
+		currentCalc = Math.floor(currentCalc);
+		textString += "<tr><td class='bdTitle'>Small Trimps Mutator</td><td class='bdPercent'>+ " + prettify((mult - 1) * 100) + "%</td><td class='bdNumber'>" + prettify(currentCalc) + "</td></tr>";
 	}
 	//Add Size Challenge
 	if (challengeActive("Size")){
@@ -3531,9 +3601,10 @@ function getLootBd(what) {
 				textString += "<tr><td class='bdTitle'>Radon Relic</td><td>x 1.05</td><td>" + points + "</td><td>x " + prettify(mult) + "</td><td>" + prettify(currentCalc) + "</td></tr>";
 			}
 			if (game.global.universe == 2 && game.global.glassDone && game.global.world > 175){
-				var mult = Math.pow(1.1, game.global.world - 175);
+				var useGlassWorld = (game.global.world > 400) ? 400 : game.global.world;
+				var mult = Math.pow(1.1, useGlassWorld - 175);
 				currentCalc *= mult;
-				textString += "<tr><td class='bdTitle'>Advanced Processing (Glass)</td><td>x 1.1</td><td>" + (game.global.world - 175) + "</td><td>x " + prettify(mult) + "</td><td>" + prettify(currentCalc) + "</td></tr>";
+				textString += "<tr><td class='bdTitle'>Advanced Processing (Glass)</td><td>x 1.1</td><td>" + (useGlassWorld - 175) + "</td><td>x " + prettify(mult) + "</td><td>" + prettify(currentCalc) + "</td></tr>";
 			}
 			if (game.global.universe == 2 && game.global.world >= 201){
 				var mult = 400;
@@ -3831,6 +3902,14 @@ function getLootBd(what) {
 		currentCalc = 0;
 		var cMode = (game.global.universe == 1) ? 2 : 3;
 		textString += "<tr class='colorSquared'><td class='bdTitle'>Challenge<sup>" + cMode + "</sup></td><td></td><td></td><td>0%</td><td>" + prettify(currentCalc) + "</td></tr>";
+	}
+	if (game.global.universe == 2 && what == "Helium"){
+		var cellCredit = u2SpireBonuses.cellCredit();
+		if (cellCredit > 0){
+			amt = u2SpireBonuses.basics();
+			currentCalc *= amt;
+			textString += "<tr><td class='bdTitle'>Stuffy's Spire</td><td></td><td>" + cellCredit + "</td><td>x " + prettify(amt) + "</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td></tr>";
+		}
 	}
 	//Heirloom bonuses last, since food/wood/metal mults can be different
 	var heirloomBonus = 0;
@@ -4249,6 +4328,7 @@ function resetGame(keepPortal, resetting) {
 	var permaBones;
 	var tutorialLg;
 	var tabForMastery;
+	var u2SpireCellsBest;
 	if (keepPortal){
 		oldUniverse = game.global.universe;
 		if (oldUniverse == 2 && (game.global.world > 25 || game.stats.totalVoidMaps.value > 0)) lastU2Voids = game.stats.totalVoidMaps.value;
@@ -4428,6 +4508,7 @@ function resetGame(keepPortal, resetting) {
 		guString = game.global.guString;
 		SB = game.global.SB;
 		tabForMastery = game.global.tabForMastery;
+		u2SpireCellsBest = game.global.u2SpireCellsBest;
 	}
 	game = null;
 	game = newGame();
@@ -4559,6 +4640,7 @@ function resetGame(keepPortal, resetting) {
 		game.global.lastU2Voids = lastU2Voids;
 		game.global.SB = SB;
 		game.global.tabForMastery = tabForMastery;
+		game.global.u2SpireCellsBest = u2SpireCellsBest;
 		if (game.global.universe == 2 && autoBattle.oneTimers.Expanding_Tauntimp.owned) game.global.expandingTauntimp = true;
 		if (microchipLevel){
 			game.buildings.Microchip.owned = microchipLevel;
@@ -4741,10 +4823,15 @@ function resetGame(keepPortal, resetting) {
 		if (newSetting.Staff != -1) equipHeirloomById(newSetting.Staff, "Staff");
 	}
 	setUniverseStyle();
-	if (Fluffy.isRewardActive("moreVoid") && game.global.lastU2Voids >= 5 && game.global.universe == 2){
-		var freeMaps = Math.floor(game.global.lastU2Voids / 5);
-		for (var x = 0; x < freeMaps; x++) createVoidMap();
-		message("Scruffy gave you " + freeMaps + " free Void Maps!", "Notices");
+	if (Fluffy.isRewardActive("moreVoid") && game.global.universe == 2){
+		var evenMore = Fluffy.isRewardActive("evenMoreVoid");
+		var useU2Voids = (evenMore) ? game.stats.mostU2Voids.valueTotal : game.global.lastU2Voids;
+		if (useU2Voids >= 5){
+			var freeMaps = Math.floor(useU2Voids / 5);
+			if (evenMore) freeMaps = Math.floor(freeMaps * 1.5);
+			for (var x = 0; x < freeMaps; x++) createVoidMap();
+			message("Scruffy gave you " + freeMaps + " free Void Maps!", "Notices");
+		}
 	}
 	setTrimpColSize();
 	alchObj.tab.style.display = 'none';
@@ -6081,6 +6168,10 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		tooltip("Archaeology Automator", null, 'update');
 		return;
 	}
+	if (setting == "sealedAutoBattle"){
+		autoBattle.unseal();
+		return;
+	}
 	if (setting == "pauseGame"){
 		if (game.options.menu.disablePause.enabled == 0) return;
 		if (new Date().getTime() - lastPause < 110) return;
@@ -6247,6 +6338,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		var name = index;
 		var area = (game.global.universe == 2) ? "oneOffs2" : "oneOffs";
 		if (index == "Huffstle" || index == "Just Smack It" || index == "Heavy Trinker" || index == "Peace") area = "oneOffs2"; //U2 achievements but completable in U1
+		else if (index == "Power Tower") area = "oneOffs"; //U1 achievements completable in U2
 		var achievement = game.achievements[area];
 		index = game.achievements[area].names.indexOf(index);
 		if (index == -1 || achievement.finished[index]) return;
@@ -6670,7 +6762,8 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 				if (game.global.challengeActive == "Trimp" && game.jobs.Amalgamator.owned > 0) return toZalgo(((game.jobs.Amalgamator.owned == 1) ? "The Amalgamator is" : "The Amalgamators are") + " starting to rapidly switch between different colors. It would be slightly entertaining if the fabric of existence wasn't falling apart around " + ((game.jobs.Amalgamator.owned == 1) ? "it." : "them."), 3, 2);
 				return "Need some motivation? You can do it! Maybe.";
 			},
-			w100: "You stop dead in your tracks. You remember who you came here with, and you remember that you are not happy with Captain Druopitee for bringing you here. You know he landed with you. You know the ship is still here. He's here.",
+			w100: "This is an odd looking zone! The ground here is unnaturally flat, and there are large piles of rubble and debris all over the place as if some massive structure had collapsed. Your Trimps seem to enjoy tasting the new flavors of rock, but there's an ominous feeling here that pushes you to keep moving.",
+			w101: "You stop dead in your tracks. You remember who you came here with, and you remember that you are not happy with Captain Druopitee for bringing you here. You know he landed with you. You know the ship is still here. He's here.",
 			w105: "You call a meeting with all of your Trimps to explain the situation. After giving an extremely long, epic, and motivational speech but hearing no reaction from the crowd, you remember that your Trimps cannot understand you. Will you ever learn?",
 			w106: "How long have you been trapped on this planet? Months? Decades? Travelling through time sure screws up your chronological perception.",
 			w109: "Though you have no idea which direction your home planet is, you still believe the ship's GPS could get you home. Maybe Druopitee has the keys. You really want to find him.",
@@ -6881,7 +6974,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 			w50: "This zone is really freaking hot.",
 			w52: "You catch Scruffy helping a group of small Trimps across a river. What a cool dude.",
 			w57: "A few of your Trimps are getting whiny so you take them for a walk. Seemed to do the trick, they just needed to burn some energy and pee.",
-			w60: "Scruffy is finally in a good mood and seems quite a bit stronger than before, so you figure now is a good time to ask him about Fluffy. In exchange for his good mood, he agrees to tell you the rest of the story. According to him, Fluffy was stationed at the seventh Spire while Scruffy was at the sixth. Fluffy and Scruffy each destroyed their own Spires, but Fluffy was caught by Druopitee and took the fall for both of them. Druopitee left the six remaining enhanced Trimps to take care of the remaining five Spires, and took Fluffy with him. You ask what the names of the other five Trimps are and he tells you: Huffy, Stuffy, Buffy, Tuffy, and Puffy.",
+			w60: "Scruffy is finally in a good mood and seems quite a bit stronger than before, so you figure now is a good time to ask him about Fluffy. In exchange for his good mood, he agrees to tell you the rest of the story. According to him, Fluffy was stationed at the second Spire while Scruffy was at the third. Fluffy and Scruffy each destroyed their own Spires, but Fluffy was caught by Druopitee and took the fall for both of them. Druopitee left the six remaining enhanced Trimps to take care of the remaining five Spires, and took Fluffy with him. You ask what the names of the other five Trimps are and he tells you: Huffy, Stuffy, Buffy, Tuffy, and Puffy.",
 			w61: "Scruffy finally seems more inspired than sad. Looks like he wants to go take down some bad guys.",
 			w62: "It seems like you've gotta find Scruffy's 5 missing brothers. Scruffy reminds you that they were evil the last time he saw them and to be prepared, but that some may have changed sides since.",
 			w65: "You wonder if Trimps came from this Universe, your original one, or somewhere else. Scruffy shrugs.",
@@ -6925,7 +7018,8 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 				if (autoBattle.sessionEnemiesKilled > autoBattle.sessionTrimpsKilled) return "Huffy pops a quick message into your head to let you know he's doing fine in the Spire!";
 				return "Huffy pops a message into your head stating that as much as he likes constantly losing, he would appreciate a little help!"
 			},
-			w150: "As you near a gigantic lake, you notice that this part of the World is becoming filled with wild varieties of plants you've never seen before. You've already taught your Trimps not to eat strange plants, but it looks like it's time for a reminder.",
+			w149: "As you near a gigantic lake, you notice that this part of the World is becoming filled with wild varieties of plants you've never seen before. You've already taught your Trimps not to eat strange plants, but it looks like it's time for a reminder.",
+			w150: "Within the center of the gigantic lake is a large island full of rubble as if a large structure had collapsed here. The stones remind you a lot of Huffy's spire, though there is an infinitely smaller number of the stones than what you'd expect make up the other one. This must have been Fluffy's Spire! You look proudly at the rubble, knowing everything Fluffy sacrificed to rid the world of the evil that was once here.",
 			w155: "The plant biodiversity around this Zone is incredible, it feels like this Zone is its own isolated ecosystem. The ground around here must be extremely arable.",
 			w160: "As you're walking through your town, you walk past Scruffy and notice his fur has seemed to change colors slightly. You think to yourself that it's strange, but what's even stranger is that he seems bewildered by the town he helped create, and he does not look happy. Out of the corner of your eye, you also spot Scruffy, but this Scruffy has the expected fur color. You gulp as you realize that this must be one of the other brothers, and you hope he's friendly!",
 			w161: "After avoiding you as best as he could, you and Scruffy finally corner the new -uffy for some questioning. Scruffy immediately recognizes Stuffy, but doesn't seem happy at all to see him. Stuffy informs you that you're polluting the planet with all your smelting and forestry, and that he wants you to shut everything down and return to nature. Scruffy protests, arguing that our cause is worth it and that Druopitee's work must be destroyed at any costs. With that, Stuffy swears to stop you, then he flees into the forest. That probably won't be the last you see of Stuffy.",
@@ -6941,7 +7035,59 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 			w202: "What's this?! Another type of Mutated enemy? Scruffy tells you that the strange looking enemies on this Zone are affected by what he calls 'Cell Compression', and that the first green enemy has consumed all of the green cells after it. The first green cell will be extra tough as it has all the stats of the other green cells after it, but if you manage to kill it you can just walk right through the cells behind it and pick up your loot. Scruffy lets you know you'll find even more Mutated Seeds here!",
 			w203: "Good gravelimp, there's another type of Mutated enemy here! You turn to Scruffy who was already preparing his notes. He tells you that this is what he calls the 'Nova' mutation. The enemy in the center of that mutation appears to be radioactive, and it's mutating the cells around itself. The center cell is extremely weak but will release a Nova whenever it's damaged, debuffing your Trimps to make them deal less damage and take more damage until the end of the Zone. The other nearby mutated cells have extremely high attack but reduced health. And of course, you'll find another large batch of Mutated Seeds!",
 			w204: "As you finally pass the Nova Zone and reach the next, you notice yet another new type of Mutation. Scruffy calls this one the 'Row Randomizer', because he says there are stronger enemies in the front of the Zone and weaker enemies in the back. The first Randomized Row you come across will be harder than normal, but the second one will be easier. And of course, Radon and Mutated Seeds!",
-			w205: "Scruffy lets you know that there seems to be no pattern to the repeating of these new Mutations. He warns that they'll appear in larger numbers the closer we get to Stuffy's Spire, and he reminds you that it's possible for one enemy to have more than one of these Mutations available at a time. He urgest you to collect as many Mutated Seeds as possible, and to use them at your new Mutator to improve your Trimps. It's the only way to catch up to Stuffy!",
+			w205: "Scruffy lets you know that there seems to be no pattern to the repeating of these new Mutations. He warns that they'll appear in larger numbers the closer we get to Stuffy's Spire, and he reminds you that it's possible for one enemy to have more than one of these Mutations available at a time. He urges you to collect as many Mutated Seeds as possible, and to use them at your new Mutator to improve your Trimps. It's the only way to catch up to Stuffy!",
+			w210: "The mutations seem to show no sign of letting up, but the Trimps like the new colors.",
+			w215: "You spot Scruffy sulking around and go see what's up. He lets you know that you're close to his old Spire and that the scenery is dredging up some bad memories. You want to talk more about his days running a Spire, but the Trimps seem to have started a fire that you should really go attend to.",
+			w216: "As you exit the horribly charred previous zone, you make a mental note to admonish the miners for teaching your soldiers they could make sparks with their swords.",
+			w220: "The mutation seems to show no signs of letting up, and neither do the urges of your Trimps to roll around in the goop.",
+			w225: "You've finally stumbled upon the massive pile of rubble that must have been Scruffy's Spire. You can tell he's ashamed for letting Fluffy take the fall for making the tower fall, but you reassure him that nothing good would have come from him being caged as well. You tell him you're glad he's here to help you, and give him a couple pats.",
+			w231: "Scruffy seems to be mostly back to his old self, and has even started playing the Riflunger again. You have to admit he's improving, the sound now barely even makes you want to fill your ears with sand!",
+			w237: "Three Trimps tried taming two tempermental Titimps. They thought Titimps treasured trash, thus they took turns throwing things toward the Titimps. Thoroughly terrified, the tormented Titimps trapped the Trimps, took their tools, then took to the trail.",
+			w243: "You spot Stuffy sneaking around the camp, and decide to engage sneak mode yourself to see what he's up to. However you're not very good at sneak mode, and he quickly notices you and scurries off.",
+			w251: "Oh goodness, there are two different Mutations on this Zone! Scruffy warns you that multiple mutations can affect the same enemy, leading to some crazy combinations. You're split on how you feel about this. On one hand, the mutated enemies are monstrous and the goop is clearly not natural, but on the other hand the colors look pretty cool. You'll have to reflect on this for a bit.",
+			w257: "You're relaxing at the end of a Zone, minding your own business, when suddenly you hear a loud explosion in the direction of the camp. You run over to assess the damage and assist Scruffy in calming the frantic Trimps. As you look around, you see a message written on a nearby rock that says \"Stuffy was here\".",
+			w265: "Scruffy informs you that he's finally been able to detect Stuffy's Spire, due to the presence of a new Mutation there that exists nowhere else. He says you're only 35 Zones away now, and to be ready.",
+			w270: "Scruffy has been busy studying Stuffy's Spire, and comes to you with more news. It sounds like Stuffy's Spire is certainly not the only one on the planet pumping out Mutation, but that taking it down is the first step on the path to saving this Universe.",
+			w275: "The planet continues to look even more and more mutated as you press further into the Zones with the intact Spires. You shudder at the thought of what the Zones might look like deeper in.",
+			w280: "You can't really overstate the amount of goo all over the place at these Zones, certainly an effect of the Mutations. The Trimps seem to enjoy throwing it at eachother in some new game they've invented.",
+			w285: "You still can't quite see the Spire yet, but you can feel it in your bones.",
+			w290: "As you cross into the next Zone, you finally get a glimpse of the Spire in the distance. It looks considerably less destroyed than the two previous Spires. You've got your work cut out for you.",
+			get w301(){
+				if (game.global.u2SpireCells < 100) return "Scruffy knows you did your best back there in the Spire!";
+				if (game.global.u2SpireCells < 500) return "Scruffy is impressed with how much of the Spire you've destroyed, before you know it the Spire will be half gone!";
+				if (game.global.u2SpireCells < 900) return "Behind you, you can see the remnants of the Spire. It might not be completely gone yet but it's definitely looking a bit small!";
+				if (game.global.u2SpireCells < 1000) return "The Spire has been so destroyed that you can't even see it behind you from one Zone away. Any lifetime now, Stuffy will pay!";
+				return "You look behind you and let out a big sigh of relief. It sure feels good knowing you stopped Stuffy! Now who's next...";
+			},
+			get w305(){
+				if (game.global.u2SpireCells < 1000) return "You're pushing deeper between two active Spires. The air feels thicker and thicker every Zone, but you continue on and know you'll stop Stuffy soon.";
+				return "Scruffy organized a surprise party for you while you were in the last Zone. He even managed to somehow get all " + prettify(game.resources.trimps.owned) + " of your Trimps to hide behind couches and things so you would actually be surprised, what a guy!"
+			},
+			get w310(){
+				if (game.global.u2SpireCells < 500) return "You hear a familiar sound behind you and turn around to see none other than Stuffy! He makes a few taunting gestures at you and then runs away. You ask a Trimp to throw something at him but the Trimp misses."
+				if (game.global.u2SpireCells < 1000) return "You hear a familiar sound behind you and turn around to see none other than Stuffy! He makes a few taunting gestures at you and then runs away. You ask a Trimp to throw something at him and the Trimp nails him right in the back of the head with a Snimp carcass. Hah!"
+				return "Scruffy walks up to you and tells you that you're awesome. You already knew that but it's still nice to hear from time to time.";
+			},
+			get w315(){
+				if (game.global.u2SpireCells < 1000) return "You return to camp to find a hole that wasn't there before and two Trimps inside. Clearly the work of Stuffy, you really gotta do something about that guy! You get to work building a ladder, but the Trimps climb out of the hole on their own before you finish it.";
+				return "You return to camp to find a hole that wasn't there before and two Trimps inside. You ask Scruffy what happened to them and he tells you they tried to dig a pool then fell asleep. Those crazy Trimps!";
+			},
+			get w320(){
+				if (game.global.u2SpireCells < 1000) return "It's not a windy day but the trees are definitely moving around. Spooky!";
+				return "It's a beautiful day for a swimm with your Trimps! You can't actually fit in the swimming pool your Trimps made, but it'd be a nice day for it if you could.";
+			},
+			get w325(){
+				if (game.global.u2SpireCells < 500) return "The air is getting incredibly thick this far out between two active Spires. Your Trimps look like they're starting to slow down a bit, so you give them an encouraging speech. It didn't seem to help much but they can't say you didn't try.";
+				if (game.global.u2SpireCells < 1000) return "The air is thick out this far between two active Spires, but so are your Trimps from all the Spire cells you've cleared. They barely even seem to notice!";
+				return "Dang your Trimps are looking beefy. Clearing Stuffy's Spire has certainly put them in tip-top shape! You point this out to Scruffy who says they'll need it if you ever find Buffy.";
+			}
+		}
+		if (game.global.universe == 2 && zoneNumber >= 290 && game.global.u2SpireCellsBest >= 100){
+			//move z290 message forward 1 zone per cleared cell as it shrinks
+			var num = Math.round(290 + (game.global.u2SpireCellsBest / 100));
+			if (num > 299) num = 299;
+			universe2['w' + num] = universe2.w290;
+			delete universe2.w290;
 		}
 		var thisUniverse = (game.global.universe == 2) ? universe2 : universe1;
 		if (typeof thisUniverse['w' + zoneNumber] !== 'undefined') return thisUniverse['w' + zoneNumber];
