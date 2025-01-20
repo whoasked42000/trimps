@@ -7904,7 +7904,7 @@ function handlePoisonDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip('Poisoned', null, event)" onmouseout="tooltip('hide')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>`;
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip('Poisoned', null, event)" onmouseout="tooltip('hide')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>`);
 		elem = document.getElementById('poisonEmpowermentIcon');
 	}
 
@@ -7933,7 +7933,7 @@ function handleIceDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip('Chilled', null, event)" onmouseout="tooltip('hide')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>`;
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip('Chilled', null, event)" onmouseout="tooltip('hide')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>`);
 		elem = document.getElementById('iceEmpowermentIcon');
 	}
 
@@ -7961,7 +7961,7 @@ function handleWindDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').innerHTML += `<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip('Breezy', null, event)" onmouseout="tooltip('hide')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>`;
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip('Breezy', null, event)" onmouseout="tooltip('hide')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>`);
 		elem = document.getElementById('windEmpowermentIcon');
 	}
 
