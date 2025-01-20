@@ -5036,14 +5036,16 @@ var u2Mutations = {
         var arrowLength = 0.5;
         var arrowSize = 0.1;
         var boxScale = 2 * scale;
+		if (usingScreenReader) screenReaderAssert("Press Shift S to return to the top of the Mutator screen");
 
         document.getElementById('mutTreeWrapper').style.display = 'block';
         document.getElementById("wrapper").style.display = "none";
         document.getElementById('mutTreeWrapper').innerHTML = '';
         var costText = (Object.keys(this.tree).length > this.purchaseCount) ? "Next Mutator Costs: " + prettify(this.nextCost()) : "All Mutators Purchased!";
         var curTransform = (this.curTransform) ? " style='transform: " + this.curTransform + ";'" : "";
-        var text = "<div style='position: relative; z-index:2;'><div style='position: absolute; top: 2%; left: 2%; display: inline-block;'><span style='font-size: 1.1em; margin-left: 0.25em;' class='btn btn-lg btn-info' onclick='u2Mutations.showNames()' id='u2MutShowNameBtn'>" + ((game.global.showU2MutNames) ? "Hide Names" : "Show Names") + "</span><br/><span style='font-size: 1.1em; margin-top: 0.25em;' id='swapToMasteryBtn' class='btn btn-lg btn-success' onclick='u2Mutations.swapTab(false)'>Show Masteries" + this.getMasteryAlert() + "</span></div><div style='background-color: black'>Seeds Available: " + prettify(game.global.mutatedSeeds) + "&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" + costText + "</div><span id='mutTreeCloseBtn' class='icomoon icon-close' onclick='u2Mutations.closeTree()'></span></div><div id='mutTree'" + curTransform + ">";
+        var text = "<hr class='visually-hidden' title='top of tooltip'/><div style='position: relative; z-index:2;'><div id='mutMenu' aria-owns='masteryInfo' style='position: absolute; top: 2%; left: 2%; display: inline-block;'><span aria-hidden=true style='font-size: 1.1em; margin-left: 0.25em;' class='btn btn-lg btn-info' onclick='u2Mutations.showNames()' id='u2MutShowNameBtn'>" + ((game.global.showU2MutNames) ? "Hide Names" : "Show Names") + "</span><br/><span tabindex=0 role=button style='font-size: 1.1em; margin-top: 0.25em;' id='swapToMasteryBtn' class='btn btn-lg btn-success' onclick='u2Mutations.swapTab(false)'>Show Masteries" + this.getMasteryAlert() + "</span></div><div style='background-color: black'>Seeds Available: " + prettify(game.global.mutatedSeeds) + "&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" + costText + "</div><span role=button tabindex=0 aria-label='close' id='mutTreeCloseBtn' class='icomoon icon-close' onclick='u2Mutations.closeTree()'></span></div><div id='mutTree'" + curTransform + ">";
         text += "<div id='mutRing1' style='width: " + (40.8*scale) + "px; height: " + (33.0*scale) + "px; top: " + (-16.5*scale) + "px; left: " + (-20.4*scale) + "px;'></div>"
+		const headers = {Scruffy: "Scruffy and Heirlooms", Health: "Combat, Radon, and Imports", MaZ: "Resources", Overkill1: "Speed"}
         for (var item in this.tree){
             
             var coords = this.tree[item].pos;
@@ -5053,9 +5055,10 @@ var u2Mutations = {
             else if (!this.checkRequirements(item)) bgColor = 'requirement';
 			var SRBuyText = `${(bgColor == 'requirement') ? "requirement not met" : bgColor }`
             var dn = (itemObj.dn) ? itemObj.dn : item;
-            text += '<button aria-labelledby="'+ item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
+			if (usingScreenReader && item in headers) text += `<h1 class='visually-hidden'>${headers[item]}</h1>`
+            text += '<button aria-labelledby="' + item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
             if (usingScreenReader ) {
-				text += '<span class="mutTreeName" id="\'' + item + '\'Name">' + dn + ' ' + SRBuyText + '</span>';
+				text += '<span class="mutTreeName" id="' + item + 'Name">' + dn + ' ' + SRBuyText + '</span>';
 			}
 			else {
 				if (game.global.showU2MutNames) text += '<span class="mutTreeName">' + dn + '</span>';
@@ -5084,11 +5087,13 @@ var u2Mutations = {
             }
         }
         text += "</div>"
-        text += "<div id='mutZoomButtons'><div id='mutZoomIn' onmouseover='tooltip(\"Mastery Info\", null, event);' onmouseout='tooltip(\"hide\")'>M</div><div id='mutZoomIn' onclick='u2Mutations.zoomClicked(-1);' onmouseover='tooltip(\"Zoom In\", \"customText\", event, \"Click this to Zoom In to the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-in'></span></div><div id='mutZoomOut' onclick='u2Mutations.zoomClicked(1);' onmouseover='tooltip(\"Zoom Out\", \"customText\", event, \"Click this to Zoom Out of the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-out'></span></div></div>";
-        document.getElementById('mutTreeWrapper').innerHTML = text;
+        text += "<div id='mutZoomButtons'><button aria-label='Mastery Information' id='masteryInfo' onmouseover='tooltip(\"Mastery Info\", null, event);' onmouseout='tooltip(\"hide\")'>M</button><div id='mutZoomIn' aria-hidden=true onclick='u2Mutations.zoomClicked(-1);' onmouseover='tooltip(\"Zoom In\", \"customText\", event, \"Click this to Zoom In to the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-in'></span></div><div id='mutZoomOut' aria-hidden=true onclick='u2Mutations.zoomClicked(1);' onmouseover='tooltip(\"Zoom Out\", \"customText\", event, \"Click this to Zoom Out of the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-out'></span></div></div>";
+        text += "<hr class='visually-hidden' title='bottom of tooltip'/>"
+		document.getElementById('mutTreeWrapper').innerHTML = text;
 		for (let item in this.tree){ // because of the global keydown event, these have to be added with an event listener rather than using inline onkeydown=""
 			makeAccessibleTooltip(`${item}MutatorBox`, [item, "Mutator"])
 		}
+		makeAccessibleTooltip("masteryInfo", ["Mastery Info", null])
         this.open = true;
     },
     closeTree: function(){
