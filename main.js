@@ -2017,7 +2017,7 @@ function confirmAbandonChallenge(){
 	var text = "Are you sure you want to abandon this challenge?";
 	if (game.challenges[game.global.challengeActive].mustRestart) text += " <b>Abandoning this challenge will cause the portal to become unstable and start you from the beginning of this run. (You'll keep your permanent rewards like helium and perks)</b><br/><br/>Click Confirm to abandon the challenge and restart at Z1, Cancel to go back, or Restart to go back to Z1 with the same challenge.";
 	tooltip('confirm', null, 'update', text, 'abandonChallenge()', 'Abandon Challenge');
-	if (game.challenges[game.global.challengeActive].mustRestart) document.getElementById("confirmTipCost").innerHTML += '<div class="btn btn-success" onclick="abandonChallenge(true); cancelTooltip()">Restart Challenge</div>';
+	if (game.challenges[game.global.challengeActive].mustRestart) document.getElementById("confirmTipCost").insertAdjacentHTML('beforeend', '<div class="btn btn-success" onclick="abandonChallenge(true); cancelTooltip()">Restart Challenge</div>');
 }
 
 function abandonChallengeResetEnemy() {
