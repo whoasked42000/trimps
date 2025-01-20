@@ -9239,7 +9239,6 @@ var toReturn = {
 			health: 6,
 			fast: true,
 			loot: function (level) {
-				/* fix for infinite breed speed issue post Spire completion that was caused by the Omnipotrimp explosion not occuring */
 				if (!game.global.spireActive) {
 					if (challengeActive('Eradicated') && game.global.world >= 59 && !game.global.brokenPlanet) planetBreaker();
 					if (!game.global.runningChallengeSquared) {

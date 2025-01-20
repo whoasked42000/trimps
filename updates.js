@@ -1902,7 +1902,6 @@ function countAlertsIn(where){
 	return count;
 }
 
-/* check for if the tooltip is offscreen vertically and if so move to the left or right of the screen */
 function positionTooltip(elem, event, extraInf) {
 	const e = event || window.event;
 	if (!e) return;
@@ -6332,7 +6331,6 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 			else prog.innerHTML = "";
 	}
 
-	/* stop the Realtor achievement doing a checkHousing check if it's already been unlocked. useful TW speedup & fix */
 	function checkAchieve(id, evalProperty, doubleChecking, noDisplay) {
 		if (id === 'housing' && !game.achievements.oneOffs.finished[game.achievements.oneOffs.names.indexOf('Realtor')] && checkHousing(false, true) >= 100) giveSingleAchieve('Realtor');
 		var achievement = game.achievements[id];
@@ -6364,8 +6362,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		if (trimpAchievementsOpen && !doubleChecking) displayAchievements();
 	}
 
-	/* checks for achievements in the alternate universe and awards them if completed */
-	function giveSingleAchieve(name) {
+function giveSingleAchieve(name) {
 	const u1Achievements = ['Defender', 'Power Tower'];
 	const u2Achievements = ['Huffstle', 'Just Smack It', 'Heavy Trinker', 'Peace'];
 
@@ -6388,7 +6385,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 	calculateAchievementBonus();
 
 	if (trimpAchievementsOpen) displayAchievements();
-	}
+}
 
 	function calculateAchievementBonus(){
 		var totalBonus = 0;

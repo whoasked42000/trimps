@@ -1989,7 +1989,6 @@ function getScientistLevel() {
 	return game.global.sLevel;
 }
 
-/* bugfix for for foreman related text when Foremany has been unlocked */
 function getScientistInfo(number, reward){
 	switch (number){
 		case 1: {
@@ -3791,8 +3790,6 @@ function checkHandleResourcefulRespec(){
 	if (getPerkLevel("Resourceful") > game.portal.Resourceful.levelTemp) clearQueue();
 }
 
-/* 	adds clearingBuildingQueue variable to game.global. used in buyBuilding function
-	this fixes a game crash caused by continually adding and removing buildings from queue that was reported in ideas and bug channel */
 function clearQueue(specific = false) {
 	if (!specific) game.global.clearingBuildingQueue = true;
 	let existing = 0;
@@ -5255,7 +5252,6 @@ function canAffordCoordinationTrimps(){
 }
 
 
-/* 	stops lockOnUnlock from running during TW as a 1s delay impacts golden upgrade purchases */
 function buyUpgrade(what, confirmed, noTip, heldCtrl) {
 	if (game.options.menu.pauseGame.enabled) return;
 	if (!confirmed && !noTip && game.options.menu.lockOnUnlock.enabled == 1 && !usingRealTimeOffline && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return;
@@ -5617,8 +5613,6 @@ function testGymystic(oldPercent) {
 
 }
 
-/* 	only update elems when there's a change
-	if used without calcBaseStats bugfix then that line needs removed as not a base game function */
 function prestigeEquipment(what, fromLoad = false, noInc = false) {
 	const equipment = game.equipment[what];
 	if (!fromLoad && !noInc) equipment.prestige++;
@@ -5646,7 +5640,6 @@ function prestigeEquipment(what, fromLoad = false, noInc = false) {
 	displayEfficientEquipment();
 }
 
-/* fixes a bug that caused player stats to go negative due to floating point issues */
 function calcBaseStats(equipType = 'attack') {
 	const equipmentTypes = {
 		attack: ['Dagger', 'Mace', 'Polearm', 'Battleaxe', 'Greatsword', 'Arbalest'],
@@ -7725,7 +7718,6 @@ function createHeirloom(zone, fromBones, spireCore, forceBest){
 	buildHeirloom.nuMod *= u2SpireBonuses.nullifium();
 	game.global.heirloomsExtra.push(buildHeirloom);
 
-	/* fixes an issue where voidPopups setting displays cores on every spire clear as it's the highest available at that zone */
 	const displayCores = type === 'Core' && rarity >= game.global.spiresCompleted - 1;
 	if (game.options.menu.voidPopups.enabled !== 2 || displayCores || getHeirloomRarityRanges(zone, fromBones).length === rarity + 1) {
 		displaySelectedHeirloom(false, 0, false, 'heirloomsExtra', game.global.heirloomsExtra.length - 1, true);
@@ -10444,7 +10436,6 @@ function mapsClicked(confirmed) {
 	game.global.switchToMaps = true;
 }
 
-/* fixes UI display when coming out of MAZ. Would previous stay at Repeat XX times */
 function mapsSwitch(updateOnly, fromRecycle) {
 	game.global.titimpLeft = 0;
 	updateGammaStacks(true);
@@ -10475,14 +10466,13 @@ function mapsSwitch(updateOnly, fromRecycle) {
 	document.getElementById("mapsBtn").className = "btn btn-warning fightBtn";
 	document.getElementById('togglemapAtZone2').style.display = (game.global.canMapAtZone) ? "block" : "none";
     if (game.global.preMapsActive) {
-		//Switching to Map Chamber
+		// Switching to Map Chamber.
 		refreshMaps();
 		game.global.mazBw = -1;
 		if (currentMapObj && (currentMapObj.location == "Void" || currentMapObj.location == "Darkness")) {
 			recycleMap(-1, true, true);
 			currentMapObj = false;
 		}
-		/* fixes UI display when coming out of MAZ. Would previous stay at Repeat XX times until it got toggled */
 		if (game.global.mapCounterGoal > 0) {
 			game.global.mapCounterGoal = 0;
 			toggleSetting('repeatUntil', null, false, true);
@@ -10645,7 +10635,6 @@ function selectMap(mapId, force) {
 	document.getElementById("recycleMapBtn").style.visibility = (map.noRecycle) ? "hidden" : "visible";
 }
 
-/* change is worthwhile incorporating either this or a later patch for MAZ lines as once you exit MAZ it won't run again on entering a map */
 function runMap(resetCounter = true) {
 	if (game.options.menu.pauseGame.enabled) return;
     if (game.global.lookingAtMap === "") return;
@@ -13768,7 +13757,6 @@ function displayGoldenUpgrades(redraw) {
 	if (getAvailableGoldenUpgrades() <= 0) return false;
 	if (!goldenUpgradesShown) game.global.lastUnlock = new Date().getTime();
 
-	/* only add golden upgrades if the upgrades section doesn't have them inside of it */
 	const elem = document.getElementById('upgradesHere');
 	if (elem && elem.children[0] && elem.children[0].id.includes('Golden')) return false;
 
@@ -15910,7 +15898,6 @@ function getPlayerCritChance(){ //returns decimal: 1 = 100%
 	return critChance;
 }
 
-/* bug: Elixir of Accuracy always returns 1 + (0.25 * amount owned) so it's been adding 100% extra crit damage since alchemy patch. Uncomment the eoaEffect > 1 line if you want to implement the fix */
 function getPlayerCritDamageMult() {
 	const relentLevel = getPerkLevel('Relentlessness');
 	const eoaEffect = alchObj.getPotionEffect('Elixir of Accuracy');
