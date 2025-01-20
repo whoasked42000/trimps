@@ -16107,7 +16107,7 @@ function manageStacks(stackName, stackCount, isTrimps, elemName, icon, tooltipTe
 
 	if (!elem) {
 		let className = addClass ? " class='" + addClass + "'" : '';
-		if (parent) parent.innerHTML += `<span id="${elemName}"${className}></span>`;
+		if (parent) parent.insertAdjacentHTML('beforeend', `<span id="${elemName}"${className}></span>`);
 		elem = document.getElementById(elemName);
 	}
 
