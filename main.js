@@ -20369,6 +20369,10 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
             u2Mutations.dragging(e);
         }
     })
+})
+
+function makeScreenreaderTooltips(mode="click") {
+	// mode is "click" or "button"
 	// Screen Reader Tooltips
 	// This could be used to make mouseover events too, to get them out of the html files
 	const tooltips = {
@@ -20465,38 +20469,46 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
-			makeAccessibleTooltip(elemID, args)
+			makeAccessibleTooltip(elemID, args, mode)
+		}
+		if (mode == "click") { // remove all added info buttons (if they exist) when using click mode
+			document.querySelectorAll(".SRinfoButton").forEach((elem) => {elem.remove()})
 		}
 	}
-})()
+}
 
-function makeAccessibleTooltip(elemID, args) {
+makeScreenreaderTooltips("click");
+
+function makeAccessibleTooltip(elemID, args, mode) {
 	// args is an array of [what, isItIn, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift]
 	if (usingScreenReader) {
 		// This contains no less than three different options for how to show tooltips. I may have gone mad.
 		// Pick one. Or two.  Or tie it to a setting. 
 		let elem = document.getElementById(elemID);
+		if (mode == "click") {
+			// ? tooltip
+			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)});
+			elem.setAttribute("tabindex", 0);
 
-		// ? tooltip
-		elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)});
-		elem.setAttribute("tabindex", 0);
-
-		// Shift-Enter(aka shift-click)
-		let callback = elem.onclick;
-		elem.onclick = function() {
-			if(shiftPressed) {
-				keyTooltip({key: "?"}, ...args)
-				return;
+			// Shift-Enter(aka shift-click)
+			let callback = elem.onclick;
+			elem.onclick = function() {
+				if(shiftPressed) {
+					keyTooltip({key: "?"}, ...args)
+					return;
+				}
+				if (callback) { callback() }
 			}
-			if (callback) { callback() }
 		}
 
 		// Separate info buttons
-		let infoElem = document.createElement("div");
-		infoElem.innerText = "Info";
-		infoElem.classList = ["visually-hidden"]
-		infoElem.addEventListener("click", function (event) { keyTooltip({key: "?"}, ...args) } );
-		elem.insertAdjacentElement("afterend", infoElem);
+		if (mode == "button") {
+			let infoElem = document.createElement("div");
+			infoElem.innerText = "Info";
+			infoElem.className = "visually-hidden SRinfoButton"
+			infoElem.addEventListener("click", function (event) { keyTooltip({key: "?"}, ...args) } );
+			elem.insertAdjacentElement("afterend", infoElem);
+		}
 	}
 	else {
 		if (true === false && !elem.onmouseover) { // TODO very cheeky way of saying this should work but I'm not doing it yet. (also needs the nature tooltip handling from keytooltip before it will all actually work)
@@ -20519,7 +20531,5 @@ function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, n
 screenReaderAssert(
 	`
 	Latest updates: 
-	Tooltip experiments: Shift-Enter, ?, and non-button clickable info buttons after elements with tooltips.
-	
-	This game uses the ? key to display informational tooltips on buttons. 
-	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document." and `)
+	Info Header with how to work all the tooltips, info buttons on demand.
+	`)
