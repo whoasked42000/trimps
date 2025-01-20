@@ -5366,7 +5366,7 @@ function addQueueItem(what) {
 	const [baseName, multiplier] = what.split('.');
 	const name = multiplier > 1 ? `${baseName} X${prettify(multiplier)}` : baseName;
 
-	elem.innerHTML += '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>';
+	elem.insertAdjacentHTML('beforeend', '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>');
 	if (game.global.nextQueueId === 0) setNewCraftItem();
 	game.global.nextQueueId++;
 }
