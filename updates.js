@@ -5699,7 +5699,7 @@ function drawAllJobs(force) {
 	if (elem.innerHTML !== innerHTML) {
 		elem.innerHTML = innerHTML;
 		updateTooltips.forEach((item) => {
-			makeAccessibleTooltip(item, [item, 'buildings']);
+			makeAccessibleTooltip(item, [item, 'jobs']);
 		});
 	}
 
@@ -5731,7 +5731,7 @@ function drawJob(what) {
 function drawGeneticistassist(what) {
 	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
 	if (usingScreenReader) {
-		return `<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span></button><button class="thing noSelect pointer jobThing"  onclick="tooltip('Geneticistassist',null,'screenRead')">Geneticistassist Info</button><button onmouseover="tooltip('Geneticistassist',null,event)" onmouseout="tooltip('hide')" class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></button>`;
+		return `<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span></button> class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></button>`;
 	}
 
 	return `<div id="GeneticistassistContainer" class="thing"><div onmouseover="tooltip('Geneticist','jobs',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/>
@@ -5876,7 +5876,7 @@ function drawAllUpgrades(force) {
 	if (elem.innerHTML !== innerHTML) {
 		elem.innerHTML = innerHTML;
 		updateTooltips.forEach((item) => {
-			makeAccessibleTooltip(item, [item, 'buildings']);
+			makeAccessibleTooltip(item, [item, 'upgrades']);
 		});
 	}
 
@@ -6069,7 +6069,7 @@ function drawAllEquipment(force) {
 	if (elem.innerHTML !== innerHTML) {
 		elem.innerHTML = innerHTML;
 		updateTooltips.forEach((item) => {
-			makeAccessibleTooltip(item, [item, 'buildings']);
+			makeAccessibleTooltip(item, [item, 'equipment']);
 		});
 	}
 
