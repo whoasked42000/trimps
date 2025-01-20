@@ -20479,7 +20479,7 @@ function makeScreenreaderTooltips(mode="click") {
 
 makeScreenreaderTooltips("click");
 
-function makeAccessibleTooltip(elemID, args, mode) {
+function makeAccessibleTooltip(elemID, args, mode="click") {
 	// args is an array of [what, isItIn, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift]
 	if (usingScreenReader) {
 		// This contains no less than three different options for how to show tooltips. I may have gone mad.
