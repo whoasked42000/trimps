@@ -15873,7 +15873,7 @@ function manageLeadStacks(remove) {
 		if (determinedBuff === null) {
 			const goodGuyElem = document.getElementById('goodGuyName');
 			const htmlMessage = '&nbsp<span class="badge antiBadge" id="determinedBuff" onmouseover="tooltip(\'Determined\', \'customText\', event, \'Your Trimps are determined to succeed. They gain 50% attack and earn double resources from all sources.\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-sun2"></span></span>';
-			if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.innerHTML += htmlMessage;
+			if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 			determinedBuff = document.getElementById('determinedBuff');
 		}
 		determinedBuff.style.display = 'inline';
@@ -15887,7 +15887,7 @@ function manageLeadStacks(remove) {
 	if (!elem) {
 		const badGuyElem = document.getElementById('badGuyName');
 		const htmlMessage = `&nbsp;<span class="badge badBadge" id="leadBuff" onmouseover="tooltip('Momentum', null, event)" onmouseout="tooltip('hide')"><span id="leadStacks">${challenge.stacks}</span><span id="momentumIcon" class="icomoon icon-hourglass"></span></span>`;
-		if (badGuyElem.innerHTML !== htmlMessage) badGuyElem.innerHTML += htmlMessage;
+		if (badGuyElem.innerHTML !== htmlMessage) badGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 	} else {
 		const stacksElem = document.getElementById('leadStacks');
 		if (stacksElem.innerHTML !== challenge.stacks) stacksElem.innerHTML = challenge.stacks;
@@ -15905,7 +15905,7 @@ function updateToxicityStacks() {
 	if (!elem) {
 		const badGuyElem = document.getElementById('badGuyName');
 		const htmlMessage = `&nbsp<span class="badge badBadge" id="toxicityBuff" onmouseover="tooltip('Toxic', null, event)" onmouseout="tooltip('hide')"><span id="toxicityStacks">${stackCount}</span><span class="icomoon icon-radioactive"></span></span>`;
-		if (badGuyElem.innerHTML !== htmlMessage) badGuyElem.innerHTML += htmlMessage;
+		if (badGuyElem.innerHTML !== htmlMessage) badGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 	} else {
 		const stacksElem = document.getElementById('toxicityStacks');
 		if (stacksElem.innerHTML !== stackCount) stacksElem.innerHTML = stackCount;
@@ -15922,7 +15922,7 @@ function updateLivingStacks() {
 	if (!elem) {
 		const goodGuyElem = document.getElementById('goodGuyName');
 		const htmlMessage = `&nbsp<span class="badge antiBadge" id="livingBuff" onmouseover="tooltip('Unliving', null, event)" onmouseout="tooltip('hide')"><span id="livingStacks">${stackCount}</span>&nbsp;<span style="margin-top: 2%" class="icomoon icon-shareable"></span></span>`;
-		if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.innerHTML += htmlMessage;
+		if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 	} else {
 		const stacksElem = document.getElementById('livingStacks');
 		if (stacksElem.innerHTML !== stackCount) stacksElem.innerHTML = stackCount;
@@ -16008,7 +16008,7 @@ function updateNomStacks(number) {
 
 	const elem = document.getElementById('nomStack');
 	if (!elem) {
-		document.getElementById('badGuyName').innerHTML += `<span class="badge badBadge" onmouseover="tooltip('Nom', 'customText', event, 'This Bad Guy is nice and plump from eating Trimps. Increases attack damage by 25% per stack');" onmouseout="tooltip('hide')"><span id="nomStack">${number}</span><span class="glyphicon glyphicon-scale"></span></span>`;
+		document.getElementById('badGuyName').insertAdjacentHTML('beforeend', `<span class="badge badBadge" onmouseover="tooltip('Nom', 'customText', event, 'This Bad Guy is nice and plump from eating Trimps. Increases attack damage by 25% per stack');" onmouseout="tooltip('hide')"><span id="nomStack">${number}</span><span class="glyphicon glyphicon-scale"></span></span>`);
 	} else {
 		if (elem.innerHTML !== number) elem.innerHTML = number;
 	}
@@ -16019,7 +16019,7 @@ function updateBalanceStacks() {
 
 	let elem = document.getElementById('balanceSpan');
 	if (!elem) {
-		document.getElementById('goodGuyName').innerHTML += `<span id='balanceSpan'></span>`;
+		document.getElementById('goodGuyName').insertAdjacentHTML('beforeend', `<span id='balanceSpan'></span>`);
 		elem = document.getElementById('balanceSpan');
 	}
 
