@@ -9139,7 +9139,7 @@ function updateGeneratorInfo() {
 	if (!mutations.Magma.active()) return;
 
 	if (!document.getElementById('generatorWindow')) {
-		document.getElementById('buildingsHere').innerHTML += getGeneratorHtml(true);
+		document.getElementById('buildingsHere').insertAdjacentHTML('beforeend', getGeneratorHtml(true));
 	}
 
 	changeGeneratorState(null, true);
