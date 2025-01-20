@@ -10117,6 +10117,10 @@ function findHomeForSpecial(special, item, array, max){
 	}
 }
 
+function liquifiedZone() {
+	return game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name === 'Liquimp';
+}
+
 function dropPrestiges() {
 	const toDrop = addSpecials(true, true, null, true);
 	const sci4 = getSLevel() >= 4 && !challengeActive('Mapology');
