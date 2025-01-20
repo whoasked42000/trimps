@@ -833,7 +833,7 @@
 									<button id='advMapsRecycleBtn'  aria-label="Recycle All Maps" class="icomoon icon-trash-o pointer iconStateBad" onmouseover="tooltip('Recycle All', null, event)" onmouseout="tooltip('hide')" onclick="recycleBelow(false)">&nbsp;</button>
 								</div>
 								<div id="mapLevelContainer" class="col-xs-4">
-									Level <button aria-label="Map level -1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(-1)">&nbsp;<span class="glyphicon glyphicon-download"></span></button><input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)"><button aria-label="Map level +1" class="pointer noselect incrementBtn" onclick="incrementMapLevel(1)">&nbsp;<span class="glyphicon glyphicon-upload"></span></button>
+									Level <input onkeyup="updateMapCost()" type="number" id="mapLevelInput" onfocusout="checkMapLevelInput(this)">
 								</div>
 								<div id="mapCostContainer" class="col-xs-4 lowPad">
 									<h4 aria-description="Map Cost"><span id="mapCostFragmentCost"></span><span id="mapCostFragmentText"> Fragments</span></h4>
