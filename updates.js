@@ -5298,50 +5298,49 @@ function convertNotationsToNumber(num){
 //Buildings Specific
 function removeQueueItem(what, force) {
 	if (game.options.menu.pauseGame.enabled && !force) return;
-	var queue = document.getElementById("queueItemsHere");
-	var elem;
-	var multiCraftMax = 1;
-	if (bwRewardUnlocked("DoubleBuild")) multiCraftMax = 2;
-	if (bwRewardUnlocked("DecaBuild")) multiCraftMax = 10;
-	if (what == "first"){
-		elem = queue.firstChild;
-		var name = game.global.buildingsQueue[0].split('.');
-		if (name[1] > 1){
-			var item = name[0];
-			name[1] = parseInt(name[1], 10);
-			if (multiCraftMax > name[1]){
-				multiCraftMax = name[1];
-			}
-			name[1] -= multiCraftMax;
-			if (multiCraftMax > 1){
-				for (var x = 1; x < multiCraftMax; x++){
-					buildBuilding(item);
-				}
-			}
-			if (name[1] > 0){
-				var newQueue = name[0] + "." + name[1];
-				name = name[0] + " X" + name[1];
-				game.global.buildingsQueue[0] = newQueue;
-				elem.firstChild.innerHTML = name;
-				checkEndOfQueue();
-				return;
-			}
+	const queue = document.getElementById('queueItemsHere');
+	if (what === 'first') {
+		let multiCraftMax = bwRewardUnlocked('DecaBuild') ? 10 : bwRewardUnlocked('DoubleBuild') ? 2 : 1;
+		let [item, amount] = game.global.buildingsQueue[0].split('.');
+		amount = parseInt(amount, 10);
+		multiCraftMax = Math.min(multiCraftMax, amount);
+
+		amount -= multiCraftMax;
+		buildBuilding(item, multiCraftMax);
+
+		const elem = queue.firstChild;
+		if (amount > 0) {
+			const newQueue = `${item}.${amount}`;
+			const name = `${item} X${amount}`;
+			game.global.buildingsQueue[0] = newQueue;
+			if (elem) elem.firstChild.innerHTML = name;
+		} else {
+			queue.removeChild(elem);
+			game.global.buildingsQueue.splice(0, 1);
 		}
-		queue.removeChild(elem);
-		game.global.buildingsQueue.splice(0, 1);
+
 		checkEndOfQueue();
 		return;
 	}
-	var index = getQueueElemIndex(what, queue);
-	elem = document.getElementById(what);
-	if (!game.global.buildingsQueue[index]) index = 0;
+
+	let index = getQueueElemIndex(what, queue);
+	let queueItem = game.global.buildingsQueue[index];
+
+	if (!queueItem) {
+		queueItem = game.global.buildingsQueue[0];
+		index = 0;
+	}
+
+	const elem = document.getElementById(what);
 	queue.removeChild(elem);
-	refundQueueItem(game.global.buildingsQueue[index]);
+	refundQueueItem(queueItem);
 	game.global.buildingsQueue.splice(index, 1);
+
 	if (index === 0) {
 		game.global.crafting = "";
 		game.global.timeLeftOnCraft = 0;
 	}
+
 	checkEndOfQueue();
 }
 
@@ -5361,12 +5360,13 @@ function checkEndOfQueue(){
 }
 
 function addQueueItem(what) {
-	var elem = document.getElementById("queueItemsHere");
-	document.getElementById("noQueue").style.display = "none";
-	var name = what.split('.');
-	if (name[1] > 1) name = name[0] + " X" + prettify(name[1]);
-	else name = name[0];
-	elem.innerHTML += '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>';
+	const elem = document.getElementById('queueItemsHere');
+	const noQueue = document.getElementById('noQueue');
+	if (noQueue.style.display !== 'none') noQueue.style.display = 'none';
+	const [baseName, multiplier] = what.split('.');
+	const name = multiplier > 1 ? `${baseName} X${prettify(multiplier)}` : baseName;
+
+	elem.insertAdjacentHTML('beforeend', '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>');
 	if (game.global.nextQueueId === 0) setNewCraftItem();
 	game.global.nextQueueId++;
 }
