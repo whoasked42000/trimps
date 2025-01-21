@@ -9154,7 +9154,7 @@ function updateGeneratorInfo() {
 		stateConfigBtn.style.display = 'inline-block';
 	}
 
-	if (!usingRealTimeOffline) return;
+	if (usingRealTimeOffline) return;
 
 	updateGeneratorFuel();
 
