@@ -4751,7 +4751,7 @@ function buildBuilding(what, amt = 1) {
 	checkAchieve('housing', what);
 
 	const ownedElem = document.getElementById(what + 'Owned');
-	if (ownedElem && shouldUpdate()) ownedElem.innerHTML = building.owned;
+	if (ownedElem && !usingRealTimeOffline) ownedElem.innerHTML = building.owned;
 
 	if (typeof building.increase !== 'undefined') {
 		if (building.increase.what === 'trimps.max') {
