@@ -9522,8 +9522,10 @@ function updateGeneratorFuel() {
 
 function changeGeneratorState(to, updateOnly) {
 	if (game.global.universe === 2) return;
+	//0 passive, 1 active, 2 hybrid
 	const originalMode = game.global.generatorMode;
-	if (challengeActive('Eradicated')) to = 1;
+	const runningEradicated = challengeActive('Eradicated');
+	if (runningEradicated) to = 1;
 	if (!updateOnly) game.global.generatorMode = to;
 	to = game.global.generatorMode;
 	if (game.global.genPaused) to = runningEradicated ? 1 : 0;
