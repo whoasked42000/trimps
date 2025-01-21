@@ -9474,7 +9474,7 @@ function updateNextGeneratorTickTime() {
 	}
 
 	const message = mousedOverClock && game.permanentGeneratorUpgrades.Supervision.owned ? "<span class='icomoon icon-pause3'></span>" : usingRealTimeOffline ? 0 : prettify(Math.floor(nextTickIn + 1));
-	if (nextTickElem !== message && shouldUpdate()) nextTickElem.innerHTML = message;
+	if (nextTickElem !== message && !usingRealTimeOffline) nextTickElem.innerHTML = message;
 
 	let countingTick = Math.round((tickTime - nextTickIn) * 10) / 10;
 	countingTick = Math.round(countingTick * 10) / 10;
