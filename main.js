@@ -16785,6 +16785,7 @@ function setFormation(what) {
 		if (game.options.menu.pauseGame.enabled) return;
 		what = parseInt(what, 10);
 		swapClass("formationState", "formationStateDisabled", document.getElementById("formation" + game.global.formation));
+
 		if ((what == 4 || what == 5) && game.global.formation != 5 && game.global.formation != 4){
 			if (game.global.mapsActive) game.global.waitToScryMaps = true;
 			else game.global.waitToScry = true;
@@ -16855,6 +16856,7 @@ function setFormation(what) {
 	else swapClass("formationState", "formationStateDisabled", document.getElementById("formation0"));
 	var toSet = (what) ? what : game.global.formation;
 	swapClass("formationState", "formationStateEnabled", document.getElementById("formation" + toSet));
+	if (usingScreenReader) document.FormationInput.formations.value = toSet;
 	if (usingRealTimeOffline) offlineProgress.updateFormations();
 }
 
