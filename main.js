@@ -19369,7 +19369,7 @@ function runEverySecond(makeUp) {
 		game.stats.bestHeliumHourThisRun.evaluate();
 		const newHeliumPhHTML = `${prettify(heHr)}/hr`;
 		const heliumPhElem = document.getElementById('heliumPh');
-		if (heliumPhElem.innerHTML !== newHeliumPhHTML && shouldUpdate(1000)) {
+		if (heliumPhElem.innerHTML !== newHeliumPhHTML && !usingRealTimeOffline) {
 			heliumPhElem.innerHTML = newHeliumPhHTML;
 		}
 		if (game.global.universe === 1) checkAchieve('heliumHour');
