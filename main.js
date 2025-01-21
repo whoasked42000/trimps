@@ -15925,7 +15925,7 @@ function updateLivingStacks() {
 		if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 	} else {
 		const stacksElem = document.getElementById('livingStacks');
-		if (stacksElem.innerHTML !== stackCount) stacksElem.innerHTML = stackCount;
+		if (stacksElem.innerHTML != stackCount) stacksElem.innerHTML = stackCount;
 	}
 }
 
@@ -16010,7 +16010,7 @@ function updateNomStacks(number) {
 	if (!elem) {
 		document.getElementById('badGuyName').insertAdjacentHTML('beforeend', `<span class="badge badBadge" onmouseover="tooltip('Nom', 'customText', event, 'This Bad Guy is nice and plump from eating Trimps. Increases attack damage by 25% per stack');" onmouseout="tooltip('hide')"><span id="nomStack">${number}</span><span class="glyphicon glyphicon-scale"></span></span>`);
 	} else {
-		if (elem.innerHTML !== number) elem.innerHTML = number;
+		if (elem.innerHTML != number) elem.innerHTML = number;
 	}
 }
 
