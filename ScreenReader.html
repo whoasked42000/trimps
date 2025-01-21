@@ -654,35 +654,36 @@
 									<div id='colStances' class="col-xs-3" style="padding-left: 5px;">
 										<div class="row noPad" style="padding-right: 15px;">
 											<div id='form0Container' class="formFifth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('0')" id="formation0" onmouseover="tooltip('No Formation', 'customText', event, 'Clear your formations, return to normal stats, and derp around the battlefield. (Hotkeys: X or 1)')" onmouseout="tooltip('hide')">
-													X
-												</div>
+												<input type="radio" name="formations" aria-label="No Formation" class="formationBtn pointer formationStateDisabled" onclick="setFormation('0')" id="formation0" value="0">
+													
+												</input>
 											</div>
 											<div id='form1Container' class="formFifth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('1')" id="formation1" onmouseover="tooltip('Heap Formation', 'customText', event, 'Trimps gain 4x health but lose half of their attack and block. (Hotkeys: H or 2)')" onmouseout="tooltip('hide')">
-													H
-												</div>
+												<input type="radio" name="formations"  aria-label="Heap" class="formationBtn pointer formationStateDisabled" onclick="setFormation('1')" id="formation1" value="1">
+													
+												</input>
 											</div>
 											<div id='form2Container' class="formFifth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('2')" id="formation2" onmouseover="tooltip('Dominance Formation', 'customText', event, 'Trimps gain 4x attack but lose half of their health and block. (Hotkeys: D or 3)')" onmouseout="tooltip('hide')">
-													D
-												</div>										
+												<input type="radio" name="formations" aria-label="Dominance" class="formationBtn pointer formationStateDisabled" onclick="setFormation('2')" id="formation2" value="2">
+													
+												</input>										
 											</div>
 											<div id='form3Container' class="formFifth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('3')" id="formation3" onmouseover="tooltip('Barrier Formation', 'customText', event, 'Trimps gain 4x block and 50% block pierce reduction but lose half of their health and attack. (Hotkeys: B or 4)')" onmouseout="tooltip('hide')">
-													B
-												</div>											
+												<input type="radio" name="formations" aria-label="Barrier" class="formationBtn pointer formationStateDisabled" onclick="setFormation('3')" id="formation3" value="3">
+													
+												</dinputiv>											
 											</div>
 											<div id='form4Container' class="formFifth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('4')" id="formation4" onmouseover="tooltip('Scryer Formation', null, event)" onmouseout="tooltip('hide')">
-													S
-												</div>											
+												<input type="radio" name="formations" aria-label="Scryer"class="formationBtn pointer formationStateDisabled" onclick="setFormation('4')" id="formation4" value="4">
+													
+												</input>											
 											</div>
 											<div id='form5Container' class="formSixth noPad">
-												<div class="formationBtn pointer formationStateDisabled" onclick="setFormation('5')" id="formation5" onmouseover="natureTooltip(event, 'formation')" onmouseout="tooltip('hide')">
-													N
-												</div>											
+												<input type="radio" name="formations" aria-label="Wind" class="formationBtn pointer formationStateDisabled" onclick="setFormation('5')" id="formation5" value="5">
+													
+												</input>											
 											</div>
+										</form>
 										</div>
 									</div>
 								</div>

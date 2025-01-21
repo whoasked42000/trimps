@@ -7427,7 +7427,7 @@ function displaySelectedHeirloom(modSelected, selectedIndex, fromTooltip, locati
 	var heirloom = getSelectedHeirloom(locationOvr, indexOvr);
 	var icon = getHeirloomIcon(heirloom);
 	var animated = (game.options.menu.showHeirloomAnimations.enabled) ? "animated " : "";
-	var html = '<div class="selectedHeirloomItem ' + animated + 'heirloomRare' + heirloom.rarity + '"><div class="row selectedHeirloomRow"><div onclick="tooltip(\'Change Heirloom Icon\', null, \'update\')" class="col-xs-2 selectedHeirloomIcon" id="' + ((fromTooltip) ? 'tooltipHeirloomIcon' : 'selectedHeirloomIcon') + '"><span class="' + icon + '"></span></div><div class="col-xs-10"><h5 aria-label="Rename Heirloom" onclick="renameHeirloom(';
+	var html = '<div class="selectedHeirloomItem ' + animated + 'heirloomRare' + heirloom.rarity + '"><div class="row selectedHeirloomRow"><div onclick="tooltip(\'Change Heirloom Icon\', null, \'update\')" class="col-xs-2 selectedHeirloomIcon" id="' + ((fromTooltip) ? 'tooltipHeirloomIcon' : 'selectedHeirloomIcon') + '"><span class="' + icon + '"></span></div><div class="col-xs-10"><h5 onclick="renameHeirloom(';
 	if (fromPopup) html += 'false, true';
 	html += ')" id="selectedHeirloomTitle" style="margin: 10px 0">' + heirloom.name + '</h5> '
 	if (!fromTooltip) html += '<span id="renameContainer"></span>';
@@ -8229,7 +8229,7 @@ function handlePoisonDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip('Poisoned', null, event)" onmouseout="tooltip('hide')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Poisoned", false, "icon-flask", false, ["poisonEmpowermentIcon", "poisonEmpowermentText"])); 
 		elem = document.getElementById('poisonEmpowermentIcon');
 	}
 
@@ -8258,7 +8258,7 @@ function handleIceDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip('Chilled', null, event)" onmouseout="tooltip('hide')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Chilled", false, "glyphicon-certificate", false, ["iceEmpowermentIcon", "iceEmpowermentText"])); 
 		elem = document.getElementById('iceEmpowermentIcon');
 	}
 
@@ -8286,7 +8286,7 @@ function handleWindDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip('Breezy', null, event)" onmouseout="tooltip('hide')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Breezy", false, "icon-air", false, ["windEmpowermentIcon", "windEmpowermentText"]));
 		elem = document.getElementById('windEmpowermentIcon');
 	}
 
@@ -8320,7 +8320,7 @@ function handleDominationDebuff() {
 		return;
 	}
 	if (elem == null){
-		document.getElementById('badDebuffSpan').innerHTML += '<span class="badge badBadge" id="dominationDebuffContainer" onmouseover="tooltip(\'Domination' + ((dominating) ? 'Dominating' : 'Weak') + '\', null, event)" onmouseout="tooltip(\'hide\')"><span id="dominationDebuffIcon" class="icomoon icon-' + ((dominating) ? 'podcast' : 'feed') + '"></span></span>';
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML(`Domination${(dominating ? 'Dominating' : 'Weak')}`, null, `icon-${(dominating ? 'podcast' : 'feed')}`, false, ["dominationDebuffContainer", "dominationDebuffIcon"]));
 		return;
 	}
 	elem.style.display = 'inline-block';
@@ -8328,11 +8328,13 @@ function handleDominationDebuff() {
 	if (!iconElem) return;
 	if (dominating && iconElem.className != 'icomoon icon-podcast') {
 		iconElem.className = 'icomoon icon-podcast';
-		elem.onmouseover = function (){tooltip("DominationDominating", null, event)}
+		if (usingScreenReader) elem.onkeydown = function(){keyTooltip(event, 'DominationDominating', null, 'null')}; 
+		else elem.onmouseover = function (){tooltip("DominationDominating", null, event)}
 	}
 	else if (!dominating && iconElem.className != 'icomoon icon-feed'){
 		iconElem.className = 'icomoon icon-feed';
-		elem.onmouseover = function (){tooltip("DominationWeak", null, event)}
+		if (usingScreenReader) elem.onkeydown = function(){keyTooltip(event, 'DominationWeak', null, 'null')};
+		else elem.onmouseover = function (){tooltip("DominationWeak", null, event)}
 	}
 }
 
@@ -11211,13 +11213,24 @@ function getPierceAmt(){
 	return base;
 }
 
-function makeBadGuyEffectHTML(title, text, icon, spanClasses="") {
+function makeBadGuyEffectHTML(title, text, icon, spanClasses="", ids=[]) {
 	if (icon.includes("glyphicon")) icon += " glyphicon"
 	else if (icon.includes("icon")) icon += " icomoon"
-	let html = '<div class="badge badBadge '+ spanClasses + '"'
-	if (usingScreenReader) html += 'tabindex=0 aria-description="' + title + '. '+ text + '">'+ title;
-	else html += 'onmouseover="tooltip(\'' + title + '\', \'customText\', event, \''+text+'\')" onmouseout="tooltip(\'hide\')"><span class="' + icon + '"></span>'
-	html += '</div>'
+	let tooltip = ``
+	let display = ``
+	let containerID = (ids[0] ? `id="${ids[0]}"`: "")
+	let iconID = (ids[1] ? `id="${ids[1]}"`: "")
+	if (usingScreenReader) {
+		tooltip = `tabindex=0 onkeydown="keyTooltip(event, '${title}', ${((text) ? "'customText'" : 'null')}, '${text}')"`
+		display = `${title}'¿'` // SRTODO decide what to do about these 
+	}
+	else {
+		tooltip = `onmouseover="tooltip('${title}', ${((text) ? "'customText'" : 'null')}, event, '${text}')" onmouseout="tooltip('hide')"`
+	}
+	let html = `<div ${containerID} class="badge badBadge ${spanClasses ? spanClasses : ""}" ${tooltip}>`
+	html += iconID.includes("Text") ? `<span ${iconID}></span><span class="${icon}"></span></div>` : `<span ${iconID} class="${icon}"></span>`
+	html += `${display}</div>`
+	
 	return html
 }
 
@@ -20420,6 +20433,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		formation2: ['Dominance Formation', 'customText', 'Trimps gain 4x attack but lose half of their health and block. (Hotkeys: D or 3)'],
 		formation3: ['Barrier Formation', 'customText', 'Trimps gain 4x block and 50% block pierce reduction but lose half of their health and attack. (Hotkeys: B or 4)'],
 		formation4: ['Scryer Formation', null],
+		formation5: ['formation', 'Wind'],
 
 		chainHolder: ['MagnetoShriek', null],
 		badCanCrit: ['Crushing Blows', 'customText', 'Your current health is higher than your block, making you vulnerable to critical strikes from your enemies. Better fix that...'],
