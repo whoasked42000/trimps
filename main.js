@@ -5311,182 +5311,255 @@ function getDesiredGenes(ovr){
 var DecimalBreed = Decimal.clone({precision: 30, rounding: 4});
 var missingTrimps = new DecimalBreed(0);
 var srLastBreedTime = "";
+var breedCache = {
+	modifiers: {
+		trimps: 0,
+		book: 0,
+		nursery: 0,
+		venimp: 0,
+		brokenPlanet: 0,
+		pheromones: 0,
+		quickTrimps: 0,
+		dailyDysfunctional: 0,
+		dailyToxic: 0,
+		chalToxic: 0,
+		chalArchaeology: 0,
+		chalQuagmire: 0,
+		voidBreed: 0,
+		heirloom: 0,
+		genes: 0,
+		mutGeneAttack: 0,
+		mutGeneHealth: 0
+	},
+	potencyMod: 0,
+	potencyModInitial: 0,
+	logPotencyMod: 0,
+	minPotencyMod: new DecimalBreed(1e-15)
+};
+
 function breed() {
-    var trimps = game.resources.trimps;
-	checkAchieve("trimps", trimps.owned);
-    
-	var trimpsMax = trimps.realMax();
-	var employedTrimps = trimps.employed;
-	if (game.permaBoneBonuses.multitasking.owned) employedTrimps *= (1 - game.permaBoneBonuses.multitasking.mult());
-	var maxBreedable = new DecimalBreed(trimpsMax).minus(employedTrimps);
-	if (missingTrimps.cmp(0) < 0) missingTrimps = new DecimalBreed(0);
-	var decimalOwned = missingTrimps.add(trimps.owned);
-	var breeding = decimalOwned.minus(employedTrimps);
-    if (breeding.cmp(2) == -1 || game.global.challengeActive == "Trapper" || game.global.challengeActive == "Trappapalooza") {
-        updatePs(0, true);
-		document.getElementById("trimpsTimeToFill").innerHTML = "";
-		srLastBreedTime = "";
-        return;
-	}
-	var potencyMod = new DecimalBreed(trimps.potency);
-	//Add potency (book)
-	if (game.upgrades.Potency.done > 0) potencyMod = potencyMod.mul(Math.pow(1.1, game.upgrades.Potency.done));
-	//Add Nurseries
-	if (game.buildings.Nursery.owned > 0) potencyMod = potencyMod.mul(Math.pow(1.01, game.buildings.Nursery.owned));
-	//Add Venimp
-	if (game.unlocks.impCount.Venimp > 0) potencyMod = potencyMod.mul(Math.pow(1.003, game.unlocks.impCount.Venimp));
-	//Broken Planet
-	if (game.global.brokenPlanet) potencyMod = potencyMod.div(10);
-	//Pheromones
-	potencyMod = potencyMod.mul(1+ (getPerkLevel("Pheromones") * game.portal.Pheromones.modifier));
+	const breedElem = document.getElementById('trimpsTimeToFill');
+	const trimps = game.resources.trimps;
+	checkAchieve('trimps', trimps.owned);
 
-	//Quick Trimps
-	if (game.singleRunBonuses.quickTrimps.owned) potencyMod = potencyMod.mul(2);
-	//Challenges
-	if (game.global.challengeActive == "Daily"){
-		if (typeof game.global.dailyChallenge.dysfunctional !== 'undefined'){
-			potencyMod = potencyMod.mul(dailyModifiers.dysfunctional.getMult(game.global.dailyChallenge.dysfunctional.strength));
-		}
-		if (typeof game.global.dailyChallenge.toxic !== 'undefined'){
-			potencyMod = potencyMod.mul(dailyModifiers.toxic.getMult(game.global.dailyChallenge.toxic.strength, game.global.dailyChallenge.toxic.stacks));
-		}
-	}
-	if (challengeActive("Toxicity") && game.challenges.Toxicity.stacks > 0){
-		potencyMod = potencyMod.mul(Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks));
-	}
-	if (game.global.challengeActive == "Archaeology"){
-		potencyMod = potencyMod.mul(game.challenges.Archaeology.getStatMult("breed"));
-	}
-	if (game.global.voidBuff == "slowBreed"){
-		potencyMod = potencyMod.mul(0.2);
-	}
-	if (game.global.challengeActive == "Quagmire"){
-		potencyMod = potencyMod.mul(game.challenges.Quagmire.getExhaustMult());
-	}
-	potencyMod = calcHeirloomBonusDecimal("Shield", "breedSpeed", potencyMod);
-	//console.log(getDesiredGenes(potencyMod.toNumber()));
+	const trimpsMax = trimps.realMax();
+	let employedTrimps = trimps.employed;
+	if (game.permaBoneBonuses.multitasking.owned) employedTrimps *= 1 - game.permaBoneBonuses.multitasking.mult();
 
-	//Geneticist
-	if (game.jobs.Geneticist.owned > 0) potencyMod = potencyMod.mul(Math.pow(.98, game.jobs.Geneticist.owned));
-	//Mutators
-	//Gene Attack
-	if (game.global.universe == 2 && u2Mutations.tree.GeneAttack.purchased) potencyMod = potencyMod.div(50);
-	//Gene Health
-	if (game.global.universe == 2 && u2Mutations.tree.GeneHealth.purchased) potencyMod = potencyMod.div(50);
-	breeding = potencyMod.mul(breeding);
-    updatePs(breeding.toNumber(), true);
-	potencyMod = potencyMod.div(10).add(1);
-	var timeRemaining = DecimalBreed.log10(maxBreedable.div(decimalOwned.minus(employedTrimps))).div(DecimalBreed.log10(potencyMod)).div(10);
-	//Calculate full breed time
-	var fullBreed = "";
-	var currentSend = game.resources.trimps.getCurrentSend();
-	var totalTime = DecimalBreed.log10(maxBreedable.div(maxBreedable.minus(currentSend))).div(DecimalBreed.log10(potencyMod)).div(10);
-	//breeding, potencyMod, timeRemaining, and totalTime are DecimalBreed
-	game.global.breedTime = currentSend / breeding.toNumber();
-	if (game.jobs.Geneticist.locked == false && game.global.Geneticistassist && game.global.GeneticistassistSetting > 0){
-		var target = new Decimal(game.global.GeneticistassistSetting);
-		//tired of typing Geneticistassist
-		var GAElem = document.getElementById('Geneticistassist');
-		var GAIndicator = document.getElementById('GAIndicator');
-		var canRun = false;
-		var now = new Date().getTime();
-		if (lastGAToggle == -1) canRun = true;
-		else if (new Date().getTime() > lastGAToggle + 2000){
+	const maxBreedable = new DecimalBreed(trimpsMax).minus(employedTrimps);
+	if (missingTrimps.cmp(0) === -1) missingTrimps = new DecimalBreed(0);
+	let decimalOwned = missingTrimps.add(trimps.owned);
+	let breeding = decimalOwned.minus(employedTrimps);
+	if (breeding.cmp(2) === -1 || challengeActive('Trapper') || challengeActive('Trappapalooza')) {
+		updatePs(0, true);
+		if (breedElem.innerHTML !== '') breedElem.innerHTML = '';
+		srLastBreedTime = '';
+		return;
+	}
+
+	const challenges = {
+		Daily: challengeActive('Daily'),
+		Toxicity: challengeActive('Toxicity'),
+		Archaeology: challengeActive('Archaeology'),
+		Quagmire: challengeActive('Quagmire')
+	};
+
+	let potencyModifiers = {
+		trimps: trimps.potency,
+		book: game.upgrades.Potency.done,
+		nursery: game.buildings.Nursery.owned,
+		venimp: game.unlocks.impCount.Venimp,
+		brokenPlanet: game.global.brokenPlanet,
+		pheromones: getPerkLevel('Pheromones'),
+		quickTrimps: game.singleRunBonuses.quickTrimps.owned,
+		dailyDysfunctional: challenges.Daily && typeof game.global.dailyChallenge.dysfunctional !== 'undefined' ? dailyModifiers.dysfunctional.getMult(game.global.dailyChallenge.dysfunctional.strength) : 0,
+		dailyToxic: challenges.Daily && typeof game.global.dailyChallenge.toxic !== 'undefined' ? dailyModifiers.toxic.getMult(game.global.dailyChallenge.toxic.strength, game.global.dailyChallenge.toxic.stacks) : 0,
+		chalToxic: challenges.Toxicity ? game.challenges.Toxicity.stacks : 0,
+		chalArchaeology: challenges.Archaeology ? game.challenges.Archaeology.getStatMult('breed') : 1,
+		chalQuagmire: challenges.Quagmire ? game.challenges.Quagmire.getExhaustMult() : 1,
+		voidBreed: game.global.voidBuff === 'slowBreed',
+		heirloom: getHeirloomBonus('Shield', 'breedSpeed'),
+		genes: game.jobs.Geneticist.owned,
+		mutGeneAttack: game.global.universe === 2 && u2Mutations.tree.GeneAttack.purchased,
+		mutGeneHealth: game.global.universe === 2 && u2Mutations.tree.GeneHealth.purchased
+	};
+
+	// If modifiers have changed, recalculate potencyMod.
+	let potencyMod;
+	if (
+		Object.keys(potencyModifiers)
+			.map((k) => potencyModifiers[k] === breedCache.modifiers[k])
+			.every(Boolean)
+	) {
+		breeding = breedCache.potencyModInitial.mul(breeding);
+		potencyMod = breedCache.potencyMod;
+	} else {
+		potencyMod = trimps.potency;
+		if (potencyModifiers.book > 0) potencyMod *= Math.pow(1.1, potencyModifiers.book);
+		if (potencyModifiers.nursery > 0) potencyMod *= Math.pow(1.01, potencyModifiers.nursery);
+		if (potencyModifiers.venimp) potencyMod *= Math.pow(1.003, potencyModifiers.venimp);
+		if (potencyModifiers.brokenPlanet) potencyMod /= 10;
+		if (potencyModifiers.pheromones > 0) potencyMod *= 1 + potencyModifiers.pheromones * game.portal.Pheromones.modifier;
+		if (potencyModifiers.quickTrimps) potencyMod *= 2;
+		if (challenges.Daily && potencyModifiers.dailyDysfunctional > 0) potencyMod *= potencyModifiers.dailyDysfunctional;
+		if (challenges.Daily && potencyModifiers.dailyToxic > 0) potencyMod *= potencyModifiers.dailyToxic;
+		if (challenges.Toxicity && potencyModifiers.chalToxic > 0) potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, potencyModifiers.chalToxic);
+		if (challenges.Archaeology) potencyMod *= potencyModifiers.chalArchaeology;
+		if (challenges.Quagmire) potencyMod *= potencyModifiers.chalQuagmire;
+		if (potencyModifiers.voidBreed) potencyMod *= 0.2;
+		potencyMod = calcHeirloomBonus('Shield', 'breedSpeed', potencyMod); 
+		if (potencyModifiers.mutGeneAttack) potencyMod /= 50;
+		if (potencyModifiers.mutGeneHealth) potencyMod /= 50;
+		
+		if (potencyModifiers.genes > 0) potencyMod = DecimalBreed(potencyMod).mul(Math.pow(0.98, potencyModifiers.genes)); // Special care for genes.
+		else potencyMod = DecimalBreed(potencyMod);
+
+		breedCache.potencyModInitial = potencyMod;
+		breeding = potencyMod.mul(breeding);
+		potencyMod = potencyMod.div(10).add(1);
+		
+		// Cache the results.
+		breedCache.modifiers = potencyModifiers;
+		breedCache.potencyMod = potencyMod;
+		breedCache.logPotencyMod = DecimalBreed.log10(potencyMod).mul(10);
+
+		if (breedCache.logPotencyMod.cmp(0) === 0) {
+			breedCache.logPotencyMod = breedCache.minPotencyMod;
+		}
+	}
+
+	updatePs(breeding.toNumber(), true);
+	const logPotencyMod = breedCache.logPotencyMod;
+
+	// Attempt to get these two vars at low precision. if it's zero, recalc using Decimal.
+	let timeRemaining = DecimalBreed(Math.log10(maxBreedable / (decimalOwned - employedTrimps)) / logPotencyMod);
+	if (missingTrimps.cmp(0) === 1 && timeRemaining == 0) {
+		timeRemaining = DecimalBreed.log10(maxBreedable.div(decimalOwned.minus(employedTrimps))).div(logPotencyMod);
+	}
+	
+	// Calculate full breed time
+	let fullBreed = '';
+	const currentSend = trimps.getCurrentSend();
+	let totalTime = DecimalBreed(Math.log10(maxBreedable / (maxBreedable - currentSend)) / logPotencyMod);
+
+	if (totalTime == 0) {
+		totalTime = DecimalBreed.log10(maxBreedable.div(maxBreedable.minus(currentSend))).div(logPotencyMod);
+	}
+
+	game.global.breedTime = currentSend / breeding;
+
+	if (!game.jobs.Geneticist.locked && game.global.Geneticistassist && game.global.GeneticistassistSetting > 0) {
+		const target = new Decimal(game.global.GeneticistassistSetting);
+		const now = new Date().getTime();
+
+		let canRun = false;
+		if (lastGAToggle === -1) {
+			canRun = true;
+		} else if (now > lastGAToggle + 2000) {
 			lastGAToggle = -1;
 			canRun = true;
 		}
-		if (!GAElem){
-			if (usingRealTimeOffline){
-				drawAllJobs(true);
-				GAElem = document.getElementById('Geneticistassist');
-				GAIndicator = document.getElementById('GAIndicator');
-			}
+
+		let GAElem = document.getElementById('Geneticistassist');
+		let GAIndicator = document.getElementById('GAIndicator');
+		if (!GAElem && usingRealTimeOffline) {
+			drawAllJobs(true);
+			GAElem = document.getElementById('Geneticistassist');
+			GAIndicator = document.getElementById('GAIndicator');
 		}
-		if (GAElem && canRun){
-			var thresh = new DecimalBreed(totalTime.mul(0.02));
-			var compareTime;
-			if (timeRemaining.cmp(1) > 0 && timeRemaining.cmp(target.add(1)) > 0){
+
+		if (GAElem && canRun) {
+			let thresh = new DecimalBreed(totalTime.mul(0.02));
+			if (!thresh.isFinite()) thresh = new Decimal(0);
+			let compareTime;
+			let htmlMessage = '';
+
+			if (timeRemaining.cmp(1) === 1 && timeRemaining.cmp(target.add(1)) === 1) {
 				compareTime = new DecimalBreed(timeRemaining.add(-1));
-			}
-			else {
+			} else {
 				compareTime = new DecimalBreed(totalTime);
 			}
-			if (!thresh.isFinite()) thresh = new Decimal(0);
-			if (!compareTime.isFinite()) compareTime = new Decimal(999);
-			var genDif = new DecimalBreed(Decimal.log10(target.div(compareTime)).div(Decimal.log10(1.02))).ceil();
 
-			if (compareTime.cmp(target) < 0) {
-				swapClass("state", "stateHiring", GAElem);
-				if (game.resources.food.owned * 0.01 < getNextGeneticistCost()){
-					GAIndicator.innerHTML = " (<span style='font-size: 0.8em' class='glyphicon glyphicon-apple'></span>)";
-				}
-				else if (timeRemaining.cmp(1) < 0 || target.minus((now - game.global.lastSoldierSentAt) / 1000).cmp(timeRemaining) > 0){
-					if (genDif.cmp(0) > 0){
-						if (genDif.cmp(10) > 0) genDif = new Decimal(10);
+			if (!compareTime.isFinite()) compareTime = new Decimal(999);
+
+			if (compareTime.cmp(target) === -1) {
+				let genDif = Decimal.log10(target.div(compareTime)).div(0.00860017176191756).ceil(); // Math.log10(1.02) = 0.00860017176191756
+				swapClass('state', 'stateHiring', GAElem);
+				if (game.resources.food.owned * 0.01 < getNextGeneticistCost()) {
+					htmlMessage = " (<span style='font-size: 0.8em' class='glyphicon glyphicon-apple'></span>)";
+				} else if (timeRemaining.cmp(1) === -1 || target.minus((now - game.global.lastSoldierSentAt) / 1000).cmp(timeRemaining) === 1) {
+					if (genDif.cmp(0) === 1) {
+						if (genDif.cmp(10) === 1) genDif = new Decimal(10);
 						addGeneticist(genDif.toNumber());
 					}
-					GAIndicator.innerHTML = " (+)";
+					htmlMessage = ' (+)';
+				} else {
+					htmlMessage = " (<span style='font-size: 0.8em' class='icmoon icon-clock3'></span>)";
 				}
-				else GAIndicator.innerHTML = " (<span style='font-size: 0.8em' class='icmoon icon-clock3'></span>)";
-			}
-			else if (compareTime.add(thresh.mul(-1)).cmp(target) > 0  || (potencyMod.cmp(1) == 0)){
+			} else if (compareTime.add(thresh.mul(-1)).cmp(target) === 1 || potencyMod.cmp(1) === 0) {
+				let genDif = Decimal.log10(target.div(compareTime)).div(0.00860017176191756).ceil(); // Math.log10(1.02) = 0.00860017176191756
 				if (!genDif.isFinite()) genDif = new Decimal(-1);
-				swapClass("state", "stateFiring", GAElem);
-				GAIndicator.innerHTML = " (-)";
-				if (genDif.cmp(0) < 0 && game.options.menu.gaFire.enabled != 2){
-					if (genDif.cmp(-10) < 0) genDif = new Decimal(-10);
+				swapClass('state', 'stateFiring', GAElem);
+				htmlMessage = ' (-)';
+				if (genDif.cmp(0) === -1 && game.options.menu.gaFire.enabled !== 2) {
+					if (genDif.cmp(-10) === -1) genDif = new Decimal(-10);
 					removeGeneticist(genDif.abs().toNumber());
 				}
+			} else {
+				swapClass('state', 'stateHappy', GAElem);
+				htmlMessage = '';
 			}
-			else {
-				swapClass("state", "stateHappy", GAElem);
-				GAIndicator.innerHTML = "";
-			}
-			
+
+			if (GAIndicator && GAIndicator.innerHTML !== htmlMessage) GAIndicator.innerHTML = htmlMessage;
 		}
 	}
-	
+
 	timeRemaining = timeRemaining.toNumber();
 	totalTime = totalTime.toNumber();
 	decimalOwned = decimalOwned.add(breeding.div(10));
-	timeRemaining = (game.options.menu.showFullBreed.enabled > 0) ? timeRemaining.toFixed(1) : Math.ceil(timeRemaining);
-	var remainingTime = timeRemaining;
-	timeRemaining += " Secs";
-		//Display full breed time if desired
-	var totalTimeText = Math.ceil(totalTime * 10) / 10;
-	if (game.options.menu.showFullBreed.enabled){
-		fullBreed = totalTimeText + " Secs";
-		timeRemaining += " / " + fullBreed;
+	timeRemaining = game.options.menu.showFullBreed.enabled > 0 ? timeRemaining.toFixed(1) : Math.ceil(timeRemaining);
+	const remainingTime = timeRemaining;
+
+	// Display full breed time if desired
+	const totalTimeText = Math.ceil(totalTime * 10) / 10;
+
+	if (game.options.menu.showFullBreed.enabled) {
+		fullBreed = `${totalTimeText} Secs`;
+		timeRemaining = `${timeRemaining} / ${fullBreed}`;
 	}
 
 	if (decimalOwned.cmp(trimpsMax) >= 0 && trimps.owned >= trimpsMax) {
 		trimps.owned = trimpsMax;
 		missingTrimps = new DecimalBreed(0);
-		var updateGenes = false;
-		if (game.options.menu.geneSend.enabled == 3 && game.global.lastBreedTime / 1000 < game.global.GeneticistassistSetting){
+		let updateGenes = false;
+		if (game.options.menu.geneSend.enabled === 3 && game.global.lastBreedTime / 1000 < game.global.GeneticistassistSetting) {
 			game.global.lastBreedTime += 100;
-			if (remainingTime == 0.0)
-				updateGenes = true;
+			if (remainingTime === 0) updateGenes = true;
 		}
-		srLastBreedTime = (fullBreed) ? fullBreed : "";
-		document.getElementById("trimpsTimeToFill").innerHTML = srLastBreedTime;
-		if (updateGenes || (!game.global.fighting && totalTimeText == "0.0")){
+		srLastBreedTime = fullBreed ? fullBreed : '';
+		if (breedElem.innerHTML !== srLastBreedTime) breedElem.innerHTML = srLastBreedTime;
+		if (updateGenes || (!game.global.fighting && totalTimeText === '0.0')) {
 			updateStoredGenInfo(breeding.toNumber());
 		}
-        return;
-    }
-	document.getElementById("trimpsTimeToFill").innerHTML = timeRemaining;
-	srLastBreedTime = timeRemaining;
-	var oldTrimps = trimps.owned;
-	trimps.owned = decimalOwned.toNumber();
-	if (decimalOwned.cmp(trimps.owned) != 0 && breeding.cmp(0) > 0){
-		missingTrimps = decimalOwned.minus(trimps.owned);
+		return;
 	}
-	else {
+
+	srLastBreedTime = timeRemaining;
+	if (!usingRealTimeOffline && breedElem.innerHTML !== timeRemaining) breedElem.innerHTML = timeRemaining;
+	trimps.owned = decimalOwned.toNumber();
+
+	if (decimalOwned.cmp(trimps.owned) !== 0 && breeding.cmp(0) === 1) {
+		missingTrimps = decimalOwned.minus(trimps.owned);
+	} else {
 		missingTrimps = new DecimalBreed(0);
 	}
-	if (trimps.owned >= trimpsMax) trimps.owned = trimpsMax;
-	else game.global.realBreedTime += 100;
+
+	if (trimps.owned >= trimpsMax) {
+		trimps.owned = trimpsMax;
+	} else {
+		game.global.realBreedTime += 100;
+	}
+
 	game.global.lastBreedTime += 100;
 	updateStoredGenInfo(breeding);
 }
