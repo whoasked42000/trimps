@@ -15150,7 +15150,7 @@ function fight(makeUp) {
 					if (game.talents.mapBattery.purchased && game.global.mapBonus === 10) innerText = "<span class='mapBonus10'>" + innerText + '</span>';
 					const mapBtnElem = document.getElementById('mapsBtnText');
 					const mapBtnText = `Maps (${innerText})`;
-					if (mapBtnElem.innerHTML !== mapBtnText && shouldUpdate(500)) mapBtnElem.innerHTML = mapBtnText;
+					if (mapBtnElem.innerHTML !== mapBtnText && !usingRealTimeOffline) mapBtnElem.innerHTML = mapBtnText;
 				}
 				game.global.lastClearedMapCell = -1;
 				buildMapGrid(game.global.currentMapId);
@@ -15216,7 +15216,7 @@ function fight(makeUp) {
 	let cellAttack = calculateDamage(cell.attack, false, false, false, cell);
 	const badAttackElem = document.getElementById('badGuyAttack');
 	const badAttackText = calculateDamage(cell.attack, true, false, false, cell);
-	if (badAttackElem.innerHTML != badAttackText && shouldUpdate(500)) badAttackElem.innerHTML = badAttackText;
+	if (badAttackElem.innerHTML != badAttackText && !usingRealTimeOffline) badAttackElem.innerHTML = badAttackText;
 	let badCrit = false;
 
 	if (challengeActive('Crushed')) {
@@ -15267,7 +15267,7 @@ function fight(makeUp) {
 	let trimpAttack = calculateDamage(game.global.soldierCurrentAttack, false, true);
 	const goodAttackElem = document.getElementById('goodGuyAttack');
 	const goodAttackText = calculateDamage(game.global.soldierCurrentAttack, true, true);
-	if (goodAttackElem.innerHTML != goodAttackText && shouldUpdate(500)) goodAttackElem.innerHTML = goodAttackText;
+	if (goodAttackElem.innerHTML != goodAttackText && !usingRealTimeOffline) goodAttackElem.innerHTML = goodAttackText;
 
 	updateTitimp();
 	let critTier = 0;
