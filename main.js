@@ -10108,7 +10108,7 @@ function setVoidCorruptionIcon(regularMap) {
 	}
 
 	const corruptionElem = document.getElementById('corruptionBuff');
-	const elemText = `<span class="badge badBadge voidBadge" onmouseover="tooltip('${title}', 'customText', event, '${text}')" onmouseout="tooltip('hide')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;`;
+	const elemText = makeBadGuyEffectHTML(title, text, "glyphicon-plus", "voidBadge");
 	if (corruptionElem.innerHTML !== elemText) corruptionElem.innerHTML = elemText;
 }
 
@@ -11211,6 +11211,16 @@ function getPierceAmt(){
 	return base;
 }
 
+function makeBadGuyEffectHTML(title, text, icon, spanClasses="") {
+	if (icon.includes("glyphicon")) icon += " glyphicon"
+	else if (icon.includes("icon")) icon += " icomoon"
+	let html = '<div class="badge badBadge '+ spanClasses + '"'
+	if (usingScreenReader) html += 'tabindex=0 aria-description="' + title + '. '+ text + '">'+ title;
+	else html += 'onmouseover="tooltip(\'' + title + '\', \'customText\', event, \''+text+'\')" onmouseout="tooltip(\'hide\')"><span class="' + icon + '"></span>'
+	html += '</div>'
+	return html
+}
+
 function startFight() {
 	if (game.global.challengeActive && typeof game.challenges[game.global.challengeActive].onStartFight === 'function') {
 		game.challenges[game.global.challengeActive].onStartFight();
@@ -11318,17 +11328,16 @@ function startFight() {
 	}
 
 	if (cell.name === 'Omnipotrimp' && game.global.world % 5 === 0 && !game.global.spireActive) {
-		badName += ' <span class="badge badBadge Magma" onmouseover="tooltip(\'Superheated\', \'customText\', event, \'This Omnipotrimp is Superheated, and will explode on death.\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-fire2"></span></span>';
+		badName += makeBadGuyEffectHTML("Superheated", "This Omnipotrimp is Superheated, and will explode on death.", "icon-fire2", "Magma");
 	}
-
 	if (game.global.brokenPlanet && !game.global.mapsActive) {
-		badName += " <span class=\"badge badBadge\" onmouseover=\"tooltip('Pierce', 'customText', event, '" + prettify(getPierceAmt() * 100) + '% of the damage from this Bad Guy pierces through block\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-tint"></span></span>';
+		badName += makeBadGuyEffectHTML("Pierce", prettify(getPierceAmt() * 100) +  "% of the damage from this Bad Guy pierces through block", "glyphicon-tint")
 	}
-
-	if (challengeActive('Glass') || challengeActive('Slow') || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation === 'Corruption') && !challengeActive('Coordinate') && !challengeActive('Nom'))) badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Fast\', \'customText\', event, \'This Bad Guy is fast and attacks first\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-forward"></span></span>';
-
+	if (challengeActive('Glass') || challengeActive('Slow') || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation === 'Corruption') && !challengeActive('Coordinate') && !challengeActive('Nom'))) {
+		badName += makeBadGuyEffectHTML("Fast", "This Bad Guy is fast and attacks first", "glyphicon-forward");
+	}
 	if (challengeActive('Electricity') || challengeActive('Mapocalypse')) {
-		badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Electric\', \'customText\', event, \'This Bad Guy is electric and stacks a debuff on your Trimps\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-power-cord"></span></span>';
+		badName += makeBadGuyEffectHTML("Electric", "This Bad Guy is electric and stacks a debuff on your Trimps", "icon-power-cord")
 	}
 
 	const badGuyName = document.getElementById('badGuyName');

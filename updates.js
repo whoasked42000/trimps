@@ -1763,6 +1763,12 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 	document.getElementById("tipText" + tipNum).innerHTML = tooltipText;
 	document.getElementById("tipCost" + tipNum).innerHTML = costText;
 	elem.style.display = "block";
+	// apply to all tooltips
+	let confirmBtn = document.getElementById("confirmTooltipBtn")
+	if (confirmBtn) { 
+		confirmBtn.setAttribute("role", "button")
+		confirmBtn.setAttribute("tabindex", "0")
+	}
 	if (ondisplay !== null)
 		ondisplay();
 	if (event != "update") positionTooltip(elem, event, renameBtn);
