@@ -11212,719 +11212,786 @@ function getPierceAmt(){
 }
 
 function startFight() {
-	if (game.global.challengeActive && typeof game.challenges[game.global.challengeActive].onStartFight === 'function'){
+	if (game.global.challengeActive && typeof game.challenges[game.global.challengeActive].onStartFight === 'function') {
 		game.challenges[game.global.challengeActive].onStartFight();
 	}
+
 	game.global.battleCounter = 0;
-    document.getElementById("badGuyCol").style.visibility = "visible";
-    var cellNum;
-    var cell;
-    var cellElem;
-	var badCoord;
-	var instaFight = false;
-	var madeBadGuy = false;
-	var ubersmithActive = false;
-	var map = false;
-    if (game.global.mapsActive) {
-        cellNum = game.global.lastClearedMapCell + 1;
+	document.getElementById('badGuyCol').style.visibility = 'visible';
+	let cellNum;
+	let cell;
+	let cellElem;
+	let badCoord;
+	let instaFight = false;
+	let ubersmithActive = false;
+	let map = false;
+
+	if (game.global.mapsActive) {
+		cellNum = game.global.lastClearedMapCell + 1;
 		cell = game.global.mapGridArray[cellNum];
-		if (!cell){
+		if (!cell) {
 			mapsSwitch();
-			console.log('Crash from missing map cell averted!')
+			console.log('Crash from missing map cell averted!');
 			return;
 		}
-        cellElem = document.getElementById("mapCell" + cellNum);
+		cellElem = document.getElementById('mapCell' + cellNum);
 		map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-    } else {
-        cellNum = game.global.lastClearedCell + 1;
-        cell = game.global.gridArray[cellNum];
-        cellElem = document.getElementById("cell" + cellNum);
-		if (cellElem == null){ //Not sure what causes this to be needed, but on very rare occasions, this can prevent some save files from freezing on load
-			if (game.global.lastClearedCell != 99) {
-				 if (game.global.lastClearedCell == -1){
+	} else {
+		cellNum = game.global.lastClearedCell + 1;
+		cell = game.global.gridArray[cellNum];
+		cellElem = document.getElementById('cell' + cellNum);
+		if (cellElem === null) {
+			//Not sure what causes this to be needed, but on very rare occasions, this can prevent some save files from freezing on load
+			if (game.global.lastClearedCell !== 99) {
+				if (game.global.lastClearedCell === -1) {
 					buildGrid();
 					drawGrid();
-					document.getElementById("battleContainer").style.visibility = "visible";
-					document.getElementById('metal').style.visibility = "visible";
-					console.log("Attempted to fight in World when no grid was initialized. Find an adult");
+					document.getElementById('battleContainer').style.visibility = 'visible';
+					document.getElementById('metal').style.visibility = 'visible';
+					console.log('Attempted to fight in World when no grid was initialized. Find an adult');
 				}
 				return;
 			}
+
 			nextWorld();
 			game.stats.zonesCleared.value++;
-			checkAchieve("totalZones");
-			console.log("crisis averted");
+			checkAchieve('totalZones');
+			console.log('crisis averted');
 			return;
 		}
-    }
-	swapClass("cellColor", "cellColorCurrent", cellElem);
-	var badName = "<span id='actualBadName'>" + cell.name + "</span>";
-	var displayedName;
-	if (game.global.challengeActive == "Coordinate") badCoord = getBadCoordLevel();
-	if (typeof game.badGuys[cell.name].displayName !== 'undefined'){
+	}
+
+	swapClass('cellColor', 'cellColorCurrent', cellElem);
+	let badName = "<span id='actualBadName'>" + cell.name + '</span>';
+	let displayedName;
+	if (challengeActive('Coordinate')) badCoord = getBadCoordLevel();
+
+	if (cell.name === 'Improbability' && game.global.spireActive) {
+		displayedName = 'Druopitee';
+		if (game.global.universe === 2) displayedName = game.global.spireLevel === 10 ? 'Stuffy' : 'Echo of Stuffy';
+		if (badCoord) displayedName = 'Druopitee and Pals';
+	} else if (cell.name === 'Omnipotrimp' && game.global.spireActive) {
+		displayedName = 'Echo of Druopitee';
+		if (badCoord) displayedName = "<span class='smallEnemyName'>Echoes of Druopitee and Pals</span>";
+	} else if (cell.name === 'Improbability' && badCoord) {
+		displayedName = 'Improbabilities';
+	} else if (typeof game.badGuys[cell.name].displayName !== 'undefined') {
 		badName = game.badGuys[cell.name].displayName;
-		if (game.global.challengeActive == "Coordinate") badName += "s (" + prettify(badCoord) + ")";
-		displayedName = "<span id='actualBadName'>" + badName + "</span>";
-	}
-	if ((cell.name == "Improbability") && game.global.spireActive){
-		displayedName = "Druopitee";
-		if (game.global.universe == 2) displayedName = (game.global.spireLevel == 10) ? "Stuffy" : "Echo of Stuffy"
-		if (game.global.challengeActive == "Coordinate") displayedName = "Druopitee and Pals";
-	}
-	else if (cell.name == "Omnipotrimp" && game.global.spireActive){
-		displayedName = "Echo of Druopitee";
-		if (game.global.challengeActive == "Coordinate") displayedName = "<span class='smallEnemyName'>Echoes of Druopitee and Pals</span>";
-	}
-	else if (cell.name == "Improbability" && game.global.challengeActive == "Coordinate") {
-		displayedName = "Improbabilities";
-	}
-	else if (!displayedName && game.global.challengeActive == "Coordinate"){
-		var newName = cell.name.replace('_', ' ') + "s" + " (" + prettify(badCoord) + ")";
+		if (badCoord) badName += `s (${prettify(badCoord)})`;
+		displayedName = `<span id='actualBadName'>${badName}</span>`;
+	} else if (badCoord && !displayedName) {
+		const newName = cell.name.replace('_', ' ') + `s (${prettify(badCoord)})`;
 		badName = badName.replace(cell.name, newName);
 		displayedName = badName;
-	}
-	else {
+	} else {
 		displayedName = badName.replace('_', ' ');
 	}
-	if (game.global.challengeActive == "Smithless" && !game.global.mapsActive && game.global.world % 25 == 0 && game.global.lastClearedCell == -1 && !cell.failedUber){
+
+	if (challengeActive('Smithless') && !game.global.mapsActive && game.global.world % 25 === 0 && game.global.lastClearedCell === -1 && !cell.failedUber) {
 		ubersmithActive = true;
 		game.challenges.Smithless.saveName = displayedName;
-		displayedName = "Ubersmith";
+		displayedName = 'Ubersmith';
 	}
-	if (displayedName == "Mutimp" || displayedName == "Hulking Mutimp"){
-		displayedName = "<span class='Mutimp'>" + displayedName + "</span>";
+
+	if (displayedName === 'Mutimp' || displayedName === 'Hulking Mutimp') {
+		displayedName = "<span class='Mutimp'>" + displayedName + '</span>';
 	}
-	if (mutations.Living.active()){
-		badName = "<span id='livingMutationContainer'" + ((cell.mutation == "Living") ? " class='badNameMutation Living'" : "") + "><span id='livingMutationName'>" + ((cell.mutation == "Living") ? "Living " : "") + "</span>" + displayedName + "</span>";
-	}
-	else if (cell.vm && visualMutations[cell.vm].highlightMob && (displayedName == visualMutations[cell.vm].highlightMob)){
-		var tempName = (cell.mutation) ? mutations[cell.mutation].namePrefix + " " + displayedName : displayedName;
-		badName = "<span class='badNameMutation " + cell.vm + "'>" + tempName + "</span>";
-	}
-	else if (cell.mutation) {
-		badName = "<span class='badNameMutation " + cell.mutation + "'>" + mutations[cell.mutation].namePrefix + " " + displayedName + "</span>";
-	}
-	else if (cell.u2Mutation && cell.u2Mutation.length){
-		badName = "<span class='badNameMutation u2Mutation' style='color: " + u2Mutations.getColor(cell.u2Mutation) + "'>" + u2Mutations.getName(cell.u2Mutation) + " " + displayedName + "</span>";
-	}
-	else if (cell.vm && visualMutations[cell.vm].namePrefix){
-		badName = "<span class='badNameMutation " + cell.vm + "'>" + visualMutations[cell.vm].namePrefix + " " + displayedName + "</span>"
-	}
-	else
+
+	if (mutations.Living.active()) {
+		badName = "<span id='livingMutationContainer'" + (cell.mutation === 'Living' ? " class='badNameMutation Living'" : '') + "><span id='livingMutationName'>" + (cell.mutation === 'Living' ? 'Living ' : '') + '</span>' + displayedName + '</span>';
+	} else if (cell.vm && visualMutations[cell.vm].highlightMob && displayedName === visualMutations[cell.vm].highlightMob) {
+		const tempName = cell.mutation ? mutations[cell.mutation].namePrefix + ' ' + displayedName : displayedName;
+		badName = "<span class='badNameMutation " + cell.vm + "'>" + tempName + '</span>';
+	} else if (cell.mutation) {
+		badName = "<span class='badNameMutation " + cell.mutation + "'>" + mutations[cell.mutation].namePrefix + ' ' + displayedName + '</span>';
+	} else if (cell.u2Mutation && cell.u2Mutation.length) {
+		badName = "<span class='badNameMutation u2Mutation' style='color: " + u2Mutations.getColor(cell.u2Mutation) + "'>" + u2Mutations.getName(cell.u2Mutation) + ' ' + displayedName + '</span>';
+	} else if (cell.vm && visualMutations[cell.vm].namePrefix) {
+		badName = "<span class='badNameMutation " + cell.vm + "'>" + visualMutations[cell.vm].namePrefix + ' ' + displayedName + '</span>';
+	} else {
 		badName = displayedName;
-	if (cell.empowerment){
-		badName = getEmpowerment(-1, true) + " " + badName;
-		badName = "<span class='badNameMutation badName" + getEmpowerment(-1) + "'>" + badName + "</span>";
 	}
-	if (cell.name == "Omnipotrimp" && game.global.world % 5 == 0 && !game.global.spireActive){
+
+	if (cell.empowerment) {
+		badName = getEmpowerment(-1, true) + ' ' + badName;
+		badName = "<span class='badNameMutation badName" + getEmpowerment(-1) + "'>" + badName + '</span>';
+	}
+
+	if (cell.name === 'Omnipotrimp' && game.global.world % 5 === 0 && !game.global.spireActive) {
 		badName += ' <span class="badge badBadge Magma" onmouseover="tooltip(\'Superheated\', \'customText\', event, \'This Omnipotrimp is Superheated, and will explode on death.\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-fire2"></span></span>';
 	}
-	if (game.global.brokenPlanet && !game.global.mapsActive){
-		badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Pierce\', \'customText\', event, \'' + prettify(getPierceAmt() * 100) + '% of the damage from this Bad Guy pierces through block\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-tint"></span></span>';
+
+	if (game.global.brokenPlanet && !game.global.mapsActive) {
+		badName += " <span class=\"badge badBadge\" onmouseover=\"tooltip('Pierce', 'customText', event, '" + prettify(getPierceAmt() * 100) + '% of the damage from this Bad Guy pierces through block\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-tint"></span></span>';
 	}
-	if (game.global.challengeActive == "Glass" || challengeActive("Slow") || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation == "Corruption") && game.global.challengeActive != "Coordinate" && !challengeActive("Nom")))
-		badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Fast\', \'customText\', event, \'This Bad Guy is fast and attacks first\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-forward"></span></span>';
-	if ((challengeActive("Electricity") || game.global.challengeActive == "Mapocalypse")){
+
+	if (challengeActive('Glass') || challengeActive('Slow') || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation === 'Corruption') && !challengeActive('Coordinate') && !challengeActive('Nom'))) badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Fast\', \'customText\', event, \'This Bad Guy is fast and attacks first\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-forward"></span></span>';
+
+	if (challengeActive('Electricity') || challengeActive('Mapocalypse')) {
 		badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Electric\', \'customText\', event, \'This Bad Guy is electric and stacks a debuff on your Trimps\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-power-cord"></span></span>';
 	}
-	document.getElementById("badGuyName").innerHTML = badName;
-	if (game.global.challengeActive == "Domination") handleDominationDebuff();
-	var corruptionStart = mutations.Corruption.start(true);
-	if (cell.maxHealth == -1 && checkIfSpireWorld() && game.global.spireActive && !game.global.mapsActive && cell.corrupted){
-		if (Fluffy.isRewardActive("eliminator")){
-			cell.corrupted = "none";
-		}
-		else if (Fluffy.isRewardActive("purifier")){
-			if (getRandomIntSeeded(game.global.mutationSeed++, 0, 100) < 50) cell.corrupted = "none";
-		}
-	}
-	if (cell.mutation)
-		setMutationTooltip(cell.corrupted, cell.mutation);
-	else if (map && map.location == "Void" && game.global.world >= corruptionStart){
-		setVoidCorruptionIcon();
-	}
-	else if (map && mutations.Magma.active()){
-		setVoidCorruptionIcon(true);
-	}
-	else
-		document.getElementById('corruptionBuff').innerHTML = "";
-	if (challengeActive("Balance") || game.global.challengeActive == "Unbalance") updateBalanceStacks();
-	if (challengeActive("Toxicity")) updateToxicityStacks();
-    if (cell.maxHealth == -1) {
-		refillEnergyShield();
-		var overkill = 0;
-		var plaguebringer = 0;
 
-		if (cell.health != -1) overkill = cell.health;
+	const badGuyName = document.getElementById('badGuyName');
+	if (badGuyName.innerHTML !== badName) badGuyName.innerHTML = badName;
+
+	if (challengeActive('Domination')) handleDominationDebuff();
+	const corruptionStart = mutations.Corruption.start(true);
+	const magmaActive = mutations.Magma.active();
+
+	if (cell.maxHealth === -1 && checkIfSpireWorld() && game.global.spireActive && !game.global.mapsActive && cell.corrupted) {
+		if (Fluffy.isRewardActive('eliminator')) {
+			cell.corrupted = 'none';
+		} else if (Fluffy.isRewardActive('purifier')) {
+			if (getRandomIntSeeded(game.global.mutationSeed++, 0, 100) < 50) cell.corrupted = 'none';
+		}
+	}
+
+	if (!usingRealTimeOffline) {
+		if (cell.mutation) {
+			setMutationTooltip(cell.corrupted, cell.mutation);
+		} else if (map && map.location === 'Void' && game.global.world >= corruptionStart) {
+			setVoidCorruptionIcon();
+		} else if (map && magmaActive) {
+			setVoidCorruptionIcon(true);
+		} else {
+			const corruptionBuffElem = document.getElementById('corruptionBuff');
+			if (corruptionBuffElem.innerHTML !== '') corruptionBuffElem.innerHTML = '';
+		}
+	}
+
+	if (challengeActive('Balance') || challengeActive('Unbalance')) updateBalanceStacks();
+	if (challengeActive('Toxicity')) updateToxicityStacks();
+
+	if (cell.maxHealth === -1) {
+		refillEnergyShield();
+		let overkill = 0;
+
+		if (cell.health !== -1) overkill = cell.health;
+
 		if (cell.u2Mutation && cell.u2Mutation.length) cell.attack = u2Mutations.getAttack(cell);
-		else if (cell.mutation && typeof mutations[cell.mutation].attack !== 'undefined')
-			cell.attack = mutations[cell.mutation].attack(cell.level, cell.name);
-		else
-			cell.attack = game.global.getEnemyAttack(cell.level, cell.name);
+		else if (cell.mutation && typeof mutations[cell.mutation].attack !== 'undefined') cell.attack = mutations[cell.mutation].attack(cell.level, cell.name);
+		else cell.attack = game.global.getEnemyAttack(cell.level, cell.name);
+
 		if (cell.u2Mutation && cell.u2Mutation.length) cell.health = u2Mutations.getHealth(cell);
-		else if (cell.mutation && typeof mutations[cell.mutation].health !== 'undefined')
-			cell.health = mutations[cell.mutation].health(cell.level, cell.name);
-		else
-			cell.health = game.global.getEnemyHealth(cell.level, cell.name);
-		if (game.global.spireActive && checkIfSpireWorld() && !game.global.mapsActive){
+		else if (cell.mutation && typeof mutations[cell.mutation].health !== 'undefined') cell.health = mutations[cell.mutation].health(cell.level, cell.name);
+		else cell.health = game.global.getEnemyHealth(cell.level, cell.name);
+
+		let attackMult = 1;
+		let healthMult = 1;
+
+		if (game.global.mapsActive) {
+			const difficulty = map.difficulty;
+			attackMult *= difficulty;
+			healthMult *= difficulty;
+		}
+
+		if (challengeActive('Daily')) {
+			if (typeof game.global.dailyChallenge.badHealth !== 'undefined') {
+				healthMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
+			}
+
+			if (typeof game.global.dailyChallenge.badMapHealth !== 'undefined' && game.global.mapsActive) {
+				healthMult *= dailyModifiers.badMapHealth.getMult(game.global.dailyChallenge.badMapHealth.strength);
+			}
+
+			if (typeof game.global.dailyChallenge.empoweredVoid !== 'undefined' && game.global.mapsActive && map.location === 'Void') {
+				const empVoidStr = dailyModifiers.empoweredVoid.getMult(game.global.dailyChallenge.empoweredVoid.strength);
+				healthMult *= empVoidStr;
+				attackMult *= empVoidStr;
+			}
+
+			if (typeof game.global.dailyChallenge.empower !== 'undefined') {
+				if (!game.global.mapsActive) healthMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+				updateDailyStacks('empower');
+			}
+		}
+
+		if (game.global.spireActive && checkIfSpireWorld() && !game.global.mapsActive) {
 			cell.origAttack = cell.attack;
 			cell.origHealth = cell.health;
-			cell.attack = getSpireStats(cell.level, cell.name, "attack", cell.origAttack);
-			cell.health = getSpireStats(cell.level, cell.name, "health", cell.origHealth);
+			cell.attack = getSpireStats(cell.level, cell.name, 'attack', cell.origAttack);
+			cell.health = getSpireStats(cell.level, cell.name, 'health', cell.origHealth);
 		}
-		if (cell.corrupted == "corruptStrong") cell.attack *= 2;
-		if (cell.corrupted == "healthyStrong") cell.attack *= 2.5;
-		if (cell.corrupted == "corruptTough") cell.health *= 5;
-		if (cell.corrupted == "healthyTough") cell.health *= 7.5;
-		if (cell.empowerment){
-			if (cell.mutation != "Corruption"){
-				cell.health = mutations.Corruption.health(cell.level, cell.name);
-				cell.attack = mutations.Corruption.attack(cell.level, cell.name);
-			}
-			cell.health *= 4;
-			cell.attack *= 1.2;
-		}
-		if (game.global.challengeActive == "Obliterated" || game.global.challengeActive == "Eradicated"){
-			var oblitMult = (game.global.challengeActive == "Eradicated") ? game.challenges.Eradicated.scaleModifier : 1e12;
-			var zoneModifier = Math.floor(game.global.world / game.challenges[game.global.challengeActive].zoneScaleFreq);
-			oblitMult *= Math.pow(game.challenges[game.global.challengeActive].zoneScaling, zoneModifier);
-			cell.health *= oblitMult;
-			cell.attack *= oblitMult;
-		}
-		if (game.global.challengeActive == "Daily"){
-			if (typeof game.global.dailyChallenge.badHealth !== 'undefined'){
-				cell.health *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
-			}
-			if (typeof game.global.dailyChallenge.badMapHealth !== 'undefined' && game.global.mapsActive){
-				cell.health *= dailyModifiers.badMapHealth.getMult(game.global.dailyChallenge.badMapHealth.strength);
-			}
-			if (typeof game.global.dailyChallenge.empoweredVoid !== 'undefined' && game.global.mapsActive && map.location == "Void"){
-				var empVoidStr = dailyModifiers.empoweredVoid.getMult(game.global.dailyChallenge.empoweredVoid.strength);
-				cell.health *= empVoidStr;
-				cell.attack *= empVoidStr;
-			}
-			if (typeof game.global.dailyChallenge.empower !== 'undefined'){
-				if (!game.global.mapsActive)
-					cell.health *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
-				updateDailyStacks("empower");
-			}
-		}
-		if (game.global.challengeActive == "Life") {
-			cell.health *= 11;
-			cell.attack *= 6;
-		}
-		if (game.global.challengeActive == "Coordinate") cell.health *= badCoord;
-        if (game.global.mapsActive) {
-            var difficulty = map.difficulty;
-            cell.attack *= difficulty;
-            cell.health *= difficulty;
-			if (game.global.world >= corruptionStart){
-				if (mutations.Magma.active() && map.location == "Void"){
-					cell.attack *= (mutations.Corruption.statScale(3)).toFixed(1);
-					cell.health *= (mutations.Corruption.statScale(10)).toFixed(1);
+
+		if (game.global.universe === 1) {
+			if (cell.empowerment) {
+				if (cell.mutation !== 'Corruption') {
+					cell.health = mutations.Corruption.health(cell.level, cell.name);
+					cell.attack = mutations.Corruption.attack(cell.level, cell.name);
 				}
-				else if (map.location == "Void" || mutations.Magma.active()){
-					cell.attack *= (mutations.Corruption.statScale(3) / 2).toFixed(1);
-					cell.health *= (mutations.Corruption.statScale(10) / 2).toFixed(1);
+
+				healthMult *= 4;
+				attackMult *= 1.2;
+			}
+
+			if (cell.corrupted === 'corruptStrong') attackMult *= 2;
+			if (cell.corrupted === 'healthyStrong') attackMult *= 2.5;
+			if (cell.corrupted === 'corruptTough') healthMult *= 5;
+			if (cell.corrupted === 'healthyTough') healthMult *= 7.5;
+
+			if (challengeActive('Meditate')) {
+				healthMult *= 2;
+			}
+			if (challengeActive('Balance')) {
+				attackMult *= game.global.mapsActive ? 2.35 : 1.17;
+				healthMult *= 2;
+			}
+			if (challengeActive('Life')) {
+				healthMult *= 11;
+				attackMult *= 6;
+			}
+			if (challengeActive('Toxicity')) {
+				attackMult *= 5;
+				healthMult *= 2;
+			}
+			if (challengeActive('Lead') && game.challenges.Lead.stacks > 0) {
+				healthMult *= 1 + Math.min(game.challenges.Lead.stacks, 200) * 0.04;
+			}
+
+			if (challengeActive('Coordinate')) {
+				healthMult *= badCoord;
+			} else if (challengeActive('Domination')) {
+				let dominating = false;
+				if (map && map.size === cellNum + 1) dominating = true;
+				else if (!map && cellNum === 99) dominating = true;
+
+				if (dominating) {
+					attackMult *= 2.5;
+					healthMult *= 7.5;
+				} else {
+					attackMult *= 0.1;
+					healthMult *= 0.1;
+				}
+			} else if (challengeActive('Obliterated') || challengeActive('Eradicated')) {
+				let oblitMult = challengeActive('Eradicated') ? game.challenges.Eradicated.scaleModifier : 1e12;
+				const zoneModifier = Math.floor(game.global.world / game.challenges[game.global.challengeActive].zoneScaleFreq);
+				oblitMult *= Math.pow(game.challenges[game.global.challengeActive].zoneScaling, zoneModifier);
+				healthMult *= oblitMult;
+				attackMult *= oblitMult;
+			} else if (challengeActive('Frigid')) {
+				const frigidMult = game.challenges.Frigid.getEnemyMult();
+				healthMult *= frigidMult;
+				attackMult *= frigidMult;
+			} else if (challengeActive('Experience')) {
+				const xpMult = game.challenges.Experience.getEnemyMult();
+				healthMult *= xpMult;
+				attackMult *= xpMult;
+			}
+
+			if (game.global.mapsActive && game.global.world >= corruptionStart) {
+				if (magmaActive && map.location === 'Void') {
+					attackMult *= mutations.Corruption.statScale(3).toFixed(1);
+					healthMult *= mutations.Corruption.statScale(10).toFixed(1);
+				} else if (map.location === 'Void' || magmaActive) {
+					attackMult *= (mutations.Corruption.statScale(3) / 2).toFixed(1);
+					healthMult *= (mutations.Corruption.statScale(10) / 2).toFixed(1);
 				}
 			}
-        }
-		if (challengeActive("Meditate")) cell.health *= 2;
-		if (challengeActive("Toxicity")){
-			cell.attack *= 5;
-			cell.health *= 2;
-		}
-		if (challengeActive("Balance")){
-			cell.attack *= (game.global.mapsActive) ? 2.35 : 1.17;
-			cell.health *= 2;
-		}
-		if (challengeActive("Lead") && (game.challenges.Lead.stacks > 0)){
-			cell.health *= (1 + (Math.min(game.challenges.Lead.stacks, 200) * 0.04));
-		}
-		if (game.global.challengeActive == "Unbalance"){
-			cell.health *= (game.global.mapsActive) ? 2 : 3;
-			cell.attack *= 1.5;
-		}
-		else if (game.global.challengeActive == "Domination"){
-			var dominating = false;
-			if (map && map.size == cellNum + 1) dominating = true;
-			else if (!map && cellNum == 99) dominating = true;
-			if (dominating){
-				cell.attack *= 2.5;
-				cell.health *= 7.5;
-			}
-			else{
-				cell.attack *= 0.1;
-				cell.health *= 0.1;
-			}
-		}
-		else if (game.global.challengeActive == "Quest"){
-			cell.health *= game.challenges.Quest.getHealthMult();
-		}
-		else if (game.global.challengeActive == "Revenge" && game.global.world % 2 == 0){
-			cell.health *= 10;
-		}
-		else if (game.global.challengeActive == "Mayhem"){
-			var mayhemMult = game.challenges.Mayhem.getEnemyMult();
-			cell.health *= mayhemMult;
-			cell.attack *= mayhemMult;
-		}
-		else if (game.global.challengeActive == "Exterminate"){
-			var extMult = game.challenges.Exterminate.getSwarmMult();
-			cell.health *= extMult;
-			cell.attack *= extMult;
-		}
-		else if (game.global.challengeActive == "Hypothermia"){
-			var hypMult = game.challenges.Hypothermia.getEnemyMult();
-			cell.health *= hypMult;
-			cell.attack *= hypMult;
-		}
-		else if (game.global.challengeActive == "Experience"){
-			var xpMult = game.challenges.Experience.getEnemyMult();
-			cell.health *= xpMult;
-			cell.attack *= xpMult;
-		}
-		else if (game.global.challengeActive == "Desolation"){
-			var desoMult = game.challenges.Desolation.getEnemyMult();
-			cell.health *= desoMult;
-			cell.attack *= desoMult;
-		}
-		else if (game.global.challengeActive == "Frigid"){
-			var frigidMult = game.challenges.Frigid.getEnemyMult();
-			cell.health *= frigidMult;
-			cell.attack *= frigidMult;
-		}
-		if (game.global.challengeActive == "Duel"){
-			if (game.challenges.Duel.enemyStacks < 20) cell.health *= game.challenges.Duel.healthMult;
-		}
-		if (cell.name == 'Improbability' || cell.name == "Omnipotrimp"){
-			if (game.global.roboTrimpLevel && game.global.useShriek) activateShriek();
-			if (game.global.world >= corruptionStart) {
-				if (game.global.spireActive) {
-					cell.origHealth *= mutations.Corruption.statScale(10);
-					cell.origAttack *= mutations.Corruption.statScale(3);
-				}
-				else {
-					cell.health *= mutations.Corruption.statScale(10);
-					cell.attack *= mutations.Corruption.statScale(3);
+
+			if (cell.name === 'Improbability' || cell.name === 'Omnipotrimp') {
+				if (game.global.roboTrimpLevel && game.global.useShriek) activateShriek();
+
+				if (game.global.world >= corruptionStart) {
+					if (game.global.spireActive) {
+						cell.origHealth *= mutations.Corruption.statScale(10) * healthMult;
+						cell.origAttack *= mutations.Corruption.statScale(3) * attackMult;
+					} else {
+						cell.health *= mutations.Corruption.statScale(10);
+						cell.attack *= mutations.Corruption.statScale(3);
+					}
 				}
 			}
 		}
-		if (game.global.challengeActive == "Nurture"){
-			if (map) cell.health *= 10;
-			else cell.health *= 2;
-			cell.health *= game.buildings.Laboratory.getEnemyMult();
+
+		if (game.global.universe === 2) {
+			if (challengeActive('Unbalance')) {
+				healthMult *= game.global.mapsActive ? 2 : 3;
+				attackMult *= 1.5;
+			} else if (challengeActive('Duel')) {
+				if (game.challenges.Duel.enemyStacks < 20) healthMult *= game.challenges.Duel.healthMult;
+			} else if (challengeActive('Quest')) {
+				healthMult *= game.challenges.Quest.getHealthMult();
+			} else if (challengeActive('Revenge') && game.global.world % 2 === 0) {
+				healthMult *= 10;
+			} else if (challengeActive('Mayhem')) {
+				const mayhemMult = game.challenges.Mayhem.getEnemyMult();
+				healthMult *= mayhemMult;
+				attackMult *= mayhemMult;
+			} else if (challengeActive('Exterminate')) {
+				const extMult = game.challenges.Exterminate.getSwarmMult();
+				healthMult *= extMult;
+				attackMult *= extMult;
+			} else if (challengeActive('Nurture')) {
+				healthMult *= map ? 10 : 2;
+				healthMult *= game.buildings.Laboratory.getEnemyMult();
+			} else if (challengeActive('Alchemy')) {
+				const alchMap = Boolean(map);
+				const alchVoid = alchMap && map.location === 'Void';
+				const alchMult = alchObj.getEnemyStats(alchMap, alchVoid) + 1;
+				attackMult *= alchMult;
+				healthMult *= alchMult;
+			} else if (challengeActive('Glass')) {
+				game.challenges.Glass.cellStartHealth = cell.health * healthMult;
+				healthMult *= game.challenges.Glass.healthMult();
+			} else if (challengeActive('Hypothermia')) {
+				const hypMult = game.challenges.Hypothermia.getEnemyMult();
+				healthMult *= hypMult;
+				attackMult *= hypMult;
+			} else if (challengeActive('Desolation')) {
+				const desoMult = game.challenges.Desolation.getEnemyMult();
+				healthMult *= desoMult;
+				attackMult *= desoMult;
+			} else if (ubersmithActive) {
+				healthMult *= game.challenges.Smithless.uberMult;
+				cell.ubersmith = true;
+				game.challenges.Smithless.uberAttacks = 0;
+				overkill = 0;
+			}
+
+			//Mayhem and Storm last so attack and health restore properly
+			if ((challengeActive('Mayhem') && cellNum === 99 && !game.global.mapsActive) || challengeActive('Pandemonium')) {
+				cell.preMayhemHealth = cell.health * healthMult;
+				if (cellNum === 99 && !game.global.mapsActive) healthMult *= game.challenges[game.global.challengeActive].getBossMult();
+				else healthMult *= game.challenges.Pandemonium.getPandMult();
+			} else if (challengeActive('Storm') && !map) {
+				game.challenges.Storm.cellStartAttack = cell.attack * attackMult;
+				game.challenges.Storm.cellStartHealth = cell.health * healthMult;
+				healthMult *= game.challenges.Storm.getHealthMult();
+				cell.attack *= game.challenges.Storm.getAttackMult();
+			}
 		}
-		if (game.global.challengeActive == "Alchemy"){
-			var alchMap = (map) ? true : false;
-			var alchVoid = (alchMap && map.location == "Void");
-			var statMult = alchObj.getEnemyStats(alchMap, alchVoid) + 1;
-			cell.attack *= statMult;
-			cell.health *= statMult;
-		}
-		//Mayhem and Storm last so attack and health restore properly
-		if (((game.global.challengeActive == "Mayhem" && cellNum == 99 && !game.global.mapsActive) || game.global.challengeActive == "Pandemonium")){
-			cell.preMayhemHealth = cell.health;
-			if (cellNum == 99 && !game.global.mapsActive) cell.health *= game.challenges[game.global.challengeActive].getBossMult();
-			else cell.health *= game.challenges.Pandemonium.getPandMult();
-		}
-		if (game.global.challengeActive == "Storm" && !map){
-			game.challenges.Storm.cellStartAttack = cell.attack;
-			game.challenges.Storm.cellStartHealth = cell.health;
-			cell.health *= game.challenges.Storm.getHealthMult();
-			cell.attack *= game.challenges.Storm.getAttackMult();
-		}
-		if (game.global.challengeActive == "Glass"){
-			game.challenges.Glass.cellStartHealth = cell.health;
-			cell.health *= game.challenges.Glass.healthMult();
-		}
-		if (ubersmithActive){
-			cell.health *= game.challenges.Smithless.uberMult;
-			cell.ubersmith = true;
-			game.challenges.Smithless.uberAttacks = 0;
-			overkill = 0;
-		}
+
 		//End bonuses that alter starting attack/health
+		cell.attack *= attackMult;
+		cell.health *= healthMult;
 		cell.maxHealth = cell.health;
-		if (overkill == "shatter" || overkill == "compressed") cell.health = 0;
-		else if (game.global.universe == 1 && getPerkLevel("Overkill") && !(!map && game.global.gridArray[0].name == "Liquimp")) cell.health -= (overkill * getPerkLevel("Overkill") * 0.005);
-		else if (game.global.universe == 2 && (game.global.challengeActive != "Wither" || !game.global.runningChallengeSquared) && (u2Mutations.tree.Overkill1.purchased || (game.global.mapsActive && u2Mutations.tree.MadMap.purchased))){
-			if (game.global.mapsActive && u2Mutations.tree.MadMap.purchased){
+
+		if (overkill === 'shatter' || overkill === 'compressed') cell.health = 0;
+		else if (game.global.universe === 1 && getPerkLevel('Overkill') && !(!map && game.global.gridArray[0].name === 'Liquimp')) cell.health -= overkill * getPerkLevel('Overkill') * 0.005;
+		else if (game.global.universe === 2 && (!challengeActive('Wither') || !game.global.runningChallengeSquared) && (u2Mutations.tree.Overkill1.purchased || (game.global.mapsActive && u2Mutations.tree.MadMap.purchased))) {
+			if (game.global.mapsActive && u2Mutations.tree.MadMap.purchased) {
 				cell.health -= overkill;
-			}
-			else{
-				if (canU2Overkill()) cell.health -= (overkill * 0.005);
+			} else {
+				if (canU2Overkill()) cell.health -= overkill * 0.005;
 			}
 		}
+
+		const empowerment = getEmpowerment();
+		const empowermentUber = getUberEmpowerment();
 		if (cell.health < 1) {
-			var overkillerCount = getOverkillerCount();;
-			if (cell.OKcount <= overkillerCount){
-				var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
-				if (nextCell){
-					nextCell.health = (overkill == "shatter" && (cellNum != 98 || !game.global.spireActive)) ? "shatter" : Math.abs(cell.health);
+			const overkillerCount = getOverkillerCount();
+			if (cell.OKcount <= overkillerCount) {
+				const nextCell = game.global.mapsActive ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
+				if (nextCell) {
+					nextCell.health = overkill === 'shatter' && (cellNum !== 98 || !game.global.spireActive) ? 'shatter' : Math.abs(cell.health);
 					nextCell.OKcount = cell.OKcount + 1;
 				}
 			}
 			cell.health = 0;
 			cell.overkilled = true;
-			if (cell.name == "Improbability") giveSingleAchieve("One-Hit Wonder");
-			if (cell.name == "Omnipotrimp") giveSingleAchieve("Mighty");
 			instaFight = true;
+			if (cell.name === 'Improbability') giveSingleAchieve('One-Hit Wonder');
+			if (cell.name === 'Omnipotrimp') giveSingleAchieve('Mighty');
 			if (!game.global.mapsActive) game.stats.cellsOverkilled.value++;
-		}
-		else 
-		{
-			if (cell.plaguebringer){
-				if (cell.health > cell.maxHealth * 0.05){
+		} else {
+			if (cell.plaguebringer) {
+				if (cell.health > cell.maxHealth * 0.05) {
 					cell.health -= cell.plaguebringer;
 					if (cell.health < cell.maxHealth * 0.05) cell.health = cell.maxHealth * 0.05;
 				}
-				var empowerment = getEmpowerment();
-				if (empowerment){
-					if (empowerment == "Poison"){
+
+				if (empowerment) {
+					if (empowerment === 'Poison') {
+						/* stackPoison handles the poison debuff and plaguebrought scaling */
 						stackPoison(cell.plaguebringer);
-						//stackPoison handles the poison debuff and plaguebrought scaling
-					}
-					if (empowerment == "Wind"){
-						var hits = cell.plagueHits;
-						if (getEmpowerment() == "Wind" && getUberEmpowerment() == "Wind") hits *= 2;
-						if (Fluffy.isRewardActive("plaguebrought")) hits *= 2;
+					} else {
+						let hits = cell.plagueHits;
+						if (empowermentUber === empowerment) hits *= 2;
+						if (Fluffy.isRewardActive('plaguebrought')) hits *= 2;
 						game.empowerments[empowerment].currentDebuffPower += Math.ceil(hits);
-						handleWindDebuff();
-					}
-					if (empowerment == "Ice"){
-						var hits = cell.plagueHits;
-						if (getEmpowerment() == "Ice" && getUberEmpowerment() == "Ice") hits *= 2;
-						if (Fluffy.isRewardActive("plaguebrought")) hits *= 2;
-						game.empowerments[empowerment].currentDebuffPower += Math.ceil(hits);
-						handleIceDebuff();
+
+						if (empowerment === 'Wind') handleWindDebuff();
+						if (empowerment === 'Ice') handleIceDebuff();
 					}
 				}
 			}
-			if (game.global.formation == 4 || game.global.formation == 5){
+
+			if (game.global.formation === 4 || game.global.formation === 5) {
 				if (game.global.mapsActive) game.global.waitToScryMaps = false;
 				else game.global.waitToScry = false;
 			}
 		}
-		madeBadGuy = true;
-    }
-	else if (challengeActive("Nom") && cell.nomStacks){
+	} else if (challengeActive('Nom') && cell.nomStacks) {
 		updateNomStacks(cell.nomStacks);
 	}
-    var trimpsFighting = game.resources.trimps.maxSoldiers;
-	var currentSend = game.resources.trimps.getCurrentSend();
-    if (game.global.soldierHealth <= 0) {
-		if (getHeirloomBonus("Shield", "gammaBurst") > 0){
+
+	const trimpsFighting = game.resources.trimps.maxSoldiers;
+	const currentSend = game.resources.trimps.getCurrentSend();
+
+	if (game.global.soldierHealth <= 0) {
+		if (getHeirloomBonus('Shield', 'gammaBurst') > 0) {
 			game.heirlooms.Shield.gammaBurst.stacks = 0;
 			updateGammaStacks();
 		}
+
 		game.global.armyAttackCount = 0;
 		game.global.fightAttackCount = 0;
 		game.global.battleCounter = 0;
-		if (cell.name == "Voidsnimp" && !game.achievements.oneOffs.finished[game.achievements.oneOffs.names.indexOf("Needs Block")]) {
+		const gameTime = getGameTime();
+
+		if (cell.name === 'Voidsnimp' && !game.achievements.oneOffs.finished[game.achievements.oneOffs.names.indexOf('Needs Block')]) {
 			if (!cell.killCount) cell.killCount = 1;
 			else cell.killCount++;
-			if (cell.killCount >= 50) giveSingleAchieve("Needs Block");
+
+			if (cell.killCount >= 50) giveSingleAchieve('Needs Block');
 		}
-		if (game.global.realBreedTime >= 600000 && game.jobs.Geneticist.owned >= 1) giveSingleAchieve("Extra Crispy");
-		if (getPerkLevel("Anticipation")){
-			game.global.antiStacks = (game.jobs.Amalgamator.owned > 0) ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
-			if (game.talents.patience.purchased){
-				if (game.global.antiStacks >= 45)
-					game.global.antiStacks = 45;
-			}
-			else if (game.global.antiStacks >= 30) game.global.antiStacks = 30;
+
+		if (game.global.realBreedTime >= 600000 && game.jobs.Geneticist.owned >= 1) giveSingleAchieve('Extra Crispy');
+
+		if (getPerkLevel('Anticipation')) {
+			game.global.antiStacks = game.jobs.Amalgamator.owned > 0 ? Math.floor((gameTime - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
+			const maxStacks = game.talents.patience.purchased ? 45 : 30;
+			if (game.global.antiStacks > maxStacks) game.global.antiStacks = maxStacks;
 			updateAntiStacks();
 		}
-		game.global.lastSoldierSentAt = getGameTime();
+
+		game.global.lastSoldierSentAt = gameTime;
 		game.global.lastBreedTime = 0;
 		game.global.realBreedTime = 0;
-		if ((challengeActive("Electricity") || game.global.challengeActive == "Mapocalypse")) {
+
+		if (challengeActive('Electricity') || challengeActive('Mapocalypse')) {
 			game.challenges.Electricity.stacks = 0;
 			game.challenges.Electricity.attacksInARow = 0;
 			updateElectricityStacks();
 		}
-		if (game.global.challengeActive == "Daily"){
-			if (typeof game.global.dailyChallenge.plague !== 'undefined'){
+
+		if (challengeActive('Daily')) {
+			if (typeof game.global.dailyChallenge.plague !== 'undefined') {
 				game.global.dailyChallenge.plague.stacks = 0;
 				updateDailyStacks('plague');
 			}
-			if (typeof game.global.dailyChallenge.weakness !== 'undefined'){
+
+			if (typeof game.global.dailyChallenge.weakness !== 'undefined') {
 				game.global.dailyChallenge.weakness.stacks = 0;
 				updateDailyStacks('weakness');
 			}
-			if (typeof game.global.dailyChallenge.rampage !== 'undefined'){
+
+			if (typeof game.global.dailyChallenge.rampage !== 'undefined') {
 				game.global.dailyChallenge.rampage.stacks = 0;
 				updateDailyStacks('rampage');
 			}
 		}
+
 		game.global.difs.attack = 0;
 		game.global.difs.health = 0;
 		game.global.difs.block = 0;
 		game.global.difs.trainers = game.jobs.Trainer.owned;
-        game.global.soldierHealthMax = game.global.health;
+		game.global.soldierHealthMax = game.global.health;
 		game.global.maxSoldiersAtStart = game.resources.trimps.maxSoldiers;
 		game.global.soldierCurrentAttack = game.global.attack;
-		//Amalgamators
-		if (game.jobs.Amalgamator.owned > 0){
+
+		if (game.jobs.Amalgamator.owned > 0) {
 			game.global.soldierHealthMax *= game.jobs.Amalgamator.getHealthMult();
 		}
-		//Magma
-		if (mutations.Magma.active()){
-			var magMult = mutations.Magma.getTrimpDecay();
+
+		if (magmaActive) {
+			const magMult = mutations.Magma.getTrimpDecay();
 			game.global.soldierHealthMax *= magMult;
 			game.global.soldierCurrentAttack *= magMult;
 		}
-		//Soldiers
+
 		game.global.soldierHealthMax *= trimpsFighting;
-		game.global.soldierCurrentAttack *= trimpsFighting;	
-		//Toughness
-		if (getPerkLevel("Toughness") > 0) game.global.soldierHealthMax += (game.global.soldierHealthMax * getPerkLevel("Toughness") * game.portal.Toughness.modifier);
-		if (getPerkLevel("Toughness_II") > 0) game.global.soldierHealthMax *= (1 + (game.portal.Toughness_II.modifier * getPerkLevel("Toughness_II")));
-		//Observation
-		if (!game.portal.Observation.radLocked && game.global.universe == 2 && game.portal.Observation.trinkets > 0) game.global.soldierHealthMax *= game.portal.Observation.getMult();
-		if (getPerkLevel("Championism") > 0) game.global.soldierHealthMax *= game.portal.Championism.getMult();
-		if (game.global.mayhemCompletions) game.global.soldierHealthMax *= game.challenges.Mayhem.getTrimpMult();
-		if (game.global.pandCompletions) game.global.soldierHealthMax *= game.challenges.Pandemonium.getTrimpMult();
-		if (game.global.desoCompletions) game.global.soldierHealthMax *= game.challenges.Desolation.getTrimpMult();
-		if (game.global.frigidCompletions > 0 && game.global.universe == 1) game.global.soldierHealthMax *= game.challenges.Frigid.getTrimpMult();
-		if (autoBattle.bonuses.Stats.level > 0 && game.global.universe == 2) game.global.soldierHealthMax *= autoBattle.bonuses.Stats.getMult();
-		if (game.global.challengeActive == "Alchemy") game.global.soldierHealthMax *= alchObj.getPotionEffect("Potion of Strength");
-		if (game.talents.mapHealth.purchased && game.global.mapsActive){
+		game.global.soldierCurrentAttack *= trimpsFighting;
+		game.global.soldierCurrentBlock = getBaseBlock() * trimpsFighting;
+
+		if (game.talents.mapHealth.purchased && game.global.mapsActive) {
 			game.global.soldierHealthMax *= 2;
 			game.global.mapHealthActive = true;
+		} else {
+			game.global.mapHealthActive = false;
 		}
-		else game.global.mapHealthActive = false;
+
 		if (game.global.lowestGen >= 0) {
 			if (game.global.breedBack <= 0) {
 				game.global.soldierHealthMax *= Math.pow(1.01, game.global.lowestGen);
 				game.global.lastLowGen = game.global.lowestGen;
 				game.global.lowestGen = -1;
+			} else {
+				game.global.lastLowGen = 0;
 			}
-			else game.global.lastLowGen = 0;
 			game.global.breedBack = currentSend / 2;
 		}
-		if (game.goldenUpgrades.Battle.currentBonus > 0){
-			game.global.soldierHealthMax *= game.goldenUpgrades.Battle.currentBonus + 1;
-		}
-		if (game.global.challengeActive == "Insanity" && game.challenges.Insanity.insanity > 0){
-			game.global.soldierHealthMax *= game.challenges.Insanity.getHealthMult();
-		}
-		//Smithy
-		if (game.global.universe == 2 && game.buildings.Smithy.owned > 0){
-			game.global.soldierHealthMax *= game.buildings.Smithy.getMult();
-		}
-		if (game.global.challengeActive == "Smithless" && game.challenges.Smithless.fakeSmithies > 0){
-			game.global.soldierHealthMax *= game.challenges.Smithless.getTrimpMult();
-		}
-		//Fluffy U2 Healthy
-		if (Fluffy.isRewardActive("healthy")){
-			game.global.soldierHealthMax *= 1.5;
-		}
-		if (Fluffy.isRewardActive("scaledHealth")){
-			game.global.soldierHealthMax *= Fluffy.rewardConfig.scaledHealth.mult();
-		}
-		if (game.buildings.Antenna.owned >= 10){
-			game.global.soldierHealthMax *= game.jobs.Meteorologist.getExtraMult();
-		}
-		//U2 Spire
-		game.global.soldierHealthMax *= u2SpireBonuses.basics();
-		//Health Mutator
-		if (game.global.universe == 2 && u2Mutations.tree.Health.purchased)	game.global.soldierHealthMax *= 1.5;
-		if (game.global.universe == 2 && u2Mutations.tree.GeneHealth.purchased)	game.global.soldierHealthMax *= 10;
-		//Resilience
-		if (getPerkLevel("Resilience") > 0) game.global.soldierHealthMax *= Math.pow(game.portal.Resilience.modifier + 1, getPerkLevel("Resilience"));
-		//Power
-		if (getPerkLevel("Power") > 0) game.global.soldierCurrentAttack += (game.global.soldierCurrentAttack * getPerkLevel("Power") * game.portal.Power.modifier);
-		if (getPerkLevel("Power_II") > 0) game.global.soldierCurrentAttack *= (1 + (game.portal.Power_II.modifier * getPerkLevel("Power_II")));
-		game.global.soldierCurrentBlock = getBaseBlock() * trimpsFighting;
-		game.global.soldierHealthMax = calcHeirloomBonus("Shield", "trimpHealth", game.global.soldierHealthMax);
-		//block handled in getBaseBlock()
-		if (game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.pressure !== 'undefined') game.global.soldierHealthMax *= dailyModifiers.pressure.getMult(game.global.dailyChallenge.pressure.strength, game.global.dailyChallenge.pressure.stacks);
-		if (game.global.formation !== 0 && game.global.formation != 5){
-			game.global.soldierHealthMax *= (game.global.formation == 1) ? 4 : 0.5;
-			var formAttackMod = 0.5;
-			if (game.global.formation == 2) formAttackMod = 4;
-			game.global.soldierCurrentAttack *= formAttackMod;
-			//block handled in getBaseBlock()
-		}
-		if (challengeActive("Balance")){
-			game.global.soldierHealthMax *= game.challenges.Balance.getHealthMult();
-		}
-		if (game.global.challengeActive == "Life"){
-			game.global.soldierHealthMax *= game.challenges.Life.getHealthMult();
-		}
-		if (game.global.challengeActive == "Revenge") game.global.soldierHealthMax *= game.challenges.Revenge.getMult();
-		if (game.global.challengeActive == "Duel" && game.challenges.Duel.trimpStacks < 20) game.global.soldierHealthMax *= game.challenges.Duel.healthMult;	
-		if (game.talents.voidPower.purchased && game.global.voidBuff){
-			game.global.soldierHealthMax *= ((game.talents.voidPower.getTotalVP() / 100) + 1);
+
+		if (getPerkLevel('Power') > 0) game.global.soldierCurrentAttack += game.global.soldierCurrentAttack * getPerkLevel('Power') * game.portal.Power.modifier;
+		if (getPerkLevel('Toughness') > 0) game.global.soldierHealthMax += game.global.soldierHealthMax * getPerkLevel('Toughness') * game.portal.Toughness.modifier;
+		if (getPerkLevel('Resilience') > 0) game.global.soldierHealthMax *= Math.pow(game.portal.Resilience.modifier + 1, getPerkLevel('Resilience'));
+		if (game.goldenUpgrades.Battle.currentBonus > 0) game.global.soldierHealthMax *= game.goldenUpgrades.Battle.currentBonus + 1;
+		if (game.global.totalSquaredReward > 0) game.global.soldierHealthMax *= game.global.totalSquaredReward / 100 + 1;
+
+		if (game.talents.voidPower.purchased && game.global.voidBuff) {
+			game.global.soldierHealthMax *= game.talents.voidPower.getTotalVP() / 100 + 1;
 			game.global.voidPowerActive = true;
+		} else {
+			game.global.voidPowerActive = false;
 		}
-		else game.global.voidPowerActive = false;
-		if (game.global.challengeActive == "Wither"){
-			game.global.soldierHealthMax *= game.challenges.Wither.getTrimpHealthMult();
+
+		if (game.global.mayhemCompletions) game.global.soldierHealthMax *= game.challenges.Mayhem.getTrimpMult();
+		if (game.global.pandCompletions) game.global.soldierHealthMax *= game.challenges.Pandemonium.getTrimpMult();
+		if (game.global.desoCompletions) game.global.soldierHealthMax *= game.challenges.Desolation.getTrimpMult();
+
+		if (game.global.universe === 1) {
+			if (game.global.formation !== 0 && game.global.formation !== 5) {
+				game.global.soldierHealthMax *= game.global.formation === 1 ? 4 : 0.5;
+				let formAttackMod = 0.5;
+				if (game.global.formation === 2) formAttackMod = 4;
+				game.global.soldierCurrentAttack *= formAttackMod;
+			}
+			if (getPerkLevel('Power_II') > 0) game.global.soldierCurrentAttack *= 1 + game.portal.Power_II.modifier * getPerkLevel('Power_II');
+			if (getPerkLevel('Toughness_II') > 0) game.global.soldierHealthMax *= 1 + game.portal.Toughness_II.modifier * getPerkLevel('Toughness_II');
+			if (game.global.frigidCompletions > 0) game.global.soldierHealthMax *= game.challenges.Frigid.getTrimpMult();
+
+			if (challengeActive('Balance')) {
+				game.global.soldierHealthMax *= game.challenges.Balance.getHealthMult();
+			}
+
+			if (challengeActive('Life')) {
+				game.global.soldierHealthMax *= game.challenges.Life.getHealthMult();
+			}
+
+			if (challengeActive('Revenge')) {
+				game.global.soldierHealthMax *= game.challenges.Revenge.getMult();
+			}
 		}
-		if (game.global.totalSquaredReward > 0)
-			game.global.soldierHealthMax *= ((game.global.totalSquaredReward / 100) + 1);
-		if (game.global.challengeActive == "Berserk"){
-			game.global.soldierHealthMax *= game.challenges.Berserk.getHealthMult();
+
+		if (game.global.universe === 2) {
+			if (game.buildings.Smithy.owned > 0) game.global.soldierHealthMax *= game.buildings.Smithy.getMult();
+			if (Fluffy.isRewardActive('healthy')) game.global.soldierHealthMax *= 1.5;
+			if (Fluffy.isRewardActive('scaledHealth')) game.global.soldierHealthMax *= Fluffy.rewardConfig.scaledHealth.mult();
+			if (game.buildings.Antenna.owned >= 10) game.global.soldierHealthMax *= game.jobs.Meteorologist.getExtraMult();
+			if (autoBattle.bonuses.Stats.level > 0) game.global.soldierHealthMax *= autoBattle.bonuses.Stats.getMult();
+			if (game.portal.Observation.trinkets > 0) game.global.soldierHealthMax *= game.portal.Observation.getMult();
+			if (getPerkLevel('Championism') > 0) game.global.soldierHealthMax *= game.portal.Championism.getMult();
+			if (u2Mutations.tree.Health.purchased) game.global.soldierHealthMax *= 1.5;
+			if (u2Mutations.tree.GeneHealth.purchased) game.global.soldierHealthMax *= 10;
+			game.global.soldierHealthMax *= u2SpireBonuses.basics();
+
+			if (challengeActive('Duel') && game.challenges.Duel.trimpStacks < 20) {
+				game.global.soldierHealthMax *= game.challenges.Duel.healthMult;
+			}
+
+			if (challengeActive('Wither')) {
+				game.global.soldierHealthMax *= game.challenges.Wither.getTrimpHealthMult();
+			}
+
+			if (challengeActive('Insanity') && game.challenges.Insanity.insanity > 0) {
+				game.global.soldierHealthMax *= game.challenges.Insanity.getHealthMult();
+			}
+
+			if (challengeActive('Berserk')) {
+				game.global.soldierHealthMax *= game.challenges.Berserk.getHealthMult();
+			}
+
+			if (game.challenges.Nurture.boostsActive()) {
+				game.global.soldierHealthMax *= game.challenges.Nurture.getStatBoost();
+			}
+
+			if (challengeActive('Alchemy')) {
+				game.global.soldierHealthMax *= alchObj.getPotionEffect('Potion of Strength');
+			}
+
+			if (challengeActive('Desolation')) {
+				game.global.soldierHealthMax *= game.challenges.Desolation.trimpHealthMult();
+			}
+
+			if (challengeActive('Smithless') && game.challenges.Smithless.fakeSmithies > 0) {
+				game.global.soldierHealthMax *= game.challenges.Smithless.getTrimpMult();
+			}
 		}
-		if (game.global.challengeActive == "Desolation"){
-			game.global.soldierHealthMax *= game.challenges.Desolation.trimpHealthMult();
-		}
-		if (game.challenges.Nurture.boostsActive()) game.global.soldierHealthMax *= game.challenges.Nurture.getStatBoost();
+
+		if (challengeActive('Daily') && typeof game.global.dailyChallenge.pressure !== 'undefined') game.global.soldierHealthMax *= dailyModifiers.pressure.getMult(game.global.dailyChallenge.pressure.strength, game.global.dailyChallenge.pressure.stacks);
+		game.global.soldierHealthMax = calcHeirloomBonus('Shield', 'trimpHealth', game.global.soldierHealthMax);
 
 		//Soldier starting health is determined
 		game.global.soldierHealth = game.global.soldierHealthMax;
 		//Finished setting up new army
 		refillEnergyShield();
-		if (game.global.challengeActive == "Devastation" || game.global.challengeActive == "Revenge") {
-			var lastOverkill = game.challenges[game.global.challengeActive].lastOverkill;
-			if (lastOverkill != -1) reduceSoldierHealth(lastOverkill * 7.5);
+		if (challengeActive('Devastation') || challengeActive('Revenge')) {
+			const lastOverkill = game.challenges[game.global.challengeActive].lastOverkill;
+			if (lastOverkill !== -1) reduceSoldierHealth(lastOverkill * 7.5);
 			game.challenges[game.global.challengeActive].lastOverkill = -1;
-			if (game.global.soldierHealth < 1){
+			if (game.global.soldierHealth < 1) {
 				game.global.soldierHealth = 0;
-				if (game.global.challengeActive == "Revenge"){
+				if (challengeActive('Revenge')) {
 					game.challenges.Revenge.addStack();
 				}
 			}
 		}
-		if (challengeActive("Lead")) manageLeadStacks();
-    }
-	else {
-		if (challengeActive("Lead")) manageLeadStacks();
-		if (game.resources.trimps.soldiers != currentSend && game.global.maxSoldiersAtStart > 0){
-			var freeTrimps = (game.resources.trimps.owned - game.resources.trimps.employed);
-			var newTrimps = ((game.resources.trimps.maxSoldiers - game.global.maxSoldiersAtStart)  / game.global.maxSoldiersAtStart) + 1;
-			var requiredTrimps = (currentSend - game.resources.trimps.soldiers);
+		if (challengeActive('Lead')) manageLeadStacks();
+	} else {
+		if (challengeActive('Lead')) manageLeadStacks();
+
+		if (game.resources.trimps.soldiers !== currentSend && game.global.maxSoldiersAtStart > 0) {
+			const freeTrimps = game.resources.trimps.owned - game.resources.trimps.employed;
+			const newTrimps = (game.resources.trimps.maxSoldiers - game.global.maxSoldiersAtStart) / game.global.maxSoldiersAtStart + 1;
+			const requiredTrimps = currentSend - game.resources.trimps.soldiers;
 			if (freeTrimps >= requiredTrimps) {
+				const oldHealth = game.global.soldierHealthMax;
 				game.resources.trimps.owned -= requiredTrimps;
-				var oldHealth = game.global.soldierHealthMax;
 				game.global.soldierHealthMax *= newTrimps;
-				game.global.soldierHealth += (game.global.soldierHealthMax - oldHealth);
+				game.global.soldierHealth += game.global.soldierHealthMax - oldHealth;
 				game.global.soldierCurrentAttack *= newTrimps;
 				game.global.soldierCurrentBlock *= newTrimps;
 				game.resources.trimps.soldiers = currentSend;
 				game.global.maxSoldiersAtStart = game.resources.trimps.maxSoldiers;
 			}
 		}
+
 		//Check map health differences
-		if (game.talents.mapHealth.purchased){
-			if (game.global.mapHealthActive && !map){
+		if (game.talents.mapHealth.purchased) {
+			if (game.global.mapHealthActive && !map) {
 				game.global.soldierHealthMax /= 2;
 				if (game.global.soldierHealth > game.global.soldierHealthmax) game.global.soldierHealth = game.global.soldierHealthMax;
 				game.global.mapHealthActive = false;
-				if (game.global.universe == 2){ 
+				if (game.global.universe === 2) {
 					game.global.soldierEnergyShieldMax /= 2;
 					if (game.global.soldierEnergyShield > game.global.soldierEnergyShieldMax) game.global.soldierEnergyShield = game.global.soldierEnergyShieldMax;
 				}
-			}
-			else if (!game.global.mapHealthActive && map){
+			} else if (!game.global.mapHealthActive && map) {
 				game.global.soldierHealthMax *= 2;
 				game.global.mapHealthActive = true;
-				if (game.global.universe == 2) game.global.soldierEnergyShieldMax *= 2;
+				if (game.global.universe === 2) game.global.soldierEnergyShieldMax *= 2;
 			}
 		}
-		if (game.talents.voidPower.purchased){
-			var mod = 1 + (game.talents.voidPower.getTotalVP() / 100);
-			if (game.global.voidPowerActive && (!map || map.location != "Void")){
+		if (game.talents.voidPower.purchased) {
+			const mod = 1 + game.talents.voidPower.getTotalVP() / 100;
+			if (game.global.voidPowerActive && (!map || map.location !== 'Void')) {
 				game.global.soldierHealthMax /= mod;
 				if (game.global.soldierHealth > game.global.soldierHealthmax) game.global.soldierHealth = game.global.soldierHealthMax;
 				game.global.voidPowerActive = false;
-			}
-			else if (!game.global.voidPowerActive && map && map.location == "Void"){
+			} else if (!game.global.voidPowerActive && map && map.location === 'Void') {
 				game.global.soldierHealthMax *= mod;
 				game.global.voidPowerActive = true;
 			}
 		}
 		//Check differences in equipment, apply perks, bonuses, and formation
 		if (game.global.difs.health !== 0) {
-			var healthTemp = trimpsFighting * game.global.difs.health * ((game.portal.Toughness.modifier * getPerkLevel("Toughness")) + 1);
-			if (mutations.Magma.active()){
-				healthTemp *= mutations.Magma.getTrimpDecay();
-			}
-			if (game.global.universe == 2 && u2Mutations.tree.Health.purchased)	healthTemp *= 1.5;
-			if (game.global.universe == 2 && u2Mutations.tree.GeneHealth.purchased)	healthTemp *= 10;
-			if (getPerkLevel("Toughness_II")) healthTemp *= (1 + (game.portal.Toughness_II.modifier * getPerkLevel("Toughness_II")));
-			if (!game.portal.Observation.radLocked && game.global.universe == 2 && game.portal.Observation.trinkets > 0) healthTemp *= game.portal.Observation.getMult();
-			if (getPerkLevel("Championism")) healthTemp *= game.portal.Championism.getMult();
+			let healthTemp = trimpsFighting * game.global.difs.health * (game.portal.Toughness.modifier * getPerkLevel('Toughness') + 1);
+
+			if (game.jobs.Amalgamator.owned > 0) healthTemp *= game.jobs.Amalgamator.getHealthMult();
+			if (magmaActive) healthTemp *= mutations.Magma.getTrimpDecay();
+			if (game.talents.mapHealth.purchased && game.global.mapsActive) healthTemp *= 2;
+			if (game.jobs.Geneticist.owned > 0) healthTemp *= Math.pow(1.01, game.global.lastLowGen);
+
+			if (getPerkLevel('Resilience') > 0) healthTemp *= Math.pow(game.portal.Resilience.modifier + 1, getPerkLevel('Resilience'));
+			if (game.goldenUpgrades.Battle.currentBonus > 0) healthTemp *= game.goldenUpgrades.Battle.currentBonus + 1;
+			if (game.global.totalSquaredReward > 0) healthTemp *= game.global.totalSquaredReward / 100 + 1;
+
 			if (game.global.mayhemCompletions) healthTemp *= game.challenges.Mayhem.getTrimpMult();
-			if (autoBattle.bonuses.Stats.level > 0 && game.global.universe == 2) healthTemp *= autoBattle.bonuses.Stats.getMult();
-			if (game.global.challengeActive == "Alchemy") healthTemp *= alchObj.getPotionEffect("Potion of Strength");
 			if (game.global.pandCompletions) healthTemp *= game.challenges.Pandemonium.getTrimpMult();
 			if (game.global.desoCompletions) healthTemp *= game.challenges.Desolation.getTrimpMult();
-			if (game.global.frigidCompletions > 0 && game.global.universe == 1) healthTemp *= game.challenges.Frigid.getTrimpMult();
-			if (game.talents.mapHealth.purchased && game.global.mapsActive) healthTemp *= 2;
-			if (Fluffy.isRewardActive("healthy")) healthTemp *= 1.5;
-			if (Fluffy.isRewardActive("scaledHealth")) healthTemp *= Fluffy.rewardConfig.scaledHealth.mult();
-			if (game.jobs.Geneticist.owned > 0) healthTemp *= Math.pow(1.01, game.global.lastLowGen);
-			if (game.goldenUpgrades.Battle.currentBonus > 0) healthTemp *= game.goldenUpgrades.Battle.currentBonus + 1;
-			if (game.global.universe == 2 && game.buildings.Smithy.owned > 0) healthTemp *= game.buildings.Smithy.getMult();
-			if (game.global.challengeActive == "Insanity") healthTemp *= game.challenges.Insanity.getHealthMult();
-			if (getPerkLevel("Resilience") > 0) healthTemp *= Math.pow(game.portal.Resilience.modifier + 1, getPerkLevel("Resilience"));
-			healthTemp *= u2SpireBonuses.basics();
-			if (game.global.universe == 2 && game.buildings.Antenna.owned >= 10) healthTemp *= game.jobs.Meteorologist.getExtraMult();
-			if (game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.pressure !== 'undefined') healthTemp *= dailyModifiers.pressure.getMult(game.global.dailyChallenge.pressure.strength, game.global.dailyChallenge.pressure.stacks);
-			if (game.global.formation !== 0 && game.global.formation !== 5){
-				healthTemp *= (game.global.formation == 1) ? 4 : 0.5;
+
+			if (game.global.universe === 1) {
+				if (game.global.formation !== 0 && game.global.formation !== 5) {
+					healthTemp *= game.global.formation === 1 ? 4 : 0.5;
+				}
+				if (getPerkLevel('Toughness_II')) healthTemp *= 1 + game.portal.Toughness_II.modifier * getPerkLevel('Toughness_II');
+				if (game.global.frigidCompletions > 0) healthTemp *= game.challenges.Frigid.getTrimpMult();
+
+				if (challengeActive('Balance')) {
+					healthTemp *= game.challenges.Balance.getHealthMult();
+				}
+
+				if (challengeActive('Life')) {
+					healthTemp *= game.challenges.Life.getHealthMult();
+				}
+
+				if (challengeActive('Revenge')) {
+					healthTemp *= game.challenges.Revenge.getMult();
+				}
 			}
-			if (game.global.totalSquaredReward > 0)
-				healthTemp *= ((game.global.totalSquaredReward / 100) + 1);
-			if (challengeActive("Balance")){
-				healthTemp *= game.challenges.Balance.getHealthMult();
+
+			if (game.global.universe === 2) {
+				if (game.buildings.Smithy.owned > 0) healthTemp *= game.buildings.Smithy.getMult();
+				if (Fluffy.isRewardActive('healthy')) healthTemp *= 1.5;
+				if (Fluffy.isRewardActive('scaledHealth')) healthTemp *= Fluffy.rewardConfig.scaledHealth.mult();
+				if (game.buildings.Antenna.owned >= 10) healthTemp *= game.jobs.Meteorologist.getExtraMult();
+				if (autoBattle.bonuses.Stats.level > 0) healthTemp *= autoBattle.bonuses.Stats.getMult();
+				if (game.portal.Observation.trinkets > 0) healthTemp *= game.portal.Observation.getMult();
+				if (getPerkLevel('Championism')) healthTemp *= game.portal.Championism.getMult();
+				if (u2Mutations.tree.Health.purchased) healthTemp *= 1.5;
+				if (u2Mutations.tree.GeneHealth.purchased) healthTemp *= 10;
+				healthTemp *= u2SpireBonuses.basics();
+
+				if (challengeActive('Duel') && game.challenges.Duel.trimpStacks < 20) {
+					healthTemp *= game.challenges.Duel.healthMult;
+				}
+
+				if (challengeActive('Wither')) {
+					healthTemp *= game.challenges.Wither.getTrimpHealthMult();
+				}
+
+				if (challengeActive('Insanity')) {
+					healthTemp *= game.challenges.Insanity.getHealthMult();
+				}
+
+				if (challengeActive('Berserk')) {
+					healthTemp *= game.challenges.Berserk.getHealthMult();
+				}
+
+				if (game.challenges.Nurture.boostsActive()) {
+					healthTemp *= game.challenges.Nurture.getStatBoost();
+				}
+
+				if (challengeActive('Alchemy')) {
+					healthTemp *= alchObj.getPotionEffect('Potion of Strength');
+				}
+
+				if (challengeActive('Desolation')) {
+					healthTemp *= game.challenges.Desolation.trimpHealthMult();
+				}
+
+				if (challengeActive('Smithless') && game.challenges.Smithless.fakeSmithies > 0) {
+					healthTemp *= game.challenges.Smithless.getTrimpMult();
+				}
 			}
-			if (game.global.challengeActive == "Smithless" && game.challenges.Smithless.fakeSmithies > 0){
-				healthTemp *= game.challenges.Smithless.getTrimpMult();
-			}
-			if (game.global.challengeActive == "Revenge") healthTemp *= game.challenges.Revenge.getMult();
-			if (game.global.challengeActive == "Life"){
-				healthTemp *= game.challenges.Life.getHealthMult();
-			}
-			if (game.global.challengeActive == "Duel" && game.challenges.Duel.trimpStacks < 20) healthTemp *= game.challenges.Duel.healthMult;
-			if (game.global.challengeActive == "Wither"){
-				healthTemp *= game.challenges.Wither.getTrimpHealthMult();
-			}
-			if (game.challenges.Nurture.boostsActive()) healthTemp *= game.challenges.Nurture.getStatBoost();
-			healthTemp = calcHeirloomBonus("Shield", "trimpHealth", healthTemp);
-			if (game.jobs.Amalgamator.owned > 0)
-				healthTemp *= game.jobs.Amalgamator.getHealthMult();
-			if (game.global.challengeActive == "Berserk") {
-				healthTemp *= game.challenges.Berserk.getHealthMult();
-			}
-			if (game.global.challengeActive == "Desolation"){
-				healthTemp *= game.challenges.Desolation.trimpHealthMult();
-			}
+
+			if (challengeActive('Daily') && typeof game.global.dailyChallenge.pressure !== 'undefined') healthTemp *= dailyModifiers.pressure.getMult(game.global.dailyChallenge.pressure.strength, game.global.dailyChallenge.pressure.stacks);
+
+			healthTemp = calcHeirloomBonus('Shield', 'trimpHealth', healthTemp);
 			game.global.soldierHealthMax += healthTemp;
 			game.global.soldierHealth += healthTemp;
 			game.global.difs.health = 0;
 			if (game.global.soldierHealth <= 0) game.global.soldierHealth = 0;
 		}
+
 		if (game.global.difs.attack !== 0) {
-			var attackTemp = trimpsFighting * game.global.difs.attack * ((game.portal.Power.modifier * getPerkLevel("Power")) + 1);
-			if (mutations.Magma.active()){
-				attackTemp *= mutations.Magma.getTrimpDecay();
-			}
-			if (getPerkLevel("Power_II")) attackTemp *= (1 + (game.portal.Power_II.modifier * getPerkLevel("Power_II")));
-			if (game.global.formation !== 0 && game.global.formation != 5){
-				attackTemp *= (game.global.formation == 2) ? 4 : 0.5;
+			let attackTemp = trimpsFighting * game.global.difs.attack * (game.portal.Power.modifier * getPerkLevel('Power') + 1);
+			if (magmaActive) attackTemp *= mutations.Magma.getTrimpDecay();
+			if (getPerkLevel('Power_II')) attackTemp *= 1 + game.portal.Power_II.modifier * getPerkLevel('Power_II');
+			if (game.global.formation !== 0 && game.global.formation !== 5) {
+				attackTemp *= game.global.formation === 2 ? 4 : 0.5;
 			}
 			game.global.soldierCurrentAttack += attackTemp;
 			game.global.difs.attack = 0;
+
+			if (game.global.soldierCurrentAttack <= 0) game.global.soldierHealth = 0;
 		}
+
 		if (game.global.difs.block !== 0) {
-			var blockTemp = (trimpsFighting * game.global.difs.block * ((game.global.difs.trainers * (calcHeirloomBonus("Shield", "trainerEfficiency", game.jobs.Trainer.modifier) / 100)) + 1));
-			if (game.global.formation !== 0 && game.global.formation !== 5){
-				blockTemp *= (game.global.formation == 3) ? 4 : 0.5;
+			let blockTemp = trimpsFighting * game.global.difs.block * (game.global.difs.trainers * (calcHeirloomBonus('Shield', 'trainerEfficiency', game.jobs.Trainer.modifier) / 100) + 1);
+			if (game.global.formation !== 0 && game.global.formation !== 5) {
+				blockTemp *= game.global.formation === 3 ? 4 : 0.5;
 			}
-			blockTemp = calcHeirloomBonus("Shield", "trimpBlock", blockTemp);
+			blockTemp = calcHeirloomBonus('Shield', 'trimpBlock', blockTemp);
 			game.global.soldierCurrentBlock += blockTemp;
 			game.global.difs.block = 0;
 		}
 	}
+
 	if (game.global.soldierHealth > game.global.soldierHealthMax) game.global.soldierHealth = game.global.soldierHealthMax;
 	if (!instaFight) updateAllBattleNumbers(game.resources.trimps.soldiers < currentSend);
-    game.global.fighting = true;
-    game.global.lastFightUpdate = new Date();
+	game.global.fighting = true;
+	game.global.lastFightUpdate = new Date();
 	if (instaFight) fight();
 }
 
