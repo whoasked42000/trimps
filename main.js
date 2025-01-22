@@ -20371,7 +20371,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
             u2Mutations.dragging(e);
         }
     })
-})
+})()
 
 function makeScreenreaderTooltips(mode="click") {
 	// mode is "click" or "button"
