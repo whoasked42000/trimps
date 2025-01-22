@@ -2037,48 +2037,126 @@ function confirmAbandonChallenge(){
 	var text = "Are you sure you want to abandon this challenge?";
 	if (game.challenges[game.global.challengeActive].mustRestart) text += " <b>Abandoning this challenge will cause the portal to become unstable and start you from the beginning of this run. (You'll keep your permanent rewards like helium and perks)</b><br/><br/>Click Confirm to abandon the challenge and restart at Z1, Cancel to go back, or Restart to go back to Z1 with the same challenge.";
 	tooltip('confirm', null, 'update', text, 'abandonChallenge()', 'Abandon Challenge');
-	if (game.challenges[game.global.challengeActive].mustRestart) document.getElementById("confirmTipCost").innerHTML += '<div class="btn btn-success" onclick="abandonChallenge(true); cancelTooltip()">Restart Challenge</div>';
+	if (game.challenges[game.global.challengeActive].mustRestart) document.getElementById("confirmTipCost").insertAdjacentHTML('beforeend', '<div class="btn btn-success" onclick="abandonChallenge(true); cancelTooltip()">Restart Challenge</div>');
 }
 
-function abandonChallenge(restart){
-	var challengeName = game.global.challengeActive;
-	var challenge = game.challenges[challengeName];
-	if (game.global.universe == 2 && (game.global.runningChallengeSquared || challengeName == "Daily")) game.global.u2MutationSeed = game.global.ogU2MutationSeed;
-	if (game.global.runningChallengeSquared){
-		var challengeList;
+function abandonChallengeResetEnemy() {
+	const worldCell = game.global.gridArray[game.global.lastClearedCell + 1];
+	if (!worldCell) return;
+
+	let statChallenge = false;
+	let statMaps = false;
+
+	if (challengeActive('Daily')) {
+		if (typeof game.global.dailyChallenge.badHealth !== 'undefined') {
+			statChallenge = true;
+		}
+
+		if (typeof game.global.dailyChallenge.empower !== 'undefined') {
+			statChallenge = true;
+		}
+
+		if (typeof game.global.dailyChallenge.badMapHealth !== 'undefined' && game.global.currentMapId !== '') {
+			statMaps = true;
+		}
+
+		if (typeof game.global.dailyChallenge.empoweredVoid !== 'undefined' && game.global.voidBuff === 'Void') {
+			statMaps = true;
+		}
+	}
+
+	if (game.global.universe === 1) {
+		const challenges = ['Meditate', 'Scientist', 'Balance', 'Life', 'Toxicity', 'Coordinate', 'Corrupted', 'Domination', 'Obliterated', 'Eradicated', 'Frigid', 'Experience'];
+		statChallenge = challenges.some((challenge) => challengeActive(challenge));
+
+		if (challengeActive('Lead') && game.challenges.Lead.stacks > 0) {
+			statChallenge = true;
+		}
+
+		statMaps = statChallenge;
+	}
+
+	if (game.global.universe === 2) {
+		const challenges = ['Unbalance', 'Duel', 'Wither', 'Quest', 'Archaeology', 'Mayhem', 'Exterminate', 'Nurture', 'Pandemonium', 'Alchemy', 'Glass', 'Hypothermia', 'Desolation'];
+		statChallenge = challenges.some((challenge) => challengeActive(challenge));
+
+		if (challengeActive('Revenge') && game.global.world % 2 === 0) {
+			statChallenge = true;
+		}
+
+		statMaps = statChallenge;
+
+		if (challengeActive('Storm')) {
+			statChallenge = true;
+		} else if (challengeActive('Exterminate')) {
+			statChallenge = true;
+		} else if (challengeActive('Smithless') && game.global.world % 25 === 0 && worldCell.ubersmith && !worldCell.failedUber) {
+			statChallenge = true;
+		}
+	}
+	
+	return [statChallenge, statMaps];
+}
+
+function abandonChallenge(restart) {
+	let challengeName = game.global.challengeActive;
+	let challenge = game.challenges[challengeName];
+	const [resetWorld, resetMap] = abandonChallengeResetEnemy();
+	if (game.global.universe === 2 && (game.global.runningChallengeSquared || challengeName === 'Daily')) game.global.u2MutationSeed = game.global.ogU2MutationSeed;
+
+	if (game.global.runningChallengeSquared) {
+		let challengeList;
 		if (challenge.multiChallenge) challengeList = challenge.multiChallenge;
 		else challengeList = [challengeName];
-		game.global.challengeActive = "";
+
+		game.global.challengeActive = '';
 		game.global.multiChallenge = {};
-		for (var x = 0; x < challengeList.length; x++){
-			if (game.global.world > game.c2[challengeList[x]])
-			game.c2[challengeList[x]] = game.global.world;
+
+		for (let x = 0; x < challengeList.length; x++) {
+			if (game.global.world > game.c2[challengeList[x]]) game.c2[challengeList[x]] = game.global.world;
 			if (typeof game.challenges[challengeList[x]].abandon !== 'undefined' && game.challenges[challengeList[x]].fireAbandon) game.challenges[challengeList[x]].abandon();
 		}
+
 		if (game.global.capTrimp && game.c2.Trimp > 230) game.c2.Trimp = 230;
 		countChallengeSquaredReward();
+
 		if (!restart) {
-			fadeIn("helium", 10);
+			fadeIn('helium', 10);
 			game.global.runningChallengeSquared = false;
-			if (game.global.universe == 2 && (game.global.world > 30 || (game.global.world == 30 && game.global.lastClearedCell >= 29))) unlockJob("Meteorologist");
-		}	
-	}
-	else if (challenge.fireAbandon && typeof challenge.abandon !== 'undefined') {
-		game.global.challengeActive = "";
+			if (game.global.universe === 2 && (game.global.world > 30 || (game.global.world === 30 && game.global.lastClearedCell >= 29))) unlockJob('Meteorologist');
+		}
+	} else if (challenge.fireAbandon && typeof challenge.abandon !== 'undefined') {
+		game.global.challengeActive = '';
 		challenge.abandon();
 	}
-	game.global.challengeActive = "";
-	
+
+	game.global.challengeActive = '';
 	cancelPortal();
-	if (challengeName == "Scientist"){
-		document.getElementById("scienceCollectBtn").style.display = "block";
+
+	if (challengeName === 'Scientist') {
+		document.getElementById('scienceCollectBtn').style.display = 'block';
 	}
-	if (game.challenges[challengeName].mustRestart){
+
+	if (game.challenges[challengeName].mustRestart) {
 		if (restart) game.global.selectedChallenge = challengeName;
 		resetGame(true);
 	}
-	if (challengeName != "Daily")
-		message("Your challenge has been abandoned.", "Notices");
+
+	if (resetWorld || resetMap) {
+		if (resetWorld) {
+			const worldCell = game.global.gridArray[game.global.lastClearedCell + 1];
+			if (worldCell) worldCell.maxHealth = -1;
+		}
+
+		if (resetMap && game.global.currentMapId !== '') {
+			const mapCell = game.global.mapGridArray[game.global.lastClearedMapCell + 1];
+			mapCell.maxHealth = -1;
+		}
+
+		if (game.global.fighting) game.global.fighting = false;
+	}
+
+	if (challengeName !== 'Daily') message('Your challenge has been abandoned.', 'Notices');
 	refreshMaps();
 }
 
