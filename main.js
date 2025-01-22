@@ -9274,26 +9274,37 @@ function increaseTheHeat(){
 	}
 }
 
-function updateGeneratorInfo(){
+function updateGeneratorInfo() {
 	if (!mutations.Magma.active()) return;
-	var elem = document.getElementById('generatorWindow');
-	//update fuel
-	var currentFuel = game.global.magmaFuel;
-	//update efficiency
-	var nextTickAmount = getGeneratorTickAmount();
 
-	//get state
-	var state = ['Passive', 'Active', 'Hybrid'];
-	state = state[game.global.generatorMode];
-	if (elem == null){
-		document.getElementById('buildingsHere').insertAdjacentHTML("beforeend", getGeneratorHtml(true));
+	if (!document.getElementById('generatorWindow')) {
+		document.getElementById('buildingsHere').insertAdjacentHTML('beforeend', getGeneratorHtml(true));
 	}
+
 	changeGeneratorState(null, true);
-	if (game.permanentGeneratorUpgrades.Hybridization.owned) document.getElementById('generatorHybridBtn').style.display = 'inline-block';
-	if (game.permanentGeneratorUpgrades.Supervision.owned) document.getElementById('generatorStateConfigBtn').style.display = 'inline-block';
+	const hybridBtn = document.getElementById('generatorHybridBtn');
+	const stateConfigBtn = document.getElementById('generatorStateConfigBtn');
+
+	if (game.permanentGeneratorUpgrades.Hybridization.owned && hybridBtn.style.display !== 'inline-block') {
+		hybridBtn.style.display = 'inline-block';
+	}
+
+	if (game.permanentGeneratorUpgrades.Supervision.owned && stateConfigBtn.style.display !== 'inline-block') {
+		stateConfigBtn.style.display = 'inline-block';
+	}
+
+	if (usingRealTimeOffline) return;
+
 	updateGeneratorFuel();
-	document.getElementById('generatorTrimpsPs').innerHTML = prettify(scaleNumberForBonusHousing(nextTickAmount));
-	document.getElementById('upgradeMagmiteTotal').innerHTML = prettify(game.global.magmite) + " Mi";
+
+	const generatorTrimps = document.getElementById('generatorTrimpsPs');
+	const nextTickAmount = getGeneratorTickAmount();
+	const generatorTrimpsText = prettify(scaleNumberForBonusHousing(nextTickAmount));
+	if (generatorTrimps.innerHTML !== generatorTrimpsText) generatorTrimps.innerHTML = generatorTrimpsText;
+
+	const totalMi = document.getElementById('upgradeMagmiteTotal');
+	const totalMiText = `${prettify(game.global.magmite)} Mi`;
+	if (totalMi.innerHTML !== totalMiText) totalMi.innerHTML = totalMiText;
 }
 
 function saveGenStateConfig(){
@@ -9551,126 +9562,130 @@ function canGeneratorTick(){
 }
 
 var lastViewedDGUpgrade;
-function showGeneratorUpgradeInfo(item, permanent){
-	var elem = document.getElementById('generatorUpgradeDescription');
-	if (elem == null) return;
-	var description;
-	var cost;
+function showGeneratorUpgradeInfo(item, permanent) {
+	const elem = document.getElementById('generatorUpgradeDescription');
+	if (!elem) return;
+
+	let description;
+	let cost;
 	if (permanent) {
 		description = game.permanentGeneratorUpgrades[item].description;
 		cost = game.permanentGeneratorUpgrades[item].cost;
-	}
-	else {
+	} else {
 		description = game.generatorUpgrades[item].description();
 		cost = game.generatorUpgrades[item].cost();
 	}
-	var color = (game.global.magmite >= cost) ? "Success" : "Danger";
-	if (item == "Overclocker" && (!game.permanentGeneratorUpgrades.Hybridization.owned || !game.permanentGeneratorUpgrades.Storage.owned))
-			color = "Danger";
-	var text;
-	if (permanent && game.permanentGeneratorUpgrades[item].owned){
-		color = "Grey";
-		text = "Done";
+
+	let color = game.global.magmite >= cost ? 'Success' : 'Danger';
+	if (item === 'Overclocker' && (!game.permanentGeneratorUpgrades.Hybridization.owned || !game.permanentGeneratorUpgrades.Storage.owned)) color = 'Danger';
+
+	let text;
+	if (permanent && game.permanentGeneratorUpgrades[item].owned) {
+		color = 'Grey';
+		text = 'Done';
+	} else {
+		text = 'Buy: ' + prettify(cost) + ' Magmite';
 	}
-	else text = "Buy: " + prettify(cost) + " Magmite";
-	elem.innerHTML = "<div id='generatorUpgradeName'>" + item + "</div><div onclick='buyGeneratorUpgrade(\"" + item + "\")' id='magmiteCost' class='pointer noSelect hoverColor color" + color + "'>" + text + "</div>" + description + "<br/>";
+
+	const elemText = `<div id='generatorUpgradeName'>${item}</div><div onclick='buyGeneratorUpgrade("${item}")' id='magmiteCost' class='pointer noSelect hoverColor color${color}'>${text}</div>${description}<br/>`;
+	if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
 	lastViewedDGUpgrade = [item, permanent];
 	verticalCenterTooltip();
 }
 
 var thisTime = 0;
-function updateNextGeneratorTickTime(){
-	//update tick time
-	var nextTickElem = document.getElementById('generatorNextTick');
-	if (game.global.genPaused){
-		if (nextTickElem)
-		nextTickElem.innerHTML = (mousedOverClock) ? "<span class='icomoon icon-controller-play'></span>" : '<span class="icomoon icon-pause3"></span>';
+function updateNextGeneratorTickTime() {
+	const nextTickElem = document.getElementById('generatorNextTick');
+	if (game.global.genPaused) {
+		const message = mousedOverClock ? "<span class='icomoon icon-controller-play'></span>" : '<span class="icomoon icon-pause3"></span>';
+		if (nextTickElem !== message) nextTickElem.innerHTML = message;
 		return;
 	}
-    var tickTime = getGeneratorTickTime();
-    var nextTickIn = (tickTime * 1000) - game.global.timeSinceLastGeneratorTick;
-    var framesPerVisual = 10;
-    nextTickIn /= 1000;
-    nextTickIn = (isNumberBad(nextTickIn)) ? 0 : nextTickIn;
-    nextTickIn = Math.round(nextTickIn * 10) / 10;
-	if(Math.round((nextTickIn + 0.1) * 10) / 10 == tickTime) {
+
+	const tickTime = getGeneratorTickTime();
+	let framesPerVisual = 10;
+	let nextTickIn = (tickTime * 1000 - game.global.timeSinceLastGeneratorTick) / 1000;
+	nextTickIn = isNumberBad(nextTickIn) ? 0 : Math.round(nextTickIn * 10) / 10;
+	nextTickIn = Math.round(nextTickIn * 10) / 10;
+
+	if (Math.round((nextTickIn + 0.1) * 10) / 10 === tickTime) {
 		thisTime = framesPerVisual - 1;
 	}
-	if (nextTickElem)
-    	nextTickElem.innerHTML = (mousedOverClock && game.permanentGeneratorUpgrades.Supervision.owned) ? "<span class='icomoon icon-pause3'></span>" : prettify(Math.floor(nextTickIn + 1));
-    var countingTick = Math.round((tickTime - nextTickIn) * 10) / 10;
-    countingTick = Math.round(countingTick * 10) / 10;
-	if (game.options.menu.generatorAnimation.enabled == 1 && thisTime >= framesPerVisual - 1) {
+
+	const message = mousedOverClock && game.permanentGeneratorUpgrades.Supervision.owned ? "<span class='icomoon icon-pause3'></span>" : usingRealTimeOffline ? 0 : prettify(Math.floor(nextTickIn + 1));
+	if (nextTickElem !== message && !usingRealTimeOffline) nextTickElem.innerHTML = message;
+
+	let countingTick = Math.round((tickTime - nextTickIn) * 10) / 10;
+	countingTick = Math.round(countingTick * 10) / 10;
+
+	if (game.options.menu.generatorAnimation.enabled === 1 && thisTime >= framesPerVisual - 1) {
 		thisTime = 0;
-		var timeRemaining = tickTime - countingTick;
-		if(timeRemaining != 0 && timeRemaining <= framesPerVisual / 10) {
-			timeRemaining -= 0.1;
-			timeRemaining = Math.round(timeRemaining * 10) / 10;
+		let timeRemaining = tickTime - countingTick;
+		if (timeRemaining !== 0 && timeRemaining <= framesPerVisual / 10) {
+			timeRemaining = Math.round((timeRemaining - 0.1) * 10) / 10;
 			thisTime = framesPerVisual;
 			framesPerVisual = timeRemaining * 10;
 			thisTime -= framesPerVisual;
 		}
 		goRadial(document.getElementById('generatorRadial'), countingTick, tickTime, 100 * framesPerVisual);
+	} else {
+		thisTime++;
 	}
-    else thisTime++;
 }
 
-function updateGeneratorFuel(){
-	var currentFuel = game.global.magmaFuel;
-	var maxFuel = getGeneratorFuelCap();
-	document.getElementById('generatorFuelOwned').innerHTML = prettify(currentFuel);
-	document.getElementById('generatorFuelMax').innerHTML = prettify(maxFuel);
-	var bar = document.getElementById('fuelStorageBar');
-	var percent;
-	if (currentFuel > maxFuel) {
-		var storageCap = getGeneratorFuelCap(true);
+function updateGeneratorFuel() {
+	const currentFuel = game.global.magmaFuel;
+	const maxFuel = getGeneratorFuelCap();
+	const elem = document.getElementById('generatorFuelOwned');
+	if (elem && elem.innerHTML != prettify(currentFuel)) elem.innerHTML = prettify(currentFuel);
+	const elem2 = document.getElementById('generatorFuelMax');
+	if (elem2 && elem2.innerHTML != prettify(maxFuel)) elem2.innerHTML = prettify(maxFuel);
 
+	const fuelStorageBar = document.getElementById('fuelStorageBar');
+	let percent;
+	if (currentFuel > maxFuel) {
+		const storageCap = getGeneratorFuelCap(true);
 		percent = Math.ceil(((currentFuel - maxFuel) / (storageCap - maxFuel)) * 100);
 		if (percent > 100) percent = 100;
 		if (percent < 0) percent = 0;
-		//bar.style.top = (100 - percent) + "%";
-		bar.style.height = percent + "%";
+		fuelStorageBar.style.height = percent + '%';
+	} else {
+		fuelStorageBar.style.height = '0%';
 	}
-	else {
-		//bar.style.top = "100%";
-		bar.style.height = "0%";
-	}
-	bar = document.getElementById('fuelBar');
+
+	const fuelBar = document.getElementById('fuelBar');
 	percent = Math.ceil((currentFuel / maxFuel) * 100);
 	if (percent > 100) percent = 100;
-	//bar.style.top = (100 - percent) + "%";
-	bar.style.height = percent + "%";
-
+	fuelBar.style.height = percent + '%';
 }
 
-function changeGeneratorState(to, updateOnly){
-	if (game.global.universe == 2) return;
+function changeGeneratorState(to, updateOnly) {
+	if (game.global.universe === 2) return;
 	//0 passive, 1 active, 2 hybrid
-	if (game.global.challengeActive == "Eradicated") to = 1;
-	if (!updateOnly)
-		game.global.generatorMode = to;
+	const originalMode = game.global.generatorMode;
+	const runningEradicated = challengeActive('Eradicated');
+	if (runningEradicated) to = 1;
+	if (!updateOnly) game.global.generatorMode = to;
 	to = game.global.generatorMode;
-	if (game.global.genPaused) to = 0;
-	if (game.global.genPaused && game.global.challengeActive == "Eradicated") to = 1;
-	if (to == 2){
-		if (game.global.magmaFuel < getGeneratorFuelCap(false, true)){
-			to = 3;
-		}
-	}
-	var state = ['Passive', 'Active', 'HybridPassive', 'HybridActive'];
-	state = state[to];
+	if (game.global.genPaused) to = runningEradicated ? 1 : 0;
+	if (to === 2 && game.global.magmaFuel < getGeneratorFuelCap(false, true)) to = 3;
+
+	if (to === originalMode && !updateOnly) return;
+
+	const state = ['Passive', 'Active', 'HybridPassive', 'HybridActive'][to];
 	swapClass('generatorState', 'generatorState' + state, document.getElementById('generatorWindow'));
 	swapClass('generatorState', 'generatorState' + state, document.getElementById('clockKnob'));
 }
 
-function generatorTick(fromOverclock){
+function generatorTick(fromOverclock) {
 	if (!mutations.Magma.active()) return;
-	if (game.global.genPaused){
+	if (game.global.genPaused) {
 		updateNextGeneratorTickTime();
 		return;
 	}
-	var fuelRate = getFuelBurnRate();
-	if (!fromOverclock){
+
+	const fuelRate = getFuelBurnRate();
+	if (!fromOverclock) {
 		if (game.global.magmaFuel < fuelRate) return;
 		game.global.timeSinceLastGeneratorTick += 100;
 		updateNextGeneratorTickTime();
@@ -9678,22 +9693,25 @@ function generatorTick(fromOverclock){
 			return;
 		}
 	}
-	checkAchieve("housing", "Generator");
-	var tickAmt = getGeneratorTickAmount();
-	if (fromOverclock) tickAmt *= (1 - game.generatorUpgrades.Overclocker.modifier);
-	var scaledTick = addMaxHousing(tickAmt, game.permanentGeneratorUpgrades.Simulacrum.owned);
+
+	checkAchieve('housing', 'Generator');
+	let tickAmt = getGeneratorTickAmount();
+	if (fromOverclock) tickAmt *= 1 - game.generatorUpgrades.Overclocker.modifier;
+	const scaledTick = addMaxHousing(tickAmt, game.permanentGeneratorUpgrades.Simulacrum.owned);
 	game.stats.trimpsGenerated.value += scaledTick;
 	game.global.trimpsGenerated += tickAmt;
 	game.global.magmaFuel = Math.round((game.global.magmaFuel - fuelRate) * 100) / 100;
-	if (!fromOverclock){
-		if (game.global.magmaFuel >= fuelRate)
-			game.global.timeSinceLastGeneratorTick = 0;
+
+	if (!fromOverclock) {
+		if (game.global.magmaFuel >= fuelRate) game.global.timeSinceLastGeneratorTick = 0;
 		else {
 			game.global.timeSinceLastGeneratorTick = 0;
 			goRadial(document.getElementById('generatorRadial'), 0, 10, 0);
-			document.getElementById('generatorNextTick').innerHTML = 0;
+			const nextTickElem = document.getElementById('generatorNextTick');
+			if (nextTickElem !== '0') nextTickElem.innerHTML = 0;
 		}
 	}
+
 	updateGeneratorInfo();
 	changeGeneratorState(null, true);
 }
