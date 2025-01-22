@@ -11079,11 +11079,12 @@ function battleCoordinator(makeUp) {
     game.global.battleCounter += (1000 / game.settings.speed);
 	var num = (getPerkLevel("Agility")) ? 1000 * Math.pow(1 - game.portal.Agility.modifier, getPerkLevel("Agility")) : 1000;
 	if (game.talents.hyperspeed.purchased) num -= 100;
-	if (game.talents.hyperspeed2.purchased)
+	if (game.talents.hyperspeed2.purchased){
 		var hsZoneMod = game.talents.liquification3.purchased ? 0.75 : 0.5;
 		if (game.global.world <= Math.floor((getHighestLevelCleared(false, true) + 1) * hsZoneMod)){
 			num -= 100;
 		}
+	}
 	else if (game.global.mapExtraBonus == "fa")
 		num -= 100;
 	if (!game.global.mapsActive && game.global.gridArray[0].name == "Liquimp" && num < 400)
@@ -16284,12 +16285,13 @@ function fight(makeUp) {
 
 	if (game.global.soldierHealth > 0) {
 		game.global.armyAttackCount++;
-	} else if (game.portal.Equality.scalingActive && game.global.armyAttackCount <= game.portal.Equality.scalingSetting) {
+	}
+	else if (game.portal.Equality.getSetting('scalingActive') && game.global.armyAttackCount <= game.portal.Equality.getSetting('scalingSetting')) {
 		game.portal.Equality.scalingCount++;
 		manageEqualityStacks();
 	}
 
-	if (game.global.fightAttackCount > 0 && game.portal.Equality.scalingActive && game.portal.Equality.scalingReverse && game.global.fightAttackCount % game.portal.Equality.reversingSetting === 0 && game.global.armyAttackCount > game.portal.Equality.scalingSetting && cell.health > 0) {
+	if (game.global.fightAttackCount > 0 && game.portal.Equality.getSetting('scalingActive') && game.portal.Equality.getSetting('scalingReverse') && game.global.fightAttackCount % game.portal.Equality.getSetting('reversingSetting') === 0 && game.global.armyAttackCount > game.portal.Equality.getSetting('scalingSetting') && cell.health > 0) {
 		game.portal.Equality.scalingCount--;
 		manageEqualityStacks();
 	}
