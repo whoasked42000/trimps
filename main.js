@@ -2472,36 +2472,39 @@ function toggleEqualityScale(fromTip){
 	updateEqualityScaling(fromTip);
 }
 
-function manageEqualityStacks(){
-	if (game.global.universe != 2) return;
-	if (game.portal.Equality.radLocked) return;
+function manageEqualityStacks() {
+	if (game.global.universe !== 2 || game.portal.Equality.radLocked) return;
+	const equality = getPerkLevel('Equality');
+
 	if (game.portal.Equality.scalingCount < 0) game.portal.Equality.scalingCount = 0;
-	if (game.portal.Equality.scalingCount > game.portal.Equality.radLevel) game.portal.Equality.scalingCount = game.portal.Equality.radLevel;
-	var tabElem = document.getElementById('equalityTab');
-	var tabTextElem = document.getElementById('equalityA');
-	var activeStacks = game.portal.Equality.getActiveLevels();
-	var text = activeStacks + " stack" + needAnS(activeStacks) + " of Equality are active, multiplying the Attack of Trimps ";
-	var enemyMult = game.portal.Equality.getMult(false);
-	if (game.heirlooms.Shield.inequality.currentBonus > 0){
-		var trimpMult = game.portal.Equality.getMult(true);
-		
-		text += " by " + prettifyTiny(trimpMult) + " and Enemies by " + prettifyTiny(enemyMult);
-	}
-	else {
-		text += " and Enemies by " + prettifyTiny(enemyMult);
+	if (game.portal.Equality.scalingCount > equality) game.portal.Equality.scalingCount = equality;
+	const tabElem = document.getElementById('equalityTab');
+	const tabTextElem = document.getElementById('equalityA');
+	const activeStacks = game.portal.Equality.getActiveLevels();
+	let text = activeStacks + ' stack' + needAnS(activeStacks) + ' of Equality are active, multiplying the Attack of Trimps ';
+	let elemText = 'Equality (Scaling ';
+	const enemyMult = game.portal.Equality.getMult(false);
+	if (game.heirlooms.Shield.inequality.currentBonus > 0) {
+		const trimpMult = game.portal.Equality.getMult(true);
+		text += ' by ' + prettifyTiny(trimpMult) + ' and Enemies by ' + prettifyTiny(enemyMult);
+	} else {
+		text += ' and Enemies by ' + prettifyTiny(enemyMult);
 	}
 
-	if (game.global.universe == 2 && !game.portal.Equality.radLocked && game.portal.Equality.getSetting('scalingActive')){
+	if (game.portal.Equality.getSetting('scalingActive')) {
 		swapClass('equalityTabScaling', 'equalityTabScalingOn', tabElem);
-		tabTextElem.innerHTML = "Equality (Scaling On)";
-		text += ". Scaling is on.";
+		elemText += 'On)';
+		text += '. Scaling is on.';
+		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
+	} else {
+		swapClass('equalityTabScaling', 'equalityTabScalingOff', tabElem);
+		elemText += 'Off)';
+		text += '. Scaling is off.';
 		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
 	}
-	else{
-		text += ". Scaling is off.";
-		swapClass('equalityTabScaling', 'equalityTabScalingOff', tabElem);
-		tabTextElem.innerHTML = "Equality (Scaling Off)";
-		manageStacks('Equality Scaling', activeStacks, true, 'equalityStacks', 'icomoon icon-arrow-bold-down', text, false);
+
+	if (tabTextElem.innerHTML !== elemText) {
+		tabTextElem.innerHTML = elemText;
 	}
 }
 
@@ -2672,33 +2675,53 @@ var offlineProgress = {
 		return this.currentFluff;
 	},
 	showEquality: function(){
-		if (this.showingEquality || game.global.universe == 1 || game.portal.Equality.radLocked){
-			this.timeOfflineElem.innerHTML = "Welcome back! You were offline for " + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + ".";
-			this.equalityBtn.innerHTML = "Show Equality";
+		if (this.showingEquality || game.global.universe === 1 || game.portal.Equality.radLocked) {
+			const newTimeOfflineHTML = 'Welcome back! You were offline for ' + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + '.';
+			if (this.timeOfflineElem.innerHTML !== newTimeOfflineHTML) {
+				this.timeOfflineElem.innerHTML = newTimeOfflineHTML;
+			}
+			if (this.equalityBtn.innerHTML !== 'Show Equality') {
+				this.equalityBtn.innerHTML = 'Show Equality';
+			}
 			this.showingEquality = false;
 			return;
 		}
-		var text = '<div style="font-size: 0.75vw; margin-top: -3.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/>'
+		let text = `<div style="font-size: 0.75vw; margin-top: -3.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/></div>`;
 		text += getEqualitySliders(true);
-		text += "</div>";
-		this.timeOfflineElem.innerHTML = text;
+		text += '</div>';
+	
+		if (this.timeOfflineElem.innerHTML !== text) {
+			this.timeOfflineElem.innerHTML = text;
+		}
 		updateEqualityScaling();
-		this.equalityBtn.innerHTML = "Hide Equality";
+	
+		if (this.equalityBtn.innerHTML !== 'Hide Equality') {
+			this.equalityBtn.innerHTML = 'Hide Equality';
+		}
 		this.showingEquality = true;
 	},
 	updateFormations: function(force){
 		if (!game.upgrades.Formations.done && !force) {
-			this.formationsElem.style.display = 'none';
+			if (this.formationsElem.style.display !== 'none') {
+				this.formationsElem.style.display = 'none';
+			}
 			return;
 		}
-		var text = "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 0) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"0\")'>X</div>";
-		text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 1) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"1\")'>H</div>";
-		if (game.upgrades.Dominance.done) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 2) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"2\")'>D</div>";
-		if (game.upgrades.Barrier.done) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 3) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"3\")'>B</div>";
-		if (getHighestLevelCleared() >= 180) text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 4) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"4\")'>S</div>";
-		if (game.global.uberNature == "Wind") text += "<div class='formationBtn offlineForm pointer " + ((game.global.formation == 5) ? 'formationStateEnabled' : 'formationStateDisabled') + "' onclick='setFormation(\"5\")'>W</div>";
-		this.formationsElem.innerHTML = text;
-		this.formationsElem.style.display = 'block';
+	
+		let text = `<div class='formationBtn offlineForm pointer ${game.global.formation === 0 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("0")'>X</div>`;
+		text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 1 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("1")'>H</div>`;
+		if (game.upgrades.Dominance.done) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 2 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("2")'>D</div>`;
+		if (game.upgrades.Barrier.done) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 3 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("3")'>B</div>`;
+		if (getHighestLevelCleared() >= 180) text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 4 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("4")'>S</div>`;
+		if (game.global.uberNature === 'Wind') text += `<div class='formationBtn offlineForm pointer ${game.global.formation === 5 ? 'formationStateEnabled' : 'formationStateDisabled'}' onclick='setFormation("5")'>W</div>`;
+	
+		if (this.formationsElem.innerHTML !== text) {
+			this.formationsElem.innerHTML = text;
+		}
+	
+		if (this.formationsElem.style.display !== 'block') {
+			this.formationsElem.style.display = 'block';
+		}
 	},
 	updateMapBtns: function() {
 		if (game.global.preMapsActive || game.global.mapsActive) {
@@ -2904,42 +2927,63 @@ var offlineProgress = {
 		var cell = game.global.gridArray[game.global.lastClearedCell + 1];
 		if (cell && cell.health > cell.maxHealth) cell.health = cell.maxHealth;
 	},
-	updateBar: function(current){
-		var width = ((current / this.progressMax) * 100).toFixed(1) + "%";
+	updateBar: function(current) {
+		const width = ((current / this.progressMax) * 100).toFixed(1) + '%';
 		this.progressElem.style.width = width;
-		this.cellElem.innerHTML = "Cell " + (game.global.lastClearedCell + 2);
-		this.zoneElem.innerHTML = "Zone " + game.global.world;
-		this.progressTextElem.innerHTML = prettify(current) + " / " + prettify(this.progressMax) + " ticks (" + width + ")";
-		this.updateMapBtns();
-		if (game.global.mapsActive){
-			var map = getCurrentMapObject();
-			var mapDesc = "<span style='font-size: 0.8em'>Mapping in " + map.name + " (" + map.level + ")<br/>Cell " + (game.global.lastClearedMapCell + 2) + "<br/>" + this.countMapItems(map.level) + " items remain</span>";
-			if (this.countThisMap) mapDesc += "<br/><span style='font-size: 0.6em'>Looks like you still haven't cleared this map. If you want to leave and make an easier one, I won't count it against you!</span>"
-			this.inMapDescriptionElem.innerHTML = mapDesc;
+		let newCellHTML = `Cell ${game.global.lastClearedCell + 2}`;
+		let newZoneHTML = `Zone ${game.global.world}`;
+		let newProgressTextHTML = `${prettify(current)} / ${prettify(this.progressMax)} ticks (${width})`;
+	
+		if (this.cellElem.innerHTML !== newCellHTML) {
+			this.cellElem.innerHTML = newCellHTML;
 		}
-		else if (game.global.preMapsActive)
-			this.inMapDescriptionElem.innerHTML = "Sitting in the Map Chamber (lame)";
-		if (current == 0){
-			this.extraInfoElem.innerHTML = "Starting Offline Progress... (Updates every 2000 processed loops)";
+	
+		if (this.zoneElem.innerHTML !== newZoneHTML) {
+			this.zoneElem.innerHTML = newZoneHTML;
+		}
+	
+		if (this.progressTextElem.innerHTML !== newProgressTextHTML) {
+			this.progressTextElem.innerHTML = newProgressTextHTML;
+		}
+		this.updateMapBtns();
+		let newMapDesc = '';
+		if (game.global.mapsActive) {
+			const map = getCurrentMapObject();
+			newMapDesc = `<span style='font-size: 0.8em'>Mapping in ${map.name} (${map.level})<br/>Cell ${game.global.lastClearedMapCell + 2}<br/>${this.countMapItems(map.level)} items remain</span>`;
+			if (this.countThisMap) newMapDesc += "<br/><span style='font-size: 0.6em'>Looks like you still haven't cleared this map. If you want to leave and make an easier one, I won't count it against you!</span>";
+		} else if (game.global.preMapsActive) {
+			newMapDesc = 'Sitting in the Map Chamber (lame)';
+		}
+	
+		if (this.inMapDescriptionElem.innerHTML !== newMapDesc) {
+			this.inMapDescriptionElem.innerHTML = newMapDesc;
+		}
+	
+		if (current === 0) {
+			this.extraInfoElem.innerHTML = 'Starting Offline Progress... (Updates every 2000 processed loops)';
 			return;
 		}
-		var timeSpent = Math.floor((new Date().getTime() - this.startTime) / 1000);
-		if (timeSpent > this.nextFluffIn){
+		const timeSpent = Math.floor((new Date().getTime() - this.startTime) / 1000);
+		if (timeSpent > this.nextFluffIn) {
 			this.fluff();
 			this.nextFluffIn = timeSpent + 30;
 		}
-		var speed = (current / (timeSpent * 10));
-		var remaining = Math.floor(((this.progressMax - current) / speed) / 10);
-		var extraText = prettify(current / 10) + " seconds processed in " + prettify(timeSpent) + " seconds (" + this.loopTicks + "L/F, " + prettify(speed) + "x speed)<br/>Estimated completion in " + this.formatTimeClock(remaining);
-		extraText += "<br/>" + this.currentFluff;
-		this.extraInfoElem.innerHTML = extraText;
+		const speed = current / (timeSpent * 10);
+		const remaining = Math.floor((this.progressMax - current) / speed / 10);
+		let newExtraText = `${prettify(current / 10)} seconds processed in ${prettify(timeSpent)} seconds (${this.loopTicks}L/F, ${prettify(speed)}x speed)<br>Estimated completion in ${this.formatTimeClock(remaining)}<br>${this.currentFluff}`;
+	
+		if (this.extraInfoElem.innerHTML !== newExtraText) {
+			this.extraInfoElem.innerHTML = newExtraText;
+		}
+		let newEffectiveHTML = '';
 		if (this.ticksProcessed - this.lastEnemyKilled > 25000) {
-			this.effectiveElem.innerHTML = "Progress has slowed to a crawl!"
-			var cell = game.global.gridArray[game.global.lastClearedCell + 1];
+			newEffectiveHTML = 'Progress has slowed to a crawl!';
+			const cell = game.global.gridArray[game.global.lastClearedCell + 1];
 			if (cell && cell.health > cell.maxHealth) cell.health = cell.maxHealth;
 		}
-		else{
-			this.effectiveElem.innerHTML = "";
+	
+		if (this.effectiveElem.innerHTML !== newEffectiveHTML) {
+			this.effectiveElem.innerHTML = newEffectiveHTML;
 		}
 	},
 	leaveMap: function(){
@@ -6672,10 +6716,11 @@ function toggleHeirlooms(){
 	}
 }
 
-function scaleHeirloomModUniverse(type, modName, value){
-	var mod = game.heirlooms[type][modName]
-	var heirloopy = (Fluffy.isRewardActive("heirloopy") && mod.heirloopy);
-	if (!heirloopy && type != "Core" && game.global.universe == 2 && !mod.noScaleU2) value *= 0.1;
+function scaleHeirloomModUniverse(type, modName, value) {
+	if (game.global.universe === 1 || type === 'Core') return value;
+	const mod = game.heirlooms[type][modName];
+	if (mod.noScaleU2) return value;
+	if (!(Fluffy.isRewardActive('heirloopy') && mod.heirloopy)) return value * 0.1;
 	return value;
 }
 
@@ -9945,33 +9990,34 @@ function getAmountInRange(maxRange, toKeep, useU2Seed)
     return toShuffle.slice(0, toKeep);
 }
 
-function setMutationTooltip(which, mutation){
-	var elem = document.getElementById('corruptionBuff');
-	var effect = mutationEffects[which];
-	if (typeof effect === 'undefined') return;
-	if (typeof mutations[mutation].tooltip === 'undefined') return;
-	elem.innerHTML = '<span class="badge badBadge ' + mutation + '" onmouseover="tooltip(\'' + effect.title + '\', \'customText\', event, \'' + mutations[mutation].tooltip(which) + '\')" onmouseout="tooltip(\'hide\')"><span class="' + effect.icon + '"></span></span>&nbsp;';
-}
+function setMutationTooltip(which, mutation) {
+	if (usingRealTimeOffline) return;
 
-function setVoidCorruptionIcon(regularMap){
-	var attackScale = "";
-	var healthScale = "";
-	if (regularMap || !mutations.Magma.active()){
-		attackScale = (mutations.Corruption.statScale(3) / 2);
-		healthScale = (mutations.Corruption.statScale(10) / 2);
+	const effect = mutationEffects[which];
+	if (typeof effect === 'undefined') return;
+	const elem = document.getElementById('corruptionBuff');
+	if (typeof mutations[mutation].tooltip === 'undefined') return;
+
+	const elemText = `<span class="badge badBadge ${mutation}" onmouseover="tooltip('${effect.title}', 'customText', event, '${mutations[mutation].tooltip(which)}')" onmouseout="tooltip('hide')"><span class="${effect.icon}"></span></span>&nbsp;`;
+	if (elem && elem.innerHTML !== elemText) elem.innerHTML = elemText;
+}
+function setVoidCorruptionIcon(regularMap) {
+	if (usingRealTimeOffline) return;
+
+	const scaleDivider = regularMap || !mutations.Magma.active() ? 2 : 1;
+	const attackScale = mutations.Corruption.statScale(3) / scaleDivider;
+	const healthScale = mutations.Corruption.statScale(10) / scaleDivider;
+
+	const title = regularMap ? 'Map Corruption' : 'Void Corruption';
+	let text = `This ${regularMap ? 'map' : 'Void Map'} has become unstable due to Corruption. Enemy attack increased by ${prettify(attackScale)}X, and health increased by ${prettify(healthScale)}X.`;
+
+	if (!regularMap) {
+		text += ' Helium at the end of the map is now double what you would earn from a World Zone, including Corrupted cells!';
 	}
-	else {
-		attackScale = (mutations.Corruption.statScale(3));
-		healthScale = (mutations.Corruption.statScale(10));
-	}
-	var text = "This " + ((regularMap) ? "map" : "Void Map") + " has become unstable due to Corruption. Enemy attack increased by " + prettify(attackScale) + "X, and health increased by " + prettify(healthScale) + "X.";
-	var title = "";
-	if (!regularMap){
-		text += " Helium at the end of the map is now double what you would earn from a World Zone, including Corrupted cells!";
-		title = "Void Corruption";
-	}
-	else title = "Map Corruption";
-	document.getElementById('corruptionBuff').innerHTML = '<span class="badge badBadge voidBadge" onmouseover="tooltip(\'' + title + '\', \'customText\', event, \'' + text + '\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;';
+
+	const corruptionElem = document.getElementById('corruptionBuff');
+	const elemText = `<span class="badge badBadge voidBadge" onmouseover="tooltip('${title}', 'customText', event, '${text}')" onmouseout="tooltip('hide')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;`;
+	if (corruptionElem.innerHTML !== elemText) corruptionElem.innerHTML = elemText;
 }
 
 function getRandomBadGuy(mapSuffix, level, totalCells, world, imports, mutation, visualMutation, fastOnly) {
@@ -10330,17 +10376,26 @@ function findHomeForSpecial(special, item, array, max){
 	}
 }
 
-function dropPrestiges(){
-	var toDrop = addSpecials(true, true, null, true);
-	for (var x = 0; x < toDrop.length; x++){
+function liquifiedZone() {
+	return game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name === 'Liquimp';
+}
+
+function dropPrestiges() {
+	const toDrop = addSpecials(true, true, null, true);
+	const sci4 = getSLevel() >= 4 && !challengeActive('Mapology');
+
+	for (let x = 0; x < toDrop.length; x++) {
 		unlockUpgrade(toDrop[x]);
-		var prestigeUnlock = game.mapUnlocks[toDrop[x]];
-		if (getSLevel() >= 4 && !challengeActive("Mapology") && (Math.ceil(prestigeUnlock.last / 5) % 2 == 0)) {
+		let prestigeUnlock = game.mapUnlocks[toDrop[x]];
+		if (sci4 && Math.ceil(prestigeUnlock.last / 5) % 2 === 0) {
 			unlockUpgrade(toDrop[x]);
 			prestigeUnlock.last += 10;
+		} else {
+			prestigeUnlock.last += 5;
 		}
-		else prestigeUnlock.last += 5;
 	}
+
+	if (liquifiedZone()) drawAllUpgrades();
 }
 
 function drawGrid(maps) {
@@ -11819,48 +11874,61 @@ function refillEnergyShield(){
 	game.global.soldierEnergyShield = game.global.soldierEnergyShieldMax;
 }
 
-function updateAllBattleNumbers (skipNum) {
+function updateAllBattleNumbers(skipNum) {
 	if (usingRealTimeOffline) return;
-	var cellNum;
-    var cell;
-    var cellElem;
-    if (game.global.mapsActive) {
-        cellNum = game.global.lastClearedMapCell + 1;
-        cell = game.global.mapGridArray[cellNum];
-        cellElem = document.getElementById("mapCell" + cellNum);
-    } else {
-        cellNum = game.global.lastClearedCell + 1;
-        cell = game.global.gridArray[cellNum];
-        cellElem = document.getElementById("cell" + cellNum);
-    }
-	if (cellElem == null) return;
-    swapClass("cellColor", "cellColorCurrent", cellElem);
-    document.getElementById("goodGuyHealthMax").innerHTML = prettify(game.global.soldierHealthMax);
+
+	const prefix = game.global.mapsActive ? 'Map' : '';
+	const cellNum = game.global[`lastCleared${prefix}Cell`] + 1;
+	const cell = game.global[`${prefix ? 'mapGridArray' : 'gridArray'}`][cellNum];
+	const cellElem = document.getElementById(`${prefix ? 'mapCell' : 'cell'}${cellNum}`);
+	if (!cellElem) return;
+
+	swapClass('cellColor', 'cellColorCurrent', cellElem);
+	let elem = document.getElementById('goodGuyHealthMax');
+	let elemText = prettify(game.global.soldierHealthMax);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
 	updateGoodBar();
 	updateBadBar(cell);
-	document.getElementById("badGuyHealthMax").innerHTML = prettify(cell.maxHealth);
-	if (!skipNum && game.global.challengeActive == "Trimp" && game.jobs.Amalgamator.owned > 0) document.getElementById("trimpsFighting").innerHTML = toZalgo(prettify(game.resources.trimps.getCurrentSend()), game.global.world);
-	else if (!skipNum) document.getElementById("trimpsFighting").innerHTML = prettify(game.resources.trimps.getCurrentSend());
-	var blockDisplay = "";
-	if (game.global.universe == 2){
-		var esMax = game.global.soldierEnergyShieldMax;
-		var esMult = getEnergyShieldMult();
-		var layers = Fluffy.isRewardActive('shieldlayer');
-		if (layers > 0){
-			esMax *= layers + 1;
-			esMult *= layers + 1;
+
+	elem = document.getElementById('badGuyHealthMax');
+	elemText = prettify(cell.maxHealth);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
+
+	if (!skipNum) {
+		elem = document.getElementById('trimpsFighting');
+		elemText = prettify(game.resources.trimps.getCurrentSend());
+		if (challengeActive('Trimp') && game.jobs.Amalgamator.owned > 0) elemText = toZalgo(elemText, game.global.world);
+		if (elem && elem.innerHTML != elemText) elem.innerHTML = elemText;
+	}
+
+	let blockDisplay = '';
+
+	if (game.global.universe === 2) {
+		const layers = Fluffy.isRewardActive('shieldlayer');
+		let shieldMax = game.global.soldierEnergyShieldMax;
+		let shieldMult = getEnergyShieldMult();
+		if (layers > 0) {
+			shieldMax *= layers + 1;
+			shieldMult *= layers + 1;
 		}
-		blockDisplay = prettify(esMax) + " (" + Math.round(esMult * 100) + "%)";
+		blockDisplay = `${prettify(shieldMax)} (${Math.round(shieldMult * 100)}%)`;
+	} else {
+		blockDisplay = prettify(game.global.soldierCurrentBlock);
 	}
-	else blockDisplay = prettify(game.global.soldierCurrentBlock);
-	document.getElementById("goodGuyBlock").innerHTML = blockDisplay;
-	document.getElementById("goodGuyAttack").innerHTML = calculateDamage(game.global.soldierCurrentAttack, true, true);
-	var badAttackElem = document.getElementById("badGuyAttack");
-	badAttackElem.innerHTML = calculateDamage(cell.attack, true, false, false, cell);
-	if (game.global.usingShriek) {
-		swapClass("dmgColor", "dmgColorRed", badAttackElem);
-		badAttackElem.innerHTML += '<span class="icomoon icon-chain"></span>';
-	}
+
+	elem = document.getElementById('goodGuyBlock');
+	if (elem.innerHTML !== blockDisplay.toString()) elem.innerHTML = blockDisplay;
+
+	elem = document.getElementById('goodGuyAttack');
+	elemText = calculateDamage(game.global.soldierCurrentAttack, true, true);
+	if (elem.innerHTML != elemText) elem.innerHTML = elemText;
+
+	elem = document.getElementById('badGuyAttack');
+	const badGuyAttack = calculateDamage(cell.attack, true, false, false, cell);
+	elemText = `${badGuyAttack}${game.global.usingShriek ? ' <span class="icomoon icon-chain"></span>' : ''}`;
+	if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
+
+	if (game.global.usingShriek) swapClass('dmgColor', 'dmgColorRed', elem);
 }
 
 function toZalgo(string, seed, strength){
@@ -12358,42 +12426,69 @@ function displayTalents(){
 	updateTalentNumbers();
 }
 
-function updateTalentNumbers(){
-	var mainEssenceElem = document.getElementById('essenceOwned')
-	var nextCostElem = document.getElementById('talentsNextCost')
-	var talentsCostElem = document.getElementById('talentsCost');
-	var alertElem = document.getElementById('talentsAlert');
-	var countElem = document.getElementById('talentsEssenceTotal');
-	var affordableElem = document.getElementById('talentsAffordable');
-	//Check primary elements, update
-	if (mainEssenceElem == null || nextCostElem == null) {return;}
+function updateTalentNumbers() {
+	const mainEssenceElem = document.getElementById('essenceOwned');
+	const nextCostElem = document.getElementById('talentsNextCost');
+	const talentsCostElem = document.getElementById('talentsCost');
+	const alertElem = document.getElementById('talentsAlert');
+	const countElem = document.getElementById('talentsEssenceTotal');
+	const affordableElem = document.getElementById('talentsAffordable');
 
-	var nextCost = getNextTalentCost();
-	mainEssenceElem.innerHTML = prettify(game.global.essence);
-	var affordable = checkAffordableTalents() - countPurchasedTalents();
-	if (affordable > 0){
-		affordableElem.innerHTML = affordable + " Affordable";
+	if (!mainEssenceElem || !nextCostElem) return;
+
+	const nextCost = getNextTalentCost();
+	const affordable = checkAffordableTalents() - countPurchasedTalents();
+
+	if (mainEssenceElem.innerHTML != prettify(game.global.essence)) {
+		mainEssenceElem.innerHTML = prettify(game.global.essence);
 	}
-	else{
-		affordableElem.innerHTML = "";
+
+	if (affordable > 0 && affordableElem.innerHTML !== affordable + ' Affordable') {
+		affordableElem.innerHTML = affordable + ' Affordable';
+	} else if (affordable <= 0 && affordableElem.innerHTML !== '') {
+		affordableElem.innerHTML = '';
 	}
-	if (nextCost == -1){
-		talentsCostElem.style.display = 'none';
-		alertElem.innerHTML = "";
-		countElem.innerHTML = "";
+
+	if (nextCost === -1) {
+		if (talentsCostElem.style.display !== 'none') {
+			talentsCostElem.style.display = 'none';
+		}
+		if (alertElem.innerHTML !== '') {
+			alertElem.innerHTML = '';
+		}
+		if (countElem.innerHTML !== '') {
+			countElem.innerHTML = '';
+		}
 		return;
 	}
-	talentsCostElem.style.display = "block";
-	nextCostElem.innerHTML = prettify(nextCost);
-	//Check setting elements, update
-	if (alertElem == null || countElem == null) return;
-	if ((game.options.menu.masteryTab.enabled == 1 || game.options.menu.masteryTab.enabled == 3) && nextCost <= game.global.essence){
-		alertElem.innerHTML = "!";
-		countElem.innerHTML = "";
+
+	if (talentsCostElem.style.display !== 'block') {
+		talentsCostElem.style.display = 'block';
+	}
+	if (nextCostElem.innerHTML !== prettify(nextCost)) {
+		nextCostElem.innerHTML = prettify(nextCost);
+	}
+
+	if (!alertElem || !countElem) return;
+
+	if ((game.options.menu.masteryTab.enabled === 1 || game.options.menu.masteryTab.enabled === 3) && nextCost <= game.global.essence) {
+		if (alertElem.innerHTML !== '!') {
+			alertElem.innerHTML = '!';
+		}
+		if (countElem.innerHTML !== '') {
+			countElem.innerHTML = '';
+		}
 		return;
 	}
-	alertElem.innerHTML = "";
-	countElem.innerHTML = (game.options.menu.masteryTab.enabled >= 2) ? " (" + ((game.global.tabForMastery) ? prettify(game.global.essence) : prettify(game.global.mutatedSeeds)) + ")" : "";
+
+	const essence = game.options.menu.masteryTab.enabled >= 2 ? ' (' + (game.global.tabForMastery ? prettify(game.global.essence) : prettify(game.global.mutatedSeeds)) + ')' : '';
+
+	if (alertElem.innerHTML !== '') {
+		alertElem.innerHTML = '';
+	}
+	if (countElem.innerHTML !== essence) {
+		countElem.innerHTML = essence;
+	}
 }
 
 function respecTalents(confirmed, force){
@@ -16279,23 +16374,26 @@ function updateGammaStacks(reset) {
 	manageStacks('Charging', game.heirlooms.Shield.gammaBurst.stacks, true, 'gammaSpan', 'glyphicon glyphicon-flash', tipText, hide);
 }
 
-function manageStacks(stackName, stackCount, isTrimps, elemName, icon, tooltipText, forceHide, addSpace, addClass){
-	var elem = document.getElementById(elemName);
-	var parentName = (isTrimps) ? "goodGuyName" : "badDebuffSpan";
-	var parent = document.getElementById(parentName);
-	if (forceHide){
-		if (elem === null) return;
-		parent.removeChild(elem);
+function manageStacks(stackName, stackCount, isTrimps, elemName, icon, tooltipText, forceHide, addSpace, addClass) {
+	const parentName = isTrimps ? 'goodGuyName' : 'badDebuffSpan';
+	const parent = document.getElementById(parentName);
+	let elem = document.getElementById(elemName);
+
+	if (forceHide) {
+		if (elem) parent.removeChild(elem);
 		return;
 	}
-	if (elem === null){
-		var className = (addClass) ? " class='" + addClass + "'" : "";
-		parent.innerHTML += "<span id='" + elemName + "'" + className + "></span>";
+
+	if (!elem) {
+		let className = addClass ? " class='" + addClass + "'" : '';
+		if (parent) parent.insertAdjacentHTML('beforeend', `<span id="${elemName}"${className}></span>`);
 		elem = document.getElementById(elemName);
 	}
-	if (stackCount == -1) stackCount = "";
-	var space = (addSpace) ? "&nbsp;" : "";
-	elem.innerHTML = ' <span class="badge antiBadge" onmouseover="tooltip(\'' + stackName + '\', \'customText\', event, \'' + tooltipText + '\');" onmouseout="tooltip(\'hide\')"><span>' + stackCount + '</span>' + space + '<span class="' + icon + '"></span></span>';
+
+	if (stackCount === -1) stackCount = '';
+	const space = addSpace ? '&nbsp;' : '';
+	const elemText = ` <span class="badge antiBadge" onmouseover="tooltip('${stackName}', 'customText', event, '${tooltipText}')" onmouseout="tooltip('hide')"><span>${stackCount}</span>${space}<span class="${icon}"></span></span>`;
+	if (elem.innerHTML !== elemText) elem.innerHTML = elemText;
 }
 
 function buyEquipment(what, confirmed, noTip, forceAmt) {
@@ -17435,30 +17533,41 @@ function givePresimptLoot(){
 	message(success[messageNumber] + prettify(amt) + " " + item + "!", "Loot", "*gift", "presimpt", "events");
 }
 
-function updateTurkimpTime() {
-	if (game.global.turkimpTimer > 0)
-		game.global.turkimpTimer -= 100;
-	var timeRemaining = game.global.turkimpTimer;
-	var elem = document.getElementById("turkimpTime");
-	if (game.talents.turkimp2.purchased){
-		elem.innerHTML = "<span class='icomoon icon-infinity'></span>";
+function updateTurkimpTime(drawIcon = false) {
+	const elem = document.getElementById('turkimpTime');
+
+	if (game.talents.turkimp2.purchased) {
+		const icon = `<span class="icomoon icon-infinity"></span>`;
+		if (elem && elem.innerHTML !== icon) elem.innerHTML = icon;
 		return;
 	}
+
+	if (game.global.turkimpTimer <= 0) return;
+
+	if (!drawIcon) game.global.turkimpTimer -= 100;
+	let timeRemaining = game.global.turkimpTimer;
+
 	if (timeRemaining <= 0) {
 		game.global.turkimpTimer = 0;
-		document.getElementById("turkimpBuff").style.display = "none";
+		document.getElementById('turkimpBuff').style.display = 'none';
 		if (game.global.playerGathering) setGather(game.global.playerGathering);
+		elem.innerHTML = '00:00';
+		return;
 	}
+
 	timeRemaining /= 1000;
-	var mins = Math.floor(timeRemaining / 60);
-	var seconds = Math.ceil(timeRemaining % 60);
-	if (seconds <= 9) seconds = "0" + seconds;
-	if (seconds == 60){
-		seconds = "00";
+	let mins = Math.floor(timeRemaining / 60);
+	let seconds = Math.ceil(timeRemaining % 60);
+
+	if (seconds === 60) {
+		seconds = 0;
 		mins++;
 	}
-	if (mins < 10) mins = "0" + mins;
-	elem.innerHTML = mins + ":" + seconds;
+
+	const formattedMins = mins < 10 ? `0${mins}` : mins;
+	const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+	const formattedTime = `${formattedMins}:${formattedSeconds}`;
+	if (elem && elem.innerHTML !== formattedTime) elem.innerHTML = formattedTime;
 }
 
 function formatMinutesForDescriptions(number){
@@ -18404,14 +18513,18 @@ var Fluffy = {
 		this.updateExp();
 		if (this.currentLevel >= 1) giveSingleAchieve("Consolation Prize");
 	},
-	updateExp: function(){
-		var expElem = document.getElementById('fluffyExp');
-		var lvlElem = document.getElementById('fluffyLevel');
-		var fluffyInfo = (this.cruffysTipActive()) ? game.challenges.Nurture.getExp() : this.getExp();
-		var width = Math.ceil((fluffyInfo[1] / fluffyInfo[2]) * 100);
+	updateExp: function() {
+		const expElem = document.getElementById('fluffyExp');
+		const lvlElem = document.getElementById('fluffyLevel');
+		const fluffyInfo = this.cruffysTipActive() ? game.challenges.Nurture.getExp() : this.getExp();
+		const width = Math.ceil((fluffyInfo[1] / fluffyInfo[2]) * 100);
+	
 		if (width > 100) width = 100;
-		expElem.style.width = width + "%";
-		lvlElem.innerHTML = fluffyInfo[0];
+		expElem.style.width = width + '%';
+	
+		if (lvlElem.innerHTML !== fluffyInfo[0]) {
+			lvlElem.innerHTML = fluffyInfo[0];
+		}
 	},
 	rewardExp: function(count){
 		if (!this.canGainExp()) return;
@@ -19504,40 +19617,44 @@ function gameLoop(makeUp, now) {
 	if (!makeUp && !usingRealTimeOffline && typeof steamCanvas !== 'undefined') steamCanvasContext.clearRect(0, 0, steamCanvas.width, steamCanvas.height);
 }
 
-function runEverySecond(makeUp){
-	//Change game state
-	if (game.global.challengeActive == "Decay" || game.global.challengeActive == "Melt") updateDecayStacks(true);
-	if (game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.pressure !== 'undefined') dailyModifiers.pressure.addSecond();
-	if (game.global.challengeActive == "Archaeology") game.challenges.Archaeology.checkAutomator(true);
-	if (game.global.autoStorage == true) autoStorage();
+function runEverySecond(makeUp) {
+	// Change game state.
+	if (challengeActive('Decay') || challengeActive('Melt')) updateDecayStacks(true);
+	if (challengeActive('Daily') && typeof game.global.dailyChallenge.pressure !== 'undefined') dailyModifiers.pressure.addSecond();
+	if (challengeActive('Archaeology')) game.challenges.Archaeology.checkAutomator(true);
+	if (game.global.autoStorage) autoStorage();
 	if (game.global.sugarRush > 0) sugarRush.tick();
-	//Achieves
-	checkAchieve("totalGems");
-	if (game.buildings.Trap.owned > 1000000) giveSingleAchieve("Hoarder");
-	if (Math.floor(game.stats.heliumHour.value()) == 1337) {
-		if (game.global.universe == 1)
-			giveSingleAchieve("Elite Feat");
-		if (game.global.universe == 2)
-			giveSingleAchieve("Eliter Feat");
+
+	// Achieves.
+	checkAchieve('totalGems');
+	if (game.buildings.Trap.owned > 1000000) giveSingleAchieve('Hoarder');
+	const heHr = game.stats.heliumHour.value();
+	if (Math.floor(heHr) === 1337) {
+		if (game.global.universe === 1) giveSingleAchieve('Elite Feat');
+		if (game.global.universe === 2) giveSingleAchieve('Eliter Feat');
 	}
-	//Display and stats
+
+	// Display and stats.
 	if (savedOfflineText && !game.global.lockTooltip) {
-		tooltip("Trustworthy Trimps", null, "update", savedOfflineText);
-		savedOfflineText = "";
+		tooltip('Trustworthy Trimps', null, 'update', savedOfflineText);
+		savedOfflineText = '';
 	}
 	if (trimpStatsDisplayed) displayAllStats();
-	if (game.resources.helium.owned > 0 || game.resources.radon.owned > 0){
-		 game.stats.bestHeliumHourThisRun.evaluate();
-		 document.getElementById("heliumPh").innerHTML = prettify(game.stats.heliumHour.value()) + "/hr";
-		 if (game.global.universe == 1) checkAchieve("heliumHour");
+	if (game.resources.helium.owned > 0 || game.resources.radon.owned > 0) {
+		game.stats.bestHeliumHourThisRun.evaluate();
+		const newHeliumPhHTML = `${prettify(heHr)}/hr`;
+		const heliumPhElem = document.getElementById('heliumPh');
+		if (heliumPhElem.innerHTML !== newHeliumPhHTML && !usingRealTimeOffline) {
+			heliumPhElem.innerHTML = newHeliumPhHTML;
+		}
+		if (game.global.universe === 1) checkAchieve('heliumHour');
 	}
 	if (Fluffy.getBestExpStat().value > 0) game.stats.bestFluffyExpHourThisRun.evaluate();
-	if (game.global.selectedChallenge == "Daily") updateDailyClock();
+	if (game.global.selectedChallenge === 'Daily') updateDailyClock();
 	if (game.global.autoEquipUnlocked) buyAutoEquip();
 	Fluffy.handleBox();
 	updatePortalTimer();
-	if (playerSpire.initialized)
-		playerSpire.moveEnemies(makeUp);
+	if (playerSpire.initialized) playerSpire.moveEnemies(makeUp);
 	trackAchievement();
 	holidayObj.checkAll();
 	if (game.global.tutorialActive) tutorial.check();
