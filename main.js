@@ -2479,7 +2479,7 @@ function getLastPortal(){
 	return game.global.lastPortal;
 }
 
-function displayPortalUpgrades(fromTab){
+function displayPortalUpgrades(fromTab) {
 	document.getElementById('ptabInfoText').innerHTML = (game.options.menu.detailedPerks.enabled) ? "Less Info" : "More Info";
 	toggleRemovePerks(true);
 	var elem = document.getElementById("portalUpgradesHere");
@@ -2533,8 +2533,8 @@ function displayPortalUpgrades(fromTab){
 		updatePerkColor(what);
 		updatePerkLevel(what);
 		if (usingScreenReader) { 
-			if (what == 'Equality') { document.getElementById('equalityScaling').addEventListener("keydown", function (event) {keyTooltip(event, 'Equality Scaling', "portal",event)}) }
-			document.getElementById(what).addEventListener("keydown", function (event) {keyTooltip(event, what, "portal",event)}) 
+			if (what == 'Equality')  makeAccessibleTooltip("equalityScaling", 'Equality Scaling', "portal") 
+			makeAccessibleTooltip(what, [what, "portal"])
 		}
 	}
 }
@@ -7427,7 +7427,7 @@ function displaySelectedHeirloom(modSelected, selectedIndex, fromTooltip, locati
 	var heirloom = getSelectedHeirloom(locationOvr, indexOvr);
 	var icon = getHeirloomIcon(heirloom);
 	var animated = (game.options.menu.showHeirloomAnimations.enabled) ? "animated " : "";
-	var html = '<div class="selectedHeirloomItem ' + animated + 'heirloomRare' + heirloom.rarity + '"><div class="row selectedHeirloomRow"><div onclick="tooltip(\'Change Heirloom Icon\', null, \'update\')" class="col-xs-2 selectedHeirloomIcon" id="' + ((fromTooltip) ? 'tooltipHeirloomIcon' : 'selectedHeirloomIcon') + '"><span class="' + icon + '"></span></div><div class="col-xs-10"><h5 aria-label="Rename Heirloom" onclick="renameHeirloom(';
+	var html = '<div class="selectedHeirloomItem ' + animated + 'heirloomRare' + heirloom.rarity + '"><div class="row selectedHeirloomRow"><div onclick="tooltip(\'Change Heirloom Icon\', null, \'update\')" class="col-xs-2 selectedHeirloomIcon" id="' + ((fromTooltip) ? 'tooltipHeirloomIcon' : 'selectedHeirloomIcon') + '"><span class="' + icon + '"></span></div><div class="col-xs-10"><h5 onclick="renameHeirloom(';
 	if (fromPopup) html += 'false, true';
 	html += ')" id="selectedHeirloomTitle" style="margin: 10px 0">' + heirloom.name + '</h5> '
 	if (!fromTooltip) html += '<span id="renameContainer"></span>';
@@ -8229,7 +8229,7 @@ function handlePoisonDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="poisonEmpowermentIcon" onmouseover="tooltip('Poisoned', null, event)" onmouseout="tooltip('hide')"><span id="poisonEmpowermentText"></span><span class="icomoon icon-flask"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Poisoned", false, "icon-flask", false, ["poisonEmpowermentIcon", "poisonEmpowermentText"])); 
 		elem = document.getElementById('poisonEmpowermentIcon');
 	}
 
@@ -8258,7 +8258,7 @@ function handleIceDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="iceEmpowermentIcon" onmouseover="tooltip('Chilled', null, event)" onmouseout="tooltip('hide')"><span id="iceEmpowermentText"></span><span class="glyphicon glyphicon-certificate"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Chilled", false, "glyphicon-certificate", false, ["iceEmpowermentIcon", "iceEmpowermentText"])); 
 		elem = document.getElementById('iceEmpowermentIcon');
 	}
 
@@ -8286,7 +8286,7 @@ function handleWindDebuff() {
 	if (usingRealTimeOffline) return;
 
 	if (!elem) {
-		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', `<span class="badge badBadge" id="windEmpowermentIcon" onmouseover="tooltip('Breezy', null, event)" onmouseout="tooltip('hide')"><span id="windEmpowermentText"></span><span class="icomoon icon-air"></span></span>`);
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML("Breezy", false, "icon-air", false, ["windEmpowermentIcon", "windEmpowermentText"]));
 		elem = document.getElementById('windEmpowermentIcon');
 	}
 
@@ -8320,7 +8320,7 @@ function handleDominationDebuff() {
 		return;
 	}
 	if (elem == null){
-		document.getElementById('badDebuffSpan').innerHTML += '<span class="badge badBadge" id="dominationDebuffContainer" onmouseover="tooltip(\'Domination' + ((dominating) ? 'Dominating' : 'Weak') + '\', null, event)" onmouseout="tooltip(\'hide\')"><span id="dominationDebuffIcon" class="icomoon icon-' + ((dominating) ? 'podcast' : 'feed') + '"></span></span>';
+		document.getElementById('badDebuffSpan').insertAdjacentHTML('beforeend', makeBadGuyEffectHTML(`Domination${(dominating ? 'Dominating' : 'Weak')}`, null, `icon-${(dominating ? 'podcast' : 'feed')}`, false, ["dominationDebuffContainer", "dominationDebuffIcon"]));
 		return;
 	}
 	elem.style.display = 'inline-block';
@@ -8328,11 +8328,13 @@ function handleDominationDebuff() {
 	if (!iconElem) return;
 	if (dominating && iconElem.className != 'icomoon icon-podcast') {
 		iconElem.className = 'icomoon icon-podcast';
-		elem.onmouseover = function (){tooltip("DominationDominating", null, event)}
+		if (usingScreenReader) elem.onkeydown = function(){keyTooltip(event, 'DominationDominating', null, 'null')}; 
+		else elem.onmouseover = function (){tooltip("DominationDominating", null, event)}
 	}
 	else if (!dominating && iconElem.className != 'icomoon icon-feed'){
 		iconElem.className = 'icomoon icon-feed';
-		elem.onmouseover = function (){tooltip("DominationWeak", null, event)}
+		if (usingScreenReader) elem.onkeydown = function(){keyTooltip(event, 'DominationWeak', null, 'null')};
+		else elem.onmouseover = function (){tooltip("DominationWeak", null, event)}
 	}
 }
 
@@ -10108,7 +10110,7 @@ function setVoidCorruptionIcon(regularMap) {
 	}
 
 	const corruptionElem = document.getElementById('corruptionBuff');
-	const elemText = `<span class="badge badBadge voidBadge" onmouseover="tooltip('${title}', 'customText', event, '${text}')" onmouseout="tooltip('hide')"><span class="glyphicon glyphicon-plus"></span></span>&nbsp;`;
+	const elemText = makeBadGuyEffectHTML(title, text, "glyphicon-plus", "voidBadge");
 	if (corruptionElem.innerHTML !== elemText) corruptionElem.innerHTML = elemText;
 }
 
@@ -11211,6 +11213,27 @@ function getPierceAmt(){
 	return base;
 }
 
+function makeBadGuyEffectHTML(title, text, icon, spanClasses="", ids=[]) {
+	if (icon.includes("glyphicon")) icon += " glyphicon"
+	else if (icon.includes("icon")) icon += " icomoon"
+	let tooltip = ``
+	let display = ``
+	let containerID = (ids[0] ? `id="${ids[0]}"`: "")
+	let iconID = (ids[1] ? `id="${ids[1]}"`: "")
+	if (usingScreenReader) {
+		tooltip = `tabindex=0 onkeydown="keyTooltip(event, '${title}', ${((text) ? "'customText'" : 'null')}, '${text}')"`
+		display = `${title}'¿'` // SRTODO decide what to do about these 
+	}
+	else {
+		tooltip = `onmouseover="tooltip('${title}', ${((text) ? "'customText'" : 'null')}, event, '${text}')" onmouseout="tooltip('hide')"`
+	}
+	let html = `<div ${containerID} class="badge badBadge ${spanClasses ? spanClasses : ""}" ${tooltip}>`
+	html += iconID.includes("Text") ? `<span ${iconID}></span><span class="${icon}"></span></div>` : `<span ${iconID} class="${icon}"></span>`
+	html += `${display}</div>`
+	
+	return html
+}
+
 function startFight() {
 	if (game.global.challengeActive && typeof game.challenges[game.global.challengeActive].onStartFight === 'function') {
 		game.challenges[game.global.challengeActive].onStartFight();
@@ -11318,17 +11341,16 @@ function startFight() {
 	}
 
 	if (cell.name === 'Omnipotrimp' && game.global.world % 5 === 0 && !game.global.spireActive) {
-		badName += ' <span class="badge badBadge Magma" onmouseover="tooltip(\'Superheated\', \'customText\', event, \'This Omnipotrimp is Superheated, and will explode on death.\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-fire2"></span></span>';
+		badName += makeBadGuyEffectHTML("Superheated", "This Omnipotrimp is Superheated, and will explode on death.", "icon-fire2", "Magma");
 	}
-
 	if (game.global.brokenPlanet && !game.global.mapsActive) {
-		badName += " <span class=\"badge badBadge\" onmouseover=\"tooltip('Pierce', 'customText', event, '" + prettify(getPierceAmt() * 100) + '% of the damage from this Bad Guy pierces through block\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-tint"></span></span>';
+		badName += makeBadGuyEffectHTML("Pierce", prettify(getPierceAmt() * 100) +  "% of the damage from this Bad Guy pierces through block", "glyphicon-tint")
 	}
-
-	if (challengeActive('Glass') || challengeActive('Slow') || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation === 'Corruption') && !challengeActive('Coordinate') && !challengeActive('Nom'))) badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Fast\', \'customText\', event, \'This Bad Guy is fast and attacks first\')" onmouseout="tooltip(\'hide\')"><span class="glyphicon glyphicon-forward"></span></span>';
-
+	if (challengeActive('Glass') || challengeActive('Slow') || (cell.u2Mutation && cell.u2Mutation.length) || ((game.badGuys[cell.name].fast || cell.mutation === 'Corruption') && !challengeActive('Coordinate') && !challengeActive('Nom'))) {
+		badName += makeBadGuyEffectHTML("Fast", "This Bad Guy is fast and attacks first", "glyphicon-forward");
+	}
 	if (challengeActive('Electricity') || challengeActive('Mapocalypse')) {
-		badName += ' <span class="badge badBadge" onmouseover="tooltip(\'Electric\', \'customText\', event, \'This Bad Guy is electric and stacks a debuff on your Trimps\')" onmouseout="tooltip(\'hide\')"><span class="icomoon icon-power-cord"></span></span>';
+		badName += makeBadGuyEffectHTML("Electric", "This Bad Guy is electric and stacks a debuff on your Trimps", "icon-power-cord")
 	}
 
 	const badGuyName = document.getElementById('badGuyName');
@@ -16763,6 +16785,7 @@ function setFormation(what) {
 		if (game.options.menu.pauseGame.enabled) return;
 		what = parseInt(what, 10);
 		swapClass("formationState", "formationStateDisabled", document.getElementById("formation" + game.global.formation));
+
 		if ((what == 4 || what == 5) && game.global.formation != 5 && game.global.formation != 4){
 			if (game.global.mapsActive) game.global.waitToScryMaps = true;
 			else game.global.waitToScry = true;
@@ -16833,6 +16856,7 @@ function setFormation(what) {
 	else swapClass("formationState", "formationStateDisabled", document.getElementById("formation0"));
 	var toSet = (what) ? what : game.global.formation;
 	swapClass("formationState", "formationStateEnabled", document.getElementById("formation" + toSet));
+	if (usingScreenReader) document.FormationInput.formations.value = toSet;
 	if (usingRealTimeOffline) offlineProgress.updateFormations();
 }
 
@@ -20347,6 +20371,10 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
             u2Mutations.dragging(e);
         }
     })
+})
+
+function makeScreenreaderTooltips(mode="click") {
+	// mode is "click" or "button"
 	// Screen Reader Tooltips
 	// This could be used to make mouseover events too, to get them out of the html files
 	const tooltips = {
@@ -20396,14 +20424,14 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		natureTab: ['Empowerments of Nature', null],
 		tab6: ['Buy Max', 'customText', 'Switching to this option will spend the majority of your resources with each purchase. Click twice to customize.'],
 
-		autoStructureBtn: ["AutoStructure", null],
+		autoStructureText: ["AutoStructure", null],
 		autoStorageBtn: ['AutoStorage', 'customText', 'Enabling this will cause your Trimps to automatically add a storage building to the queue if you reach max capacity. This will work on and offline if enabled.'],
-		autoJobsBtn: ["AutoJobs", null],
+		autoJobsText: ["AutoJobs", null],
 		fireBtn: ['Fire Trimps', null],
-		autoGoldenBtn: ['AutoGold', null],
+		autoGoldenText: ['AutoGold', null],
 		autoPrestigeBtn: ['AutoPrestige', null],
 		autoUpgradeBtn: ['AutoUpgrade', null],
-		autoEquipBtn: ["AutoEquip", null],
+		autoEquipText: ["AutoEquip", null],
 		talentRespecBtn: ["Respec Masteries", null],
 
 		formation0: ['No Formation', 'customText', 'Clear your formations, return to normal stats, and derp around the battlefield. (Hotkeys: X or 1)'],
@@ -20411,6 +20439,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 		formation2: ['Dominance Formation', 'customText', 'Trimps gain 4x attack but lose half of their health and block. (Hotkeys: D or 3)'],
 		formation3: ['Barrier Formation', 'customText', 'Trimps gain 4x block and 50% block pierce reduction but lose half of their health and attack. (Hotkeys: B or 4)'],
 		formation4: ['Scryer Formation', null],
+		formation5: ['formation', 'Wind'],
 
 		chainHolder: ['MagnetoShriek', null],
 		badCanCrit: ['Crushing Blows', 'customText', 'Your current health is higher than your block, making you vulnerable to critical strikes from your enemies. Better fix that...'],
@@ -20442,18 +20471,67 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
-			let elem = document.getElementById(elemID);
-			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)})
-			elem.setAttribute("tabindex", 0)
+			makeAccessibleTooltip(elemID, args, mode)
+		}
+		if (mode == "click") { // remove all added info buttons (if they exist) when using click mode
+			document.querySelectorAll(".SRinfoButton").forEach((elem) => {elem.remove()})
 		}
 	}
-})()
+}
+
+makeScreenreaderTooltips("click");
+
+function makeAccessibleTooltip(elemID, args, mode="click") {
+	// args is an array of [what, isItIn, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift]
+	if (usingScreenReader) {
+		// This contains no less than three different options for how to show tooltips. I may have gone mad.
+		// Pick one. Or two.  Or tie it to a setting. 
+		let elem = document.getElementById(elemID);
+		if (mode == "click") {
+			// ? tooltip
+			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)});
+			elem.setAttribute("tabindex", 0);
+
+			// Shift-Enter(aka shift-click)
+			let callback = elem.onclick;
+			elem.onclick = function() {
+				if(shiftPressed) {
+					keyTooltip({key: "?"}, ...args)
+					return;
+				}
+				if (callback) { callback() }
+			}
+		}
+
+		// Separate info buttons
+		if (mode == "button") {
+			let infoElem = document.createElement("div");
+			infoElem.innerText = "Info";
+			infoElem.className = "visually-hidden SRinfoButton"
+			infoElem.addEventListener("click", function (event) { keyTooltip({key: "?"}, ...args) } );
+			elem.insertAdjacentElement("afterend", infoElem);
+		}
+	}
+	else {
+		if (true === false && !elem.onmouseover) { // TODO very cheeky way of saying this should work but I'm not doing it yet. (also needs the nature tooltip handling from keytooltip before it will all actually work)
+			elem.addEventListener("onmouseover", function (event) { tooltip(...Object.values(arguments).slice(0,2), event, ...Object.values(arguments).slice(2,) ); });
+			elem.addEventListener("onmouseout", function (event)  { tooltip("hide"); });
+		}
+	}
+}
+
+function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift){
+	// wrapper for tooltips to show screen reader tooltips using onkeydown
+	if (usingScreenReader && keyEvent && keyEvent.key == "?") {
+		const natureTooltips = ["Poison", "Wind", "Ice"]
+		if (natureTooltips.includes(isItIn)) natureTooltip(...Object.values(arguments))
+		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(3,))
+	}
+}
 
 
 screenReaderAssert(
 	`
 	Latest updates: 
-	Spire Assault equipment checkboxes. Less buttons everywhere, tabindex on tooltip iteractables.
-	
-	This game uses the ? key to display informational tooltips on buttons. 
-	For best experience in NVDA: Settings > browse mode: Disable "trap all command gestures from reaching the document".`)
+	Info Header with how to work all the tooltips, info buttons on demand.
+	`)
