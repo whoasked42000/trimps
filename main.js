@@ -7939,55 +7939,59 @@ function getRandomMapName() {
 }
 
 function buildMapGrid(mapId) {
-	if (game.global.formation == 4 || game.global.formation == 5) game.global.canScryCache = true;
+	if (game.global.formation === 4 || game.global.formation === 5) game.global.canScryCache = true;
 	game.global.mapStarted = getGameTime();
-    var map = game.global.mapsOwnedArray[getMapIndex(mapId)];
-    var array = [];
-	var imports = [];
-	for (var item in game.unlocks.imps){
-		if (!game.unlocks.imps[item]) continue;
-		var badGuy = game.badGuys[item];
-		if (badGuy.location == "Maps" && badGuy.world <= map.level){
-			imports.push(item);
-		}
-	}
-	var fastTarget = 0;
-	var forceNextFast = false;
-	var fastEvery = -1;
-	var forced = 0;
-	if (game.global.universe == 2){
+
+	const map = game.global.mapsOwnedArray[getMapIndex(mapId)];
+	const array = new Array(map.size);
+	const imports = Object.keys(game.unlocks.imps).filter((item) => game.unlocks.imps[item] && game.badGuys[item].location === 'Maps' && game.badGuys[item].world <= map.level);
+	const showSnow = map.location === 'Frozen' || (game.badGuys.Presimpt.locked === 0 && game.options.menu.showSnow && game.options.menu.showSnow.enabled);
+	const isVoid = map.location === 'Void';
+
+	let fastTarget = 0;
+	let forceNextFast = false;
+	let fastEvery = -1;
+	let forced = 0;
+
+	if (game.global.universe === 2) {
 		fastTarget = map.size / 6;
-		var roll = Math.floor(Math.random() * 3);
-		if (roll == 0) fastTarget--;
-		else if (roll == 2) fastTarget++;
-		var highAdd = (map.level - game.global.world);
-		if (highAdd > 0) fastTarget += (highAdd * 0.5);
+		const roll = Math.floor(Math.random() * 3);
+		if (roll === 0) fastTarget--;
+		else if (roll === 2) fastTarget++;
+
+		const highAdd = map.level - game.global.world;
+		if (highAdd > 0) fastTarget += highAdd * 0.5;
 		if (fastTarget < 1) fastTarget = 1;
 		fastEvery = Math.floor(map.size / fastTarget);
 	}
-    for (var i = 0; i < map.size; i++) {
-		var thisFast = (fastTarget && (forceNextFast || i % fastEvery == 0));
-        var cell = {
-            level: i + 1,
-            maxHealth: -1,
-            health: -1,
-            attack: -1,
-            special: "",
-            text: "",
-            name: getRandomBadGuy(map.location, i + 1, map.size, map.level, imports, false, false, thisFast)
+
+	for (let i = 0; i < map.size; i++) {
+		const thisFast = fastTarget && (forceNextFast || i % fastEvery === 0);
+		const name = getRandomBadGuy(map.location, i + 1, map.size, map.level, imports, false, false, thisFast);
+		const isEnemyFast = game.badGuys[name].fast;
+		const cell = {
+			level: i + 1,
+			maxHealth: -1,
+			health: -1,
+			attack: -1,
+			special: '',
+			text: '',
+			name
 		};
-		if (thisFast && !game.badGuys[cell.name].fast) forceNextFast = true;
-		else forceNextFast = false;
-		if (thisFast && game.badGuys[cell.name].fast) forced++;
-		if (map.location == "Frozen" || (game.badGuys.Presimpt.locked == 0 && game.options.menu.showSnow && game.options.menu.showSnow.enabled)){
-			if (map.location == "Void") cell.vm = "CorruptSnow";
-			else cell.vm = "TrimpmasSnow"
+
+		forceNextFast = thisFast && !isEnemyFast;
+		if (thisFast && isEnemyFast) forced++;
+
+		if (showSnow) {
+			if (isVoid) cell.vm = 'CorruptSnow';
+			else cell.vm = 'TrimpmasSnow';
 		}
-		array.push(cell);
+		array[i] = cell;
 	}
-    game.global.mapGridArray = array;
+
+	game.global.mapGridArray = array;
 	addSpecials(true);
-	if (game.global.challengeActive == "Exterminate") game.challenges.Exterminate.startedMap();
+	if (challengeActive('Exterminate')) game.challenges.Exterminate.startedMap();
 }
 
 function getMapIndex(mapId) {
