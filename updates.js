@@ -1902,11 +1902,13 @@ function countAlertsIn(where){
 	return count;
 }
 
-function positionTooltip(elem, event, extraInf){
-	var cordx = 0;
-	var cordy = 0;
-	var e = event || window.event;
+function positionTooltip(elem, event, extraInf) {
+	const e = event || window.event;
 	if (!e) return;
+
+	let cordx = 0;
+	let cordy = 0;
+
 	if (e.pageX || e.pageY) {
 		cordx = e.pageX;
 		cordy = e.pageY;
@@ -1914,46 +1916,72 @@ function positionTooltip(elem, event, extraInf){
 		cordx = e.clientX;
 		cordy = e.clientY;
 	}
+
 	lastMousePos = [cordx, cordy];
-	var bodw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-		bodh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-		tiph = Math.max(elem.clientHeight, elem.scrollHeight, elem.offsetHeight),
-		tipw = bodw * .325,
-		center = cordx - (tipw / 2),
-		spacing = bodh * 0.04,
-		setLeft,
-		setTop,
-		setting;
-		if (extraInf == "Heirloom") setting = 1;
-		else setting = game.options.menu.tooltipPosition.enabled;
-	if (extraInf == "forceLeft") {
-		elem.style.left = Math.floor(cordx - (bodw * .55)) + "px";
-		elem.style.top = Math.floor(cordy - (tiph * 0.5)) + "px";
+	const bodw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+	const bodh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+	const tiph = Math.max(elem.clientHeight, elem.scrollHeight, elem.offsetHeight);
+	const tipw = Math.max(elem.clientWidth, elem.scrollWidth, elem.offsetWidth);
+	const center = cordx - tipw / 2;
+	const spacing = bodh * 0.04;
+
+	if (extraInf === 'forceLeft') {
+		elem.style.left = Math.floor(cordx - bodw * 0.55) + 'px';
+		elem.style.top = Math.floor(cordy - tiph * 0.5) + 'px';
 		return;
 	}
-	
-	if (setting == 0) {
+
+	const setting = extraInf === 'Heirloom' ? 1 : game.options.menu.tooltipPosition.enabled;
+	let setLeft;
+	let setTop;
+
+	if (setting === 0) {
 		setLeft = cordx + spacing;
-		if ((setLeft + tipw) > bodw) setLeft = (bodw - tipw);
+		if (setLeft + tipw > bodw) {
+			setLeft = bodw - tipw;
+		}
 		setTop = cordy - tiph - spacing;
 	}
-	if ((setting >= 1) || (setTop < 0)){
+
+	if (setting >= 1 || setTop < 0) {
 		setLeft = center;
-		if (setLeft < 0)
+		if (setLeft < 0) {
 			setLeft = 0;
-		else if (setLeft > (bodw - tipw))
+		} else if (setLeft > bodw - tipw) {
 			setLeft = bodw - tipw;
-		var maxAbove = (cordy - tiph - spacing);
-		if (setting == 1 ||  (maxAbove < 0)){
-			setTop = cordy + spacing;
-			if ((setTop + tiph) > bodh)
-				setTop = maxAbove;
 		}
-		else
+
+		const maxAbove = cordy - tiph - spacing;
+		if (setting === 1 || maxAbove < 0) {
+			setTop = cordy + spacing;
+			if (setTop + tiph > bodh) {
+				setTop = maxAbove;
+			}
+		} else {
 			setTop = maxAbove;
+		}
 	}
-	elem.style.left = Math.floor(setLeft) + "px";
-	elem.style.top = Math.floor(setTop) + "px";
+
+	/* check if the tooltip is offscreen vertically */
+	if (setTop < 0 || setTop + tiph > bodh) {
+		const spaceLeft = cordx;
+		const spaceRight = bodw - cordx;
+		if (spaceRight >= spaceLeft) {
+			setLeft = cordx + spacing;
+			if (setLeft + tipw > bodw) {
+				setLeft = bodw - tipw;
+			}
+		} else {
+			setLeft = cordx - tipw - spacing;
+			if (setLeft < 0) {
+				setLeft = 0;
+			}
+		}
+		setTop = Math.max(0, Math.min(cordy - tiph / 2, bodh - tiph));
+	}
+
+	elem.style.left = Math.floor(setLeft) + 'px';
+	elem.style.top = Math.floor(setTop) + 'px';
 }
 
 function addTooltipPricing(toTip, what, isItIn) {
@@ -5298,50 +5326,49 @@ function convertNotationsToNumber(num){
 //Buildings Specific
 function removeQueueItem(what, force) {
 	if (game.options.menu.pauseGame.enabled && !force) return;
-	var queue = document.getElementById("queueItemsHere");
-	var elem;
-	var multiCraftMax = 1;
-	if (bwRewardUnlocked("DoubleBuild")) multiCraftMax = 2;
-	if (bwRewardUnlocked("DecaBuild")) multiCraftMax = 10;
-	if (what == "first"){
-		elem = queue.firstChild;
-		var name = game.global.buildingsQueue[0].split('.');
-		if (name[1] > 1){
-			var item = name[0];
-			name[1] = parseInt(name[1], 10);
-			if (multiCraftMax > name[1]){
-				multiCraftMax = name[1];
-			}
-			name[1] -= multiCraftMax;
-			if (multiCraftMax > 1){
-				for (var x = 1; x < multiCraftMax; x++){
-					buildBuilding(item);
-				}
-			}
-			if (name[1] > 0){
-				var newQueue = name[0] + "." + name[1];
-				name = name[0] + " X" + name[1];
-				game.global.buildingsQueue[0] = newQueue;
-				elem.firstChild.innerHTML = name;
-				checkEndOfQueue();
-				return;
-			}
+	const queue = document.getElementById('queueItemsHere');
+	if (what === 'first') {
+		let multiCraftMax = bwRewardUnlocked('DecaBuild') ? 10 : bwRewardUnlocked('DoubleBuild') ? 2 : 1;
+		let [item, amount] = game.global.buildingsQueue[0].split('.');
+		amount = parseInt(amount, 10);
+		multiCraftMax = Math.min(multiCraftMax, amount);
+
+		amount -= multiCraftMax;
+		buildBuilding(item, multiCraftMax);
+
+		const elem = queue.firstChild;
+		if (amount > 0) {
+			const newQueue = `${item}.${amount}`;
+			const name = `${item} X${amount}`;
+			game.global.buildingsQueue[0] = newQueue;
+			if (elem) elem.firstChild.innerHTML = name;
+		} else {
+			queue.removeChild(elem);
+			game.global.buildingsQueue.splice(0, 1);
 		}
-		queue.removeChild(elem);
-		game.global.buildingsQueue.splice(0, 1);
+
 		checkEndOfQueue();
 		return;
 	}
-	var index = getQueueElemIndex(what, queue);
-	elem = document.getElementById(what);
-	if (!game.global.buildingsQueue[index]) index = 0;
+
+	let index = getQueueElemIndex(what, queue);
+	let queueItem = game.global.buildingsQueue[index];
+
+	if (!queueItem) {
+		queueItem = game.global.buildingsQueue[0];
+		index = 0;
+	}
+
+	const elem = document.getElementById(what);
 	queue.removeChild(elem);
-	refundQueueItem(game.global.buildingsQueue[index]);
+	refundQueueItem(queueItem);
 	game.global.buildingsQueue.splice(index, 1);
+
 	if (index === 0) {
 		game.global.crafting = "";
 		game.global.timeLeftOnCraft = 0;
 	}
+
 	checkEndOfQueue();
 }
 
@@ -5361,12 +5388,13 @@ function checkEndOfQueue(){
 }
 
 function addQueueItem(what) {
-	var elem = document.getElementById("queueItemsHere");
-	document.getElementById("noQueue").style.display = "none";
-	var name = what.split('.');
-	if (name[1] > 1) name = name[0] + " X" + prettify(name[1]);
-	else name = name[0];
-	elem.innerHTML += '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>';
+	const elem = document.getElementById('queueItemsHere');
+	const noQueue = document.getElementById('noQueue');
+	if (noQueue.style.display !== 'none') noQueue.style.display = 'none';
+	const [baseName, multiplier] = what.split('.');
+	const name = multiplier > 1 ? `${baseName} X${prettify(multiplier)}` : baseName;
+
+	elem.insertAdjacentHTML('beforeend', '<div class="queueItem" id="queueItem' + game.global.nextQueueId + '" onmouseover="tooltip(\'Queue\',null,event)" onmouseout="tooltip(\'hide\')" onClick="removeQueueItem(\'queueItem' + game.global.nextQueueId + '\'); cancelTooltip();"><span class="queueItemName">' + name + '</span><div id="animationDiv"></div></div>');
 	if (game.global.nextQueueId === 0) setNewCraftItem();
 	game.global.nextQueueId++;
 }
@@ -5612,29 +5640,56 @@ function unlockBuilding(what) {
 	drawAllBuildings();
 }
 
-function drawAllBuildings(){
-	if (usingRealTimeOffline) return;
-	var elem = document.getElementById("buildingsHere");
-	elem.innerHTML = "";
-	for (var item in game.buildings){
-		building = game.buildings[item];
-		if (building.locked == 1) continue;
-		drawBuilding(item, elem);
-		if (building.alert && game.options.menu.showAlerts.enabled){
-			document.getElementById("buildingsAlert").innerText = "!";
-			if (document.getElementById(item + "Alert")) document.getElementById(item + "Alert").innerText = "!";
-		}
+function drawAllBuildings(force) {
+	if (usingRealTimeOffline && !force) return;
+
+	const buildings = game.buildings;
+	const elem = document.getElementById('buildingsHere');
+	let innerHTML = '';
+	let updateTooltips = [];
+	let alert = false;
+
+	for (const item in buildings) {
+		const building = buildings[item];
+		if (building.locked) continue;
+		if (building.alert) alert = true;
+		innerHTML += drawBuilding(item);
+		updateTooltips.push(item);
 	}
+
+	if (elem.innerHTML !== innerHTML) {
+		elem.innerHTML = innerHTML;
+		updateTooltips.forEach((item) => {
+			makeAccessibleTooltip(item, [item, 'buildings']);
+		});
+	}
+
+	if (alert && elem.innerHTML !== '' && game.options.menu.showAlerts.enabled) {
+		const alertElem = document.getElementById('buildingsAlert');
+		if (alertElem.innerHTML !== '!') alertElem.innerHTML = '!';
+	}
+
 	updateGeneratorInfo();
 }
 
-function drawBuilding(what, where){
-	if (usingScreenReader){
-		where.insertAdjacentHTML('beforeend', '<button class="thingColorCanNotAfford thing noselect pointer buildingThing" id="' + what + '" onclick="buyBuilding(\'' + what + '\')"><span class="thingName"><span id="' + what + 'Alert" class="alert badge"></span>' + what + '</span>, <span class="thingOwned" id="' + what + 'Owned">' + game.buildings[what].owned + '</span><span class="cantAffordSR">, Not Affordable</span><span class="affordSR">, Can Buy</span></button>');
-		document.getElementById(what).addEventListener("keydown", function (event) { keyTooltip(event, what, "buildings") });
-		return;
+function drawBuilding(what) {
+	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	if (usingScreenReader) {
+		return `
+			<button class="thingColorCanNotAfford thing noselect pointer buildingThing" id="${what}" onclick="buyBuilding('${what}')">
+				<span class="thingName">
+				<span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span>, 
+				<span class="thingOwned" id="${what}Owned">${game.buildings[what].owned}</span>
+				<span class="cantAffordSR">, Not Affordable</span>
+				<span class="affordSR">, Can Buy</span>
+			</button>`;
 	}
-	where.insertAdjacentHTML('beforeend', '<div onmouseover="tooltip(\'' + what + '\',\'buildings\',event)" onmouseout="tooltip(\'hide\')" class="thingColorCanNotAfford thing noselect pointer buildingThing" id="' + what + '" onclick="buyBuilding(\'' + what + '\')"><span class="thingName"><span id="' + what + 'Alert" class="alert badge"></span>' + what + '</span><br/><span class="thingOwned" id="' + what + 'Owned">' + game.buildings[what].owned + '</span></div>');
+
+	return `<div onmouseover="tooltip('${what}','buildings',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer buildingThing" id="${what}" onclick="buyBuilding('${what}')">
+			<span class="thingName">
+			<span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span><br/>
+			<span class="thingOwned" id="${what}Owned">${game.buildings[what].owned}</span>
+		</div>`;
 }
 
 function unlockJob(what) {
@@ -5645,44 +5700,70 @@ function unlockJob(what) {
 	drawAllJobs();
 }
 
-function drawAllJobs(force){
+function drawAllJobs(force) {
 	if (usingRealTimeOffline && !force) return;
-	var elem = document.getElementById("jobsHere");
-	elem.innerHTML = "";
-	for (var item in game.jobs){
-		if (game.jobs[item].locked == 1) continue;
-		if (item == "Geneticist" && game.global.Geneticistassist){
-			drawGeneticistassist(elem);
+
+	const jobs = game.jobs;
+	const elem = document.getElementById('jobsHere');
+	let innerHTML = '';
+	let updateTooltips = [];
+	let alert = false;
+	let geneticist = false;
+
+	for (const item in jobs) {
+		if (jobs[item].locked) continue;
+		if (jobs[item].alert) alert = true;
+
+		if (item === 'Geneticist' && game.global.Geneticistassist) {
+			innerHTML += drawGeneticistassist(item);
+			geneticist = true;
+		} else {
+			innerHTML += drawJob(item);
 		}
-		else
-			drawJob(item, elem);
-		if (game.jobs[item].alert && game.options.menu.showAlerts.enabled){
-			document.getElementById("jobsAlert").innerHTML = "!";
-			if (document.getElementById(item + "Alert")) document.getElementById(item + "Alert").innerHTML = "!";
-		}
+
+		updateTooltips.push(item);
 	}
+
+	if (elem.innerHTML !== innerHTML) {
+		elem.innerHTML = innerHTML;
+		updateTooltips.forEach((item) => {
+			makeAccessibleTooltip(item, [item, 'jobs']);
+		});
+	}
+
+	if (alert && elem.innerHTML !== '' && game.options.menu.showAlerts.enabled) {
+		const alertElem = document.getElementById('jobsAlert');
+		if (alertElem.innerHTML !== '!') alertElem.innerHTML = '!';
+	}
+	if (geneticist) toggleGeneticistassist(true);
 }
 
-function drawJob(what, where){
-	if (usingScreenReader){
-		where.insertAdjacentHTML('beforeend', '<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="' + what + '" onclick="buyJob(\'' + what + '\')"><span class="thingName"><span id="' + what + 'Alert" class="alert badge"></span>' + what + '</span>, <span class="thingOwned" id="' + what + 'Owned">0</span><span class="cantAffordSR">, Not Affordable</span><span class="affordSR">, Can Buy</span></button>');
-		document.getElementById(what).addEventListener("keydown", function (event) { keyTooltip(event, what, "jobs") })
-		return;
+function drawJob(what) {
+	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+
+	if (usingScreenReader) {
+		return `
+			<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="${what}" onclick="buyJob('${what}')">
+				<span class="thingName"><span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span>, 
+				<span class="thingOwned" id="${what}Owned">0</span>
+				<span class="cantAffordSR">, Not Affordable</span>
+				<span class="affordSR">, Can Buy</span>
+			</button>`;
 	}
-	where.insertAdjacentHTML('beforeend', '<div onmouseover="tooltip(\'' + what + '\',\'jobs\',event)" onmouseout="tooltip(\'hide\')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="' + what + '" onclick="buyJob(\'' + what + '\')"><span class="thingName"><span id="' + what + 'Alert" class="alert badge"></span>' + what + '</span><br/><span class="thingOwned" id="' + what + 'Owned">0</span></div>');
+	return `<div onmouseover="tooltip('${what}','jobs',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="${what}" onclick="buyJob('${what}')">
+				<span class="thingName"><span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span><br/>
+				<span class="thingOwned" id="${what}Owned">0</span>
+			</div>`;
 }
 
-function drawGeneticistassist(where){
-	if (usingScreenReader){
-		where.insertAdjacentHTML('beforeend', '<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob(\'Geneticist\')"><span class="thingName"><span id="GeneticistAlert" class="alert badge"></span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span><span class="cantAffordSR">, Not Affordable</span><span class="affordSR">, Can Buy</span></button><button class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></button>');
-		// Geneticist \'Geneticist\',\'jobs\'
-		document.getElementById("Geneticist").addEventListener("keydown", function (event) { keyTooltip(event, "Geneticist", "jobs") })
-		document.getElementById("Geneticistassist").addEventListener("keydown", function (event) { keyTooltip(event, "Geneticistassist", null) })
-		toggleGeneticistassist(true);
-		return
+function drawGeneticistassist(what) {
+	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	if (usingScreenReader) {
+		return `<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span></button><button class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></button>`;
 	}
-	where.insertAdjacentHTML('beforeend', '<div id="GeneticistassistContainer" class="thing"><div onmouseover="tooltip(\'Geneticist\',\'jobs\',event)" onmouseout="tooltip(\'hide\')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob(\'Geneticist\')"><span class="thingName"><span id="GeneticistAlert" class="alert badge"></span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span></div><div onmouseover="tooltip(\'Geneticistassist\',null,event)" onmouseout="tooltip(\'hide\')" class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></div></div>');
-	toggleGeneticistassist(true);
+
+	return `<div id="GeneticistassistContainer" class="thing"><div onmouseover="tooltip('Geneticist','jobs',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/>
+	<span class="thingOwned" id="GeneticistOwned">0</span></div><div onmouseover="tooltip('Geneticistassist',null,event)" onmouseout="tooltip('hide')" class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></div></div>`;
 }
 
 function refreshMaps(){
@@ -5800,44 +5881,76 @@ function unlockUpgrade(what, displayOnly) {
 	drawAllUpgrades();
 }
 
-function drawAllUpgrades(){
-	if (usingRealTimeOffline) return;
-	var elem = document.getElementById("upgradesHere");
-	elem.innerHTML = "";
-	for (var item in game.upgrades){
-		if (game.upgrades[item].locked == 1) continue;
-		drawUpgrade(item, elem);
-		if (game.upgrades[item].alert && game.options.menu.showAlerts.enabled){
-			document.getElementById("upgradesAlert").innerHTML = "!";
-			if (document.getElementById(item + "Alert")) document.getElementById(item + "Alert").innerHTML = "!";
-		}
+function drawAllUpgrades(force) {
+	if (usingRealTimeOffline && !force) {
+		goldenUpgradesShown = true;
+		displayGoldenUpgrades();
+		return;
 	}
+
+	const upgrades = game.upgrades;
+	const elem = document.getElementById('upgradesHere');
+	let innerHTML = '';
+	let updateTooltips = [];
+	let alert = false;
+
+	for (const item in upgrades) {
+		if (upgrades[item].locked) continue;
+		if (upgrades[item].alert) alert = true;
+		innerHTML += drawUpgrade(item);
+		updateTooltips.push(item);
+	}
+
+	if (elem.innerHTML !== innerHTML) {
+		elem.innerHTML = innerHTML;
+		updateTooltips.forEach((item) => {
+			makeAccessibleTooltip(item, [item, 'upgrades']);
+		});
+	}
+
+	if (alert && elem.innerHTML !== '' && game.options.menu.showAlerts.enabled) {
+		const alertElem = document.getElementById('upgradesAlert');
+		if (alertElem.innerHTML !== '!') alertElem.innerHTML = '!';
+	}
+
 	goldenUpgradesShown = false;
 	displayGoldenUpgrades();
 }
 
+function drawUpgrade(what) {
+	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	const upgrade = game.upgrades[what];
 
-
-function drawUpgrade(what, where){
-	var upgrade = game.upgrades[what];
-	if (upgrade.prestiges && (!upgrade.cost.resources[metal] || !upgrade.cost.resources[wood])){
-		var resName = (what == "Supershield") ? "wood" : "metal";
+	if (upgrade.prestiges && (!upgrade.cost.resources[metal] || !upgrade.cost.resources[wood])) {
+		const resName = what === 'Supershield' ? 'wood' : 'metal';
 		upgrade.cost.resources[resName] = getNextPrestigeCost(what);
 	}
-	var done = upgrade.done;
-	var dif = upgrade.allowed - done;
-	if (dif >= 1) dif -= 1;
-	var name = what;
-	if (typeof upgrade.name !== 'undefined') name = upgrade.name;
+
+	let done = upgrade.done;
+	let dif = upgrade.allowed - done - 1;
+	let name = typeof upgrade.name !== 'undefined' ? upgrade.name : what;
+	let html;
+
 	if (upgrade.isRelic) done = game.challenges.Archaeology.getPoints(upgrade.relic);
-	if (usingScreenReader){
-		where.insertAdjacentHTML("beforeend", '<button class="thingColorCanNotAfford thing noselect pointer upgradeThing" id="' + what + '" onclick="buyUpgrade(\'' + what + '\')"><span id="' + what + 'Alert" class="alert badge"></span><span class="thingName">' + name + '</span>, <span class="thingOwned" id="' + what + 'Owned">' + done + '</span><span class="cantAffordSR">, Not Affordable</span><span class="affordSR">, Can Buy</span></button>');
-		document.getElementById(what).addEventListener("keydown", function (event) { keyTooltip(event, what, "upgrades") })
+	else if (dif >= 1) done += `(+${dif})`;
+
+	if (usingScreenReader) {
+		html = `<button class="thingColorCanNotAfford thing noselect pointer upgradeThing" id="${what}" onclick="buyUpgrade('${what}')">
+				<span id="${what}Alert" class="alert badge">${alertMessage}</span>
+				<span class="thingName">${name}</span>, 
+				<span class="thingOwned" id="${what}Owned">${done}</span>
+				<span class="cantAffordSR">, Not Affordable</span>
+				<span class="affordSR">, Can Buy</span>
+			</button>`;
+	} else {
+		html = `<div onmouseover="tooltip('${what}','upgrades',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer upgradeThing" id="${what}" onclick="buyUpgrade('${what}')">
+			<span id="${what}Alert" class="alert badge">${alertMessage}</span>
+			<span class="thingName">${name}</span><br/>
+			<span class="thingOwned" id="${what}Owned">${done}</span>
+		</div>`;
 	}
-	else{
-		where.insertAdjacentHTML("beforeend", '<div onmouseover="tooltip(\'' + what + '\',\'upgrades\',event)" onmouseout="tooltip(\'hide\')" class="thingColorCanNotAfford thing noselect pointer upgradeThing" id="' + what + '" onclick="buyUpgrade(\'' + what + '\')"><span id="' + what + 'Alert" class="alert badge"></span><span class="thingName">' + name + '</span><br/><span class="thingOwned" id="' + what + 'Owned">' + done + '</span></div>');
-	}
-	if (!upgrade.isRelic && dif >= 1) document.getElementById(what + "Owned").innerHTML = upgrade.done + "(+" + dif + ")";
+
+	return html;
 }
 
 function checkButtons(what) {
@@ -5967,29 +6080,49 @@ function unlockEquipment(what, fromCheck) {
 	}
 }
 
-function drawAllEquipment(){
-	if (usingRealTimeOffline) return;
-	var elem = document.getElementById("equipmentHere");
-	elem.innerHTML = "";
-	for (var item in game.equipment){
-		if (game.equipment[item].locked == 1) continue;
-		drawEquipment(item, elem);
+function drawAllEquipment(force) {
+	if (usingRealTimeOffline && !force) return;
+
+	const equipment = game.equipment;
+	const elem = document.getElementById('equipmentHere');
+	let innerHTML = '';
+	let updateTooltips = [];
+
+	for (const item in equipment) {
+		if (equipment[item].locked) continue;
+		innerHTML += drawEquipment(item);
+		updateTooltips.push(item);
 	}
+
+	if (elem.innerHTML !== innerHTML) {
+		elem.innerHTML = innerHTML;
+		updateTooltips.forEach((item) => {
+			makeAccessibleTooltip(item, [item, 'equipment']);
+		});
+	}
+
 	displayEfficientEquipment();
 }
 
-function drawEquipment(what, elem){
-	var numeral = "";
-	var equipment = game.equipment[what];
-	if (equipment.prestige > 1){
-		numeral = (usingScreenReader) ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
+function drawEquipment(what) {
+	let numeral = '';
+	let equipment = game.equipment[what];
+	if (equipment.prestige > 1) numeral = usingScreenReader ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
+
+	if (usingScreenReader) {
+		return `
+			<button class="noselect pointer thingColorCanNotAfford thing" id="${what}" onclick="buyEquipment('${what}')">
+				<span class="thingName">${what} <span id="${what}Numeral">${numeral}</span></span>, 
+				<span class="thingOwned">Level: <span id="${what}Owned">${equipment.level}</span></span>
+				<span class="cantAffordSR">, Not Affordable</span>
+				<span class="affordSR">, Can Buy</span>
+			</button>`;
 	}
-	if (usingScreenReader){
-		elem.insertAdjacentHTML("beforeend", '<button class="noselect pointer thingColorCanNotAfford thing" id="' + what + '" onclick="buyEquipment(\'' + what + '\')"><span class="thingName">' + what + ' <span id="' + what + 'Numeral">' + numeral + '</span></span>, <span class="thingOwned">Level: <span id="' + what + 'Owned">0</span></span><span class="cantAffordSR">, Not Affordable</span><span class="affordSR">, Can Buy</span></button>');
-		document.getElementById(what).addEventListener("keydown", function (event) { keyTooltip(event, what, "equipment") })
-		return;
-	}
-	elem.insertAdjacentHTML("beforeend", '<div onmouseover="tooltip(\'' + what + '\',\'equipment\',event)" onmouseout="tooltip(\'hide\')" class="efficientNo noselect pointer thingColorCanNotAfford thing" id="' + what + '" onclick="buyEquipment(\'' + what + '\')"><span class="thingName">' + what + ' <span id="' + what + 'Numeral">' + numeral + '</span></span><br/><span class="thingOwned">Level: <span id="' + what + 'Owned">0</span></span></div>');
+	return `<div 
+				onmouseover="tooltip('${what}','equipment',event)" onmouseout="tooltip('hide')" class="efficientNo noselect pointer thingColorCanNotAfford thing" id="${what}" onclick="buyEquipment('${what}')">
+				<span class="thingName">${what} <span id="${what}Numeral">${numeral}</span></span><br/>
+				<span class="thingOwned">Level: <span id="${what}Owned">${equipment.level}</span></span>
+			</div>`;
 }
 
 //isPrevious returns the previous color, used for swapping with str.replace to know which one was before
@@ -6304,7 +6437,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 	}
 
 	function checkAchieve(id, evalProperty, doubleChecking, noDisplay) {
-		if (id == "housing" && checkHousing(false, true) >= 100) giveSingleAchieve("Realtor");
+		if (id === 'housing' && !game.achievements.oneOffs.finished[game.achievements.oneOffs.names.indexOf('Realtor')] && checkHousing(false, true) >= 100) giveSingleAchieve('Realtor');
 		var achievement = game.achievements[id];
 		if (typeof achievement.evaluate !== 'undefined') evalProperty = achievement.evaluate();
 		if (achievement.timed && evalProperty < 0) return;
@@ -6334,23 +6467,30 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		if (trimpAchievementsOpen && !doubleChecking) displayAchievements();
 	}
 
-	function giveSingleAchieve(index){
-		var name = index;
-		var area = (game.global.universe == 2) ? "oneOffs2" : "oneOffs";
-		if (index == "Huffstle" || index == "Just Smack It" || index == "Heavy Trinker" || index == "Peace") area = "oneOffs2"; //U2 achievements but completable in U1
-		else if (index == "Power Tower") area = "oneOffs"; //U1 achievements completable in U2
-		var achievement = game.achievements[area];
-		index = game.achievements[area].names.indexOf(index);
-		if (index == -1 || achievement.finished[index]) return;
-		if (typeof greenworks !== 'undefined'){
-			activateSteamAchieve(area, name);
-		}
-		displayAchievementPopup(area, false, index);
-		achievement.newStuff.push(index);
-		achievement.finished[index] = true;
-		calculateAchievementBonus();
-		if (trimpAchievementsOpen) displayAchievements();
+function giveSingleAchieve(name) {
+	const u1Achievements = ['Defender', 'Power Tower'];
+	const u2Achievements = ['Huffstle', 'Just Smack It', 'Heavy Trinker', 'Peace'];
+
+	let area = game.global.universe === 2 ? 'oneOffs2' : 'oneOffs';
+	if (u1Achievements.includes(name)) area = 'oneOffs';
+	if (u2Achievements.includes(name)) area = 'oneOffs2';
+
+	const achievement = game.achievements[area];
+	const index = achievement.names.indexOf(name);
+
+	if (index === -1 || achievement.finished[index]) return;
+
+	if (typeof greenworks !== 'undefined') {
+		activateSteamAchieve(area, name);
 	}
+
+	displayAchievementPopup(area, false, index);
+	achievement.newStuff.push(index);
+	achievement.finished[index] = true;
+	calculateAchievementBonus();
+
+	if (trimpAchievementsOpen) displayAchievements();
+}
 
 	function calculateAchievementBonus(){
 		var totalBonus = 0;

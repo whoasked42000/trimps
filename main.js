@@ -1992,7 +1992,8 @@ function getScientistLevel() {
 function getScientistInfo(number, reward){
 	switch (number){
 		case 1: {
-			return (reward) ? "start with 5000 Science, 100 Food, 100 Wood, 10 Traps, and 1 Foreman" : 11500;
+			const foreman = game.global.universe === 1 || !bwRewardUnlocked('Foremany') ? `, and 1 Foreman` : ``;
+			return reward ? `start with 5000 Science, 100 Food, 100 Wood, 10 Traps${foreman}` : 11500;
 		}
 		case 2: {
 			return (reward) ? "start with 5 Barns, 5 Sheds, 5 Forges, and T2 Equipment unlocked" : 8000;
@@ -2208,15 +2209,18 @@ function viewPortalUpgrades() {
 	u2Mutations.toggleRespec(false, true);
 }
 
-function screwThisUniverse(confirmed){
-	if (!confirmed){
-		tooltip('confirm', null, 'update', 'Are you sure you want to return to Universe 1? You will lose any Radon and Scruffy Exp earned so far.', 'screwThisUniverse(true)', 'Abandon Scruffy', 'I\'m sure he\'ll be fine');
+function screwThisUniverse(confirmed) {
+	if (!confirmed) {
+		tooltip('confirm', null, 'update', 'Are you sure you want to return to Universe 1? You will lose any Radon and Scruffy Exp earned so far.', 'screwThisUniverse(true)', 'Abandon Scruffy', "I'm sure he'll be fine");
 		return;
 	}
+
 	game.global.totalRadonEarned -= game.resources.radon.owned;
 	game.resources.radon.owned = 0;
 	game.global.fluffyExp2 -= Fluffy.getBestExpStat().value;
 	Fluffy.getBestExpStat().value = 0;
+	portalClicked();
+	swapPortalUniverse();
 	portalUniverse = 1;
 	resetGame(true);
 	checkEquipPortalHeirlooms();
@@ -3786,15 +3790,23 @@ function checkHandleResourcefulRespec(){
 	if (getPerkLevel("Resourceful") > game.portal.Resourceful.levelTemp) clearQueue();
 }
 
-function clearQueue(specific) {
-	var existing = 0;
-	for (var x = 0; x < game.global.nextQueueId; x++){
-		if (!document.getElementById("queueItem" + x)) continue;
+function clearQueue(specific = false) {
+	if (!specific) game.global.clearingBuildingQueue = true;
+	let existing = 0;
+
+	for (let x = 0; x < game.global.nextQueueId; x++) {
+		const queueItem = document.getElementById(`queueItem${x}`);
+		if (!queueItem) continue;
+
 		existing++;
-		if (specific && game.global.buildingsQueue[existing - 1].split('.')[0] != specific) continue;
+
+		if (specific && game.global.buildingsQueue[existing - 1].split('.')[0] !== specific) continue;
 		else existing--;
-		removeQueueItem("queueItem" + x, true);
+
+		removeQueueItem(`queueItem${x}`, true);
 	}
+
+	game.global.clearingBuildingQueue = false;
 }
 
 function activatePortal(){
@@ -4631,36 +4643,34 @@ function getBuildingItemPrice(toBuy, costItem, isEquipment, purchaseAmt){
 }
 
 function buyBuilding(what, confirmed, fromAuto, forceAmt) {
-	if (game.options.menu.pauseGame.enabled) return false;
-	if (what == "Hub") return;
-	if (!forceAmt && !confirmed && game.options.menu.lockOnUnlock.enabled == 1 && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return false;
-	var toBuy = game.buildings[what];
-	var purchaseAmt = 1;
-	if (what == "Antenna") purchaseAmt = 1;
+	if (game.options.menu.pauseGame.enabled || what === 'Hub' || game.global.clearingBuildingQueue) return false;
+	if (!forceAmt && !confirmed && game.options.menu.lockOnUnlock.enabled === 1 && !usingRealTimeOffline && new Date().getTime() - 1000 <= game.global.lastUnlock) return false;
+
+	const toBuy = game.buildings[what];
+	if (typeof toBuy === 'undefined') return false;
+
+	let purchaseAmt = 1;
+	if (what === 'Antenna') purchaseAmt = 1;
 	else if (forceAmt) purchaseAmt = Math.min(forceAmt, calculateMaxAfford(toBuy, true, false, false, true));
-	else if (!toBuy.percent) purchaseAmt = (game.global.buyAmt == "Max") ? calculateMaxAfford(toBuy, true, false) : game.global.buyAmt;
-	if (purchaseAmt > 1e10) purchaseAmt = 1e10;
-	//if (what == "Antenna" && (game.buildings.Antenna.purchased + purchaseAmt) > Math.floor((game.global.highestRadonLevelCleared - 100) / 5)) return false;
-    if (typeof toBuy === 'undefined') return false;
-	var canAfford = ((forceAmt) ? canAffordBuilding(what, false, false, false, false, purchaseAmt) : canAffordBuilding(what));
-	if (purchaseAmt == 0) return false;
-	if (canAfford){
-		if (what == "Wormhole" && !confirmed && game.options.menu.confirmhole.enabled && !fromAuto){
-			tooltip('Confirm Purchase', null, 'update', 'You are about to purchase ' + purchaseAmt + ' Wormholes, <b>which cost helium</b>. Make sure you can earn back what you spend!', 'buyBuilding(\'Wormhole\', true, false, ' + purchaseAmt + ')');
-			return false;
-		}
-		if (forceAmt) canAffordBuilding(what, true, false, false, false, purchaseAmt);
-		else canAffordBuilding(what, true);
-		game.buildings[what].purchased += purchaseAmt;
-		if (getCraftTime(game.buildings[what]) == 0) {
-			for (var x = 0; x < purchaseAmt; x++) buildBuilding(what);
-		}
-		else
-		startQueue(what, purchaseAmt);
-	}
-	else
+	else if (!toBuy.percent) purchaseAmt = game.global.buyAmt === 'Max' ? calculateMaxAfford(toBuy, true, false) : game.global.buyAmt;
+	purchaseAmt = Math.min(purchaseAmt, 1e10);
+
+	const canAfford = forceAmt ? canAffordBuilding(what, false, false, false, false, purchaseAmt) : canAffordBuilding(what);
+	if (purchaseAmt === 0 || !canAfford) return false;
+
+	if (what === 'Wormhole' && !confirmed && game.options.menu.confirmhole.enabled && !fromAuto) {
+		tooltip('Confirm Purchase', null, 'update', `You are about to purchase ${purchaseAmt} Wormholes, <b>which cost helium</b>. Make sure you can earn back what you spend!`, `buyBuilding('Wormhole', true, false, ${purchaseAmt})`);
 		return false;
-	if (!fromAuto) tooltip(what, "buildings", "update");
+	}
+
+	if (forceAmt) canAffordBuilding(what, true, false, false, false, purchaseAmt);
+	else canAffordBuilding(what, true);
+	game.buildings[what].purchased += purchaseAmt;
+
+	if (getCraftTime(game.buildings[what]) === 0) buildBuilding(what, purchaseAmt);
+	else startQueue(what, purchaseAmt);
+
+	if (!fromAuto) tooltip(what, 'buildings', 'update');
 	return true;
 }
 
@@ -4695,87 +4705,107 @@ function startQueue(what, count) {
 }
 
 function craftBuildings(makeUp) {
-    var buildingsBar = document.getElementById("animationDiv");
-	if (buildingsBar == null) return;
-	var timeRemaining = document.getElementById("queueTimeRemaining");
-    var speedElem = document.getElementById("buildSpeed");
-    if (game.global.crafting === "" && game.global.buildingsQueue.length > 0) {
-        setNewCraftItem();
-    }
-    if ((game.global.autoCraftModifier <= 0 && game.global.playerGathering != "buildings") || game.global.crafting === "") {
-        speedElem.innerHTML = "";
-        return;
-    }
-    var modifier = (game.global.autoCraftModifier > 0) ? game.global.autoCraftModifier : 0;
-    if (game.global.playerGathering == "buildings") modifier += getPlayerModifier();
-    if (!makeUp) {
-        speedElem.innerHTML = prettify(Math.floor(modifier * 100)) + "%";
-        game.global.timeLeftOnCraft -= ((1 / game.settings.speed) * modifier);
-		var percent = 1 - (game.global.timeLeftOnCraft / getCraftTime(game.buildings[game.global.crafting]));
+	const buildingsBar = document.getElementById('animationDiv');
+	//if (!buildingsBar && !usingRealTimeOffline) return;
+	if (!buildingsBar) return;
 
-		var timeLeft = (game.global.timeLeftOnCraft / modifier).toFixed(1);
+	const buildingsQueue = game.global.buildingsQueue;
+	const timeRemaining = document.getElementById('queueTimeRemaining');
+	const speedElem = document.getElementById('buildSpeed');
+
+	if (game.global.crafting === '' && buildingsQueue.length > 0) {
+		setNewCraftItem();
+	}
+
+	if ((game.global.autoCraftModifier <= 0 && game.global.playerGathering !== 'buildings') || game.global.crafting === '') {
+		if (speedElem.innerHTML !== '') speedElem.innerHTML = '';
+		return;
+	}
+
+	let modifier = game.global.autoCraftModifier > 0 ? game.global.autoCraftModifier : 0;
+	if (game.global.playerGathering === 'buildings') modifier += getPlayerModifier();
+
+	if (!makeUp) {
+		let elemText = `${prettify(Math.floor(modifier * 100))}%`;
+		if (speedElem.innerHTML !== elemText) speedElem.innerHTML = elemText;
+		game.global.timeLeftOnCraft -= (1 / game.settings.speed) * modifier;
+		const percent = 1 - game.global.timeLeftOnCraft / getCraftTime(game.buildings[game.global.crafting]);
+
+		let timeLeft = (game.global.timeLeftOnCraft / modifier).toFixed(1);
 		if (timeLeft < 0.1 || isNumberBad(timeLeft)) timeLeft = 0.1;
-        if (timeRemaining) timeRemaining.textContent = " - " + timeLeft + " Seconds";
-		if (game.options.menu.queueAnimation.enabled) buildingsBar.style.opacity = percent;
-		else buildingsBar.style.opacity = "0";
-        if (game.global.timeLeftOnCraft > 0) return;
-    }
-	buildBuilding(game.global.crafting);
-	if (game.global.trapBuildToggled && game.global.trapBuildAllowed && game.global.buildingsQueue.length == 1 && game.global.buildingsQueue[0] == "Trap.1"){
+		elemText = ` - ${timeLeft} Seconds`;
+		if (timeRemaining && timeRemaining.textContent !== elemText) timeRemaining.textContent = elemText;
+
+		if (buildingsBar) buildingsBar.style.opacity = game.options.menu.queueAnimation.enabled ? percent : '0';
+		if (game.global.timeLeftOnCraft > 0) return;
+	}
+
+	if (game.global.trapBuildToggled && game.global.trapBuildAllowed && buildingsQueue.length === 1 && buildingsQueue[0] === 'Trap.1') {
+		buildBuilding(game.global.crafting);
 		autoTrap();
 		return;
 	}
-    removeQueueItem("first");
-	if (game.global.buildingsQueue.length === 0){
+
+	removeQueueItem('first');
+
+	if (game.global.buildingsQueue.length === 0) {
 		checkEndOfQueue();
-	}
-	else{
+	} else {
 		setNewCraftItem();
 	}
 }
 
-function buildBuilding(what) {
-    var building = game.buildings[what];
-    var toIncrease;
-	building.owned++;
-	checkAchieve("housing", what);
-    if (building.owned == 1 && typeof building.first !== 'undefined') building.first();
-	var ownedElem = document.getElementById(what + "Owned");
-	if (ownedElem)
-		ownedElem.innerHTML = building.owned;
-	if (typeof building.increase !== 'undefined'){
-		if (building.increase.what == "trimps.max"){
-			addMaxHousing(building.increase.by, bwRewardUnlocked("AutoStructure"));
-		}
-		else {
-			var buildingSplit = building.increase.what.split('.');
-			if (buildingSplit[0] == "global") toIncrease = game.global;
-			else if (buildingSplit[0] == "Dragimp") toIncrease = game.jobs.Dragimp;
-			else
-				toIncrease = game.resources[buildingSplit[0]];
-			if (buildingSplit[2] == "mult") toIncrease[buildingSplit[1]] = parseFloat(toIncrease[buildingSplit[1]]) * parseFloat(building.increase.by).toFixed(5);
-			else
-				toIncrease[buildingSplit[1]] += parseFloat(building.increase.by);
+function buildBuilding(what, amt = 1) {
+	const building = game.buildings[what];
+	if (building.owned === 0 && typeof building.first !== 'undefined') building.first();
+	building.owned += amt;
+	let toIncrease;
+	checkAchieve('housing', what);
+
+	const ownedElem = document.getElementById(what + 'Owned');
+	if (ownedElem && !usingRealTimeOffline) ownedElem.innerHTML = building.owned;
+
+	if (typeof building.increase !== 'undefined') {
+		if (building.increase.what === 'trimps.max') {
+			addMaxHousing(building.increase.by * amt, bwRewardUnlocked('AutoStructure'));
+		} else {
+			const buildingSplit = building.increase.what.split('.');
+			if (buildingSplit[0] === 'global') toIncrease = game.global;
+			else if (buildingSplit[0] === 'Dragimp') toIncrease = game.jobs.Dragimp;
+			else toIncrease = game.resources[buildingSplit[0]];
+
+			if (buildingSplit[2] === 'mult') toIncrease[buildingSplit[1]] = parseFloat(toIncrease[buildingSplit[1]]) * parseFloat(Math.pow(building.increase.by, amt)).toFixed(5);
+			else toIncrease[buildingSplit[1]] += parseFloat(building.increase.by) * amt;
 		}
 	}
-	if (typeof building.fire !== 'undefined') building.fire();
-	if (what == "Wormhole"){
-		var spent = Math.floor((building.cost.helium[0] * Math.pow(building.cost.helium[1], building.owned - 1)));
-		if (getPerkLevel("Resourceful")) spent = Math.ceil(spent * (Math.pow(1 - game.portal.Resourceful.modifier, getPerkLevel("Resourceful"))));
+
+	if (typeof building.fire !== 'undefined') {
+		for (let x = 0; x < amt; x++) {
+			building.fire();
+		}
+	}
+
+	if (what === 'Wormhole') {
+		const [baseCost, costRatio] = building.cost.helium;
+		let spent = Math.floor(baseCost * Math.pow(costRatio, building.owned - 1));
+		if (getPerkLevel('Resourceful')) spent = Math.ceil(spent * Math.pow(1 - game.portal.Resourceful.modifier, getPerkLevel('Resourceful')));
+
 		game.global.totalHeliumEarned -= parseFloat(spent);
 		game.stats.spentOnWorms.value += parseFloat(spent);
-		if (game.stats.spentOnWorms.value + game.stats.spentOnWorms.valueTotal > 250000) giveSingleAchieve("Holey");
+		if (game.stats.spentOnWorms.value + game.stats.spentOnWorms.valueTotal > 250000) giveSingleAchieve('Holey');
 	}
+
 	numTab();
-	if (!game.buildings.Hub.locked){
-		var hubbable = ["Hut", "House", "Mansion", "Hotel", "Resort", "Gateway", "Collector"];
-		if (hubbable.indexOf(what) != -1) buildBuilding("Hub");
-		if (what == "Collector" && autoBattle.oneTimers.Collectology.owned){
-			var extraHubs = autoBattle.oneTimers.Collectology.getHubs() - 1;
-			for (var x = 0; x < extraHubs; x++){
-				buildBuilding("Hub");
-			}
+
+	if (!game.buildings.Hub.locked) {
+		const hubbable = ['Hut', 'House', 'Mansion', 'Hotel', 'Resort', 'Gateway', 'Collector'];
+		if (!hubbable.includes(what)) return;
+
+		let hubAmt = 1;
+		if (what === 'Collector' && autoBattle.oneTimers.Collectology.owned) {
+			hubAmt = autoBattle.oneTimers.Collectology.getHubs();
 		}
+		buildBuilding('Hub', hubAmt * amt);
 	}
 }
 
@@ -5239,9 +5269,10 @@ function canAffordCoordinationTrimps(){
 	return (game.resources.trimps.realMax() >= (game.resources.trimps.getCurrentSend() * 3))
 }
 
+
 function buyUpgrade(what, confirmed, noTip, heldCtrl) {
 	if (game.options.menu.pauseGame.enabled) return;
-	if (!confirmed && !noTip && game.options.menu.lockOnUnlock.enabled == 1 && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return;
+	if (!confirmed && !noTip && game.options.menu.lockOnUnlock.enabled == 1 && !usingRealTimeOffline && (new Date().getTime() - 1000 <= game.global.lastUnlock)) return;
     if (what == "Coordination") {
        if (!canAffordCoordinationTrimps()) return false;
     }
@@ -5673,29 +5704,58 @@ function testGymystic(oldPercent) {
 
 }
 
-function prestigeEquipment(what, fromLoad, noInc) {
-    var equipment = game.equipment[what];
+function prestigeEquipment(what, fromLoad = false, noInc = false) {
+	const equipment = game.equipment[what];
 	if (!fromLoad && !noInc) equipment.prestige++;
-	var resource = (what == "Shield") ? "wood" : "metal";
-	var cost = equipment.cost[resource];
-	var prestigeMod = 0;
-	if (equipment.prestige >= 4) prestigeMod = (((equipment.prestige - 3) * 0.85) + 2);
-	else prestigeMod = (equipment.prestige - 1);
-    cost[0] = Math.round(equipment.oc * Math.pow(1.069, ((prestigeMod) * game.global.prestige.cost) + 1));
-	var stat;
-	if (equipment.blockNow) stat = "block";
-	else stat = (typeof equipment.health !== 'undefined') ? "health" : "attack";
-	if (!fromLoad) game.global[stat] -= (equipment[stat + "Calculated"] * equipment.level);
-	if (!fromLoad) game.global.difs[stat] -= (equipment[stat + "Calculated"] * equipment.level);
-    equipment[stat + "Calculated"] = Math.round(equipment[stat] * Math.pow(1.19, ((equipment.prestige - 1) * game.global.prestige[stat]) + 1));
-	//No need to touch level if it's newNum
+
+	const prestigeMod = equipment.prestige >= 4 ? (equipment.prestige - 3) * 0.85 + 2 : equipment.prestige - 1;
+	const resource = what === 'Shield' ? 'wood' : 'metal';
+	const cost = equipment.cost[resource];
+	cost[0] = Math.round(equipment.oc * Math.pow(1.069, prestigeMod * game.global.prestige.cost + 1));
+
+	const stat = equipment.blockNow ? 'block' : typeof equipment.health !== 'undefined' ? 'health' : 'attack';
+	if (!fromLoad) game.global[stat] -= equipment[stat + 'Calculated'] * equipment.level;
+	if (!fromLoad) game.global.difs[stat] -= equipment[stat + 'Calculated'] * equipment.level;
+	equipment[stat + 'Calculated'] = Math.round(equipment[stat] * Math.pow(1.19, (equipment.prestige - 1) * game.global.prestige[stat] + 1));
+
+	// No need to touch level if it's newNum
 	if (fromLoad) return;
 	equipment.level = 0;
-	if (!noInc && !fromLoad) levelEquipment(what, 1);
-	var numeral = (usingScreenReader) ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
-    if (document.getElementById(what + "Numeral") !== null) document.getElementById(what + "Numeral").innerHTML = numeral;
+	if (!noInc) levelEquipment(what, 1);
+	if (game.global[stat] <= 0) game.global[stat] = calcBaseStats(stat);
+
+	const numeral = usingScreenReader ? prettify(equipment.prestige) : romanNumeral(equipment.prestige);
+	const equipElem = document.getElementById(`${what}Numeral`);
+	if (equipElem !== null) equipElem.innerHTML = numeral;
+
 	displayEfficientEquipment();
 }
+
+function calcBaseStats(equipType = 'attack') {
+	const equipmentTypes = {
+		attack: ['Dagger', 'Mace', 'Polearm', 'Battleaxe', 'Greatsword', 'Arbalest'],
+		health: ['Shield', 'Boots', 'Helmet', 'Pants', 'Shoulderguards', 'Breastplate', 'Gambeson'],
+		block: game.equipment.Shield.blockNow ? ['Shield'] : []
+	};
+
+	const bonusValues = {
+		attack: 6,
+		health: 50,
+		block: 0
+	};
+
+	let bonus = bonusValues[equipType] || 0;
+	let equipmentList = equipmentTypes[equipType] || [];
+
+	for (let i = 0; i < equipmentList.length; i++) {
+		const equip = game.equipment[equipmentList[i]];
+		if (equip.locked || (equip.blockNow && equipType === 'health')) continue;
+		bonus += equip[equipType + 'Calculated'] * equip.level;
+	}
+
+	return bonus;
+}
+	
 
 function getNextPrestigeCost(what){
 	var equipment = game.equipment[game.upgrades[what].prestiges];
@@ -7748,9 +7808,12 @@ function createHeirloom(zone, fromBones, spireCore, forceBest){
 	if (game.global.universe == 2 && u2Mutations.tree.Nullifium.purchased) buildHeirloom.nuMod *= 1.1;
 	buildHeirloom.nuMod *= u2SpireBonuses.nullifium();
 	game.global.heirloomsExtra.push(buildHeirloom);
-	if (game.options.menu.voidPopups.enabled != 2 || type == "Core" || (getHeirloomRarityRanges(zone, fromBones).length == (rarity + 1))){
-		displaySelectedHeirloom(false, 0, false, "heirloomsExtra", game.global.heirloomsExtra.length - 1, true);
+
+	const displayCores = type === 'Core' && rarity >= game.global.spiresCompleted - 1;
+	if (game.options.menu.voidPopups.enabled !== 2 || displayCores || getHeirloomRarityRanges(zone, fromBones).length === rarity + 1) {
+		displaySelectedHeirloom(false, 0, false, 'heirloomsExtra', game.global.heirloomsExtra.length - 1, true);
 	}
+	
 	if ((game.stats.totalHeirlooms.value + game.stats.totalHeirlooms.valueTotal) == 0) document.getElementById("heirloomBtnContainer").style.display = "block";
 	game.stats.totalHeirlooms.value++;
 	checkAchieve("totalHeirlooms");
@@ -10494,14 +10557,17 @@ function mapsSwitch(updateOnly, fromRecycle) {
 	document.getElementById("mapsBtn").className = "btn btn-warning fightBtn";
 	document.getElementById('togglemapAtZone2').style.display = (game.global.canMapAtZone) ? "block" : "none";
     if (game.global.preMapsActive) {
-		//Switching to Map Chamber
+		// Switching to Map Chamber.
 		refreshMaps();
 		game.global.mazBw = -1;
 		if (currentMapObj && (currentMapObj.location == "Void" || currentMapObj.location == "Darkness")) {
 			recycleMap(-1, true, true);
 			currentMapObj = false;
 		}
-		game.global.mapCounterGoal = 0;
+		if (game.global.mapCounterGoal > 0) {
+			game.global.mapCounterGoal = 0;
+			toggleSetting('repeatUntil', null, false, true);
+		}
 		game.global.mapsActive = false;
 		setNonMapBox();
 		document.getElementById("battleHeadContainer").style.display = "none";
@@ -10660,7 +10726,7 @@ function selectMap(mapId, force) {
 	document.getElementById("recycleMapBtn").style.visibility = (map.noRecycle) ? "hidden" : "visible";
 }
 
-function runMap() {
+function runMap(resetCounter = true) {
 	if (game.options.menu.pauseGame.enabled) return;
     if (game.global.lookingAtMap === "") return;
 	if (challengeActive("Watch")) game.challenges.Watch.enteredMap = true;
@@ -10687,7 +10753,7 @@ function runMap() {
     game.global.preMapsActive = false;
     game.global.mapsActive = true;
 	game.global.currentMapId = mapId;
-	game.global.mapRunCounter = 0;
+	if (resetCounter) game.global.mapRunCounter = 0;
 	mapsSwitch(true);
 	var mapObj = getCurrentMapObject();
 	if (mapObj.bonus){
@@ -13781,6 +13847,10 @@ function displayGoldenUpgrades(redraw) {
 	if (goldenUpgradesShown && !redraw) return false;
 	if (getAvailableGoldenUpgrades() <= 0) return false;
 	if (!goldenUpgradesShown) game.global.lastUnlock = new Date().getTime();
+
+	const elem = document.getElementById('upgradesHere');
+	if (elem && elem.children[0] && elem.children[0].id.includes('Golden')) return false;
+
 	var html = "";
 	for (var item in game.goldenUpgrades){
 		var upgrade = game.goldenUpgrades[item];
@@ -13801,7 +13871,7 @@ function displayGoldenUpgrades(redraw) {
 			html += '<div onmouseover="tooltip(\'' + item + '\', \'goldenUpgrades\', event)" onmouseout="tooltip(\'hide\')" class="' + color + ' thing goldenUpgradeThing noselect pointer upgradeThing" id="' + item + 'Golden" onclick="buyGoldenUpgrade(\'' + item + '\'); tooltip(\'hide\')"><span class="thingName">Golden ' + displayName + ' ' + romanNumeral(game.global.goldenUpgrades + 1) + '</span><br/><span class="thingOwned" id="golden' + item + 'Owned">' + upgrade.purchasedAt.length + '</span></div>';
 		}
 	}
-	var elem = document.getElementById('upgradesHere');
+	
 	elem.innerHTML =  html + elem.innerHTML;
 	goldenUpgradesShown = true;
 	return true;
@@ -15919,13 +15989,15 @@ function getPlayerCritChance(){ //returns decimal: 1 = 100%
 	return critChance;
 }
 
-function getPlayerCritDamageMult(){
-	var relentLevel = getPerkLevel("Relentlessness");
-	var critMult = (((game.portal.Relentlessness.otherModifier * relentLevel) + (getHeirloomBonus("Shield", "critDamage") / 100)) + 1);
-	critMult += (getPerkLevel("Criticality") * game.portal.Criticality.modifier);
+function getPlayerCritDamageMult() {
+	const relentLevel = getPerkLevel('Relentlessness');
+	const eoaEffect = alchObj.getPotionEffect('Elixir of Accuracy');
+
+	let critMult = game.portal.Relentlessness.otherModifier * relentLevel + getHeirloomBonus('Shield', 'critDamage') / 100 + 1;
+	critMult += getPerkLevel('Criticality') * game.portal.Criticality.modifier;
 	if (relentLevel > 0) critMult += 1;
 	if (game.challenges.Nurture.boostsActive() && game.challenges.Nurture.getLevel() >= 5) critMult += 0.5;
-	critMult += alchObj.getPotionEffect("Elixir of Accuracy");
+	/* if (eoaEffect > 1) */ critMult += eoaEffect;
 	return critMult;
 }
 

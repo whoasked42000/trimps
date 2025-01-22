@@ -91,6 +91,7 @@ var toReturn = {
 		totalPortals: 0,
 		totalRadPortals: 0,
 		lastCustomAmt: 1,
+		clearingBuildingQueue: false,
 		trapBuildAllowed: false,
 		trapBuildToggled: false,
 		lastSkeletimp: 0,
@@ -5873,9 +5874,18 @@ var toReturn = {
 				return 5;
 			},
 			bonfireTooltip: function(){
-				if (this.bonfires == 0) return "You have no Bonfires. Your Trimps are sad and cold. Next Bonfire will be constructed at " + prettify(this.bonfirePrice()) + " Wood.";
-				var bonfireLength = this.getBonfireLength();
-				return "You have " + this.bonfires + " Bonfire" + needAnS(this.bonfires) + ". Your Trimps will automatically construct another Bonfire once you start a Zone with " + prettify(this.bonfirePrice()) + " total Wood. Your next bonfire will expire at the start of Zone " + (this.lastBurn + bonfireLength) + ".";
+				let text = '';
+
+				if (this.bonfires === 0) {
+					text = 'You have no active Bonfires. Your Trimps are sad and cold. Next Bonfire will be constructed at ' + prettify(this.bonfirePrice()) + ' Wood.';
+				} else {
+					const bonfireLength = this.getBonfireLength();
+					text = 'You have ' + this.bonfires + ' active Bonfire' + needAnS(this.bonfires) + '. Your Trimps will automatically construct another Bonfire once you start a Zone with ' + prettify(this.bonfirePrice()) + ' total Wood. Your next Bonfire will expire at the start of Zone ' + (this.lastBurn + bonfireLength) + '.';
+				}
+				
+				text += `<br><br>You have constructed ${this.totalBonfires} Bonfire${needAnS(this.totalBonfires)} so far this run.`;
+				
+				return text;
 			},
 			emberTooltip: function(){
 				return "You have " + this.embers + " Ember" + needAnS(this.embers) + ", increasing your Radon gain by " + prettify((this.getRadonMult() - 1) * 100) + "% and Enemy stats by " + prettify((this.getEnemyMult() - 1) * 100) + "%. All wood gathered and looted from the World is reduced by " + prettifyTiny(this.getWoodMult(true)) + ", wood from Maps is reduced by the same amount but only when a Bonfire is burning.";
@@ -9229,17 +9239,18 @@ var toReturn = {
 			health: 6,
 			fast: true,
 			loot: function (level) {
-				if (game.global.spireActive){
-					return;
+				if (!game.global.spireActive) {
+					if (challengeActive('Eradicated') && game.global.world >= 59 && !game.global.brokenPlanet) planetBreaker();
+					if (!game.global.runningChallengeSquared) {
+						let amt = 30;
+						amt = rewardResource('helium', amt, level);
+						message('You managed to steal ' + prettify(amt) + ' ' + heliumOrRadon(true) + " from that Omnipotrimp. That'll teach it.", 'Loot', heliumIcon(true), 'helium', 'helium');
+					}
 				}
-				if (game.global.challengeActive == "Eradicated" && game.global.world >= 59 && !game.global.brokenPlanet) planetBreaker();
-				if (!game.global.runningChallengeSquared){
-					var amt = 30;
-					amt = rewardResource("helium", amt, level);
-					message("You managed to steal " + prettify(amt) + " " + heliumOrRadon(true) + " from that Omnipotrimp. That'll teach it.", "Loot", heliumIcon(true), 'helium', 'helium');
-				}
-				if (game.global.world % 5 == 0){
-					message("The Omnipotrimp explodes, killing all of your soldiers!", "Combat", null, null, 'trimp');
+			
+				if (game.global.world % 5 === 0) {
+					const enemyName = game.global.spireActive ? 'Echo of Druopitee' : 'Omnipotrimp';
+					message(`The ${enemyName} explodes, killing all of your soldiers!`, 'Combat', null, null, 'trimp');
 					game.stats.trimpsKilled.value += game.resources.trimps.soldiers;
 					game.global.soldierHealth = 0;
 					game.global.fighting = false;
