@@ -5730,7 +5730,7 @@ function drawAllBuildings(force) {
 }
 
 function drawBuilding(what) {
-	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	const alertMessage = game.buildings[what].alert && game.options.menu.showAlerts.enabled ? '!' : '';
 	if (usingScreenReader) {
 		return `
 			<button class="thingColorCanNotAfford thing noselect pointer buildingThing" id="${what}" onclick="buyBuilding('${what}')">
@@ -5796,7 +5796,7 @@ function drawAllJobs(force) {
 }
 
 function drawJob(what) {
-	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	const alertMessage = game.jobs[what].alert && game.options.menu.showAlerts.enabled ? '!' : '';
 
 	if (usingScreenReader) {
 		return `
@@ -5814,7 +5814,7 @@ function drawJob(what) {
 }
 
 function drawGeneticistassist(what) {
-	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	const alertMessage = game.jobs.Geneticist.alert && game.options.menu.showAlerts.enabled ? '!' : '';
 	if (usingScreenReader) {
 		return `<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="Geneticist" onclick="buyJob('Geneticist')"><span class="thingName"><span id="GeneticistAlert" class="alert badge">${alertMessage}</span>Geneticist</span><br/><span class="thingOwned" id="GeneticistOwned">0</span></button><button class="thing thingColorNone noselect stateHappy pointer jobThing" id="Geneticistassist" onclick="toggleGeneticistassist()">Geneticistassist<span id="GAIndicator"></span><br/><span id="GeneticistassistSetting">&nbsp;</span></button>`;
 	}
@@ -5975,7 +5975,7 @@ function drawAllUpgrades(force) {
 }
 
 function drawUpgrade(what) {
-	const alertMessage = what.alert && game.options.menu.showAlerts.enabled ? '!' : '';
+	const alertMessage = game.upgrades[what].alert && game.options.menu.showAlerts.enabled ? '!' : '';
 	const upgrade = game.upgrades[what];
 
 	if (upgrade.prestiges && (!upgrade.cost.resources[metal] || !upgrade.cost.resources[wood])) {
