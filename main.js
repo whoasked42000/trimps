@@ -2739,6 +2739,30 @@ var offlineProgress = {
 	loopTicks: 0,
 	showingEquality: false,
 	totalOfflineTime: 0,
+	getLimitBar: function(){
+		var val = game.global.timeWarpLimit;
+		if (val == -1) val = 21;
+		else val = Math.round(val / 50);
+		var text = "<input oninput='offlineProgress.setLimit(this)' onchange='offlineProgress.setLimit(this)' type='range' id='limitTimewarpSlider' min='1' max='21' value='" + val + "' />";
+		text += "<span class='twLimitSpeed'>" + this.getLimitText() + "</span>";
+		return text;
+	},
+	getTimeOfflineText: function(){
+		return 'Welcome back! You were offline for ' + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + '.' + this.getLimitBar();
+	},
+	getLimitText: function(){
+		if (game.global.timeWarpLimit == -1) return "Unlimited Speed!";
+		return "Limited to " + game.global.timeWarpLimit + "x speed"
+	},
+	setLimit: function(elem){
+		if (elem.value == 21) game.global.timeWarpLimit = -1;
+		else game.global.timeWarpLimit = Math.round(elem.value * 50);
+		var elems = document.getElementsByClassName('twLimitSpeed');
+		var text = this.getLimitText();
+		for (var x = 0; x < elems.length; x++){
+			elems[x].innerHTML = text;
+		}
+	},
 	fluff: function(){
 		var fluffs = ["Your Trimps really missed you", "Your Trimps didn't do dishes while you were gone", "A Scientist has been locked outside all night", "There's a Snimp in the pantry", "Your Trimps threw a party while you were out", "Your Trimps raided your fridge while you were gone", "Some Trimps toilet papered your ship", "Your Trimps were a few minutes away from burning the place down", "The Turkimps escaped again", "Your Trimps ran the AC all night", "Wow, such speed", "Your Trimps dinged your ship while out on a joyride", "One of your Trimps got a tattoo while you were gone"];
 		if (game.global.fluffyExp > 0) {
@@ -2754,7 +2778,7 @@ var offlineProgress = {
 	},
 	showEquality: function(){
 		if (this.showingEquality || game.global.universe === 1 || game.portal.Equality.radLocked) {
-			const newTimeOfflineHTML = 'Welcome back! You were offline for ' + this.formatTime(Math.floor(this.totalOfflineTime / 1000)) + '.';
+			const newTimeOfflineHTML = this.getTimeOfflineText();
 			if (this.timeOfflineElem.innerHTML !== newTimeOfflineHTML) {
 				this.timeOfflineElem.innerHTML = newTimeOfflineHTML;
 			}
@@ -2764,10 +2788,9 @@ var offlineProgress = {
 			this.showingEquality = false;
 			return;
 		}
-		let text = `<div style="font-size: 0.75vw; margin-top: -3.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/></div>`;
+		let text = `<div style="font-size: 0.85vw; margin-top: -1.5vw;"><div style="width: 50%; font-size: 0.75vw;" role="button" class="noselect pointer portalThing thing perkColorOff changingOff equalityColorOn" id="equalityScaling3" onclick="toggleEqualityScale()"><span class="thingName">Scale Equality</span><br><span class="thingOwned"><span id="equalityScalingState3">On</span></span></div><br/>`;
 		text += getEqualitySliders(true);
 		text += '</div>';
-	
 		if (this.timeOfflineElem.innerHTML !== text) {
 			this.timeOfflineElem.innerHTML = text;
 		}
@@ -2920,11 +2943,12 @@ var offlineProgress = {
 		this.repeatUntil = game.options.menu.repeatUntil.enabled;
 		this.exitTo = game.options.menu.exitTo.enabled;
 		this.totalOfflineTime = offlineTime;
-		this.timeOfflineElem.innerHTML = "Welcome back! You were offline for " + this.formatTime(Math.floor(offlineTime / 1000)) + ".";
+		this.timeOfflineElem.innerHTML = this.getTimeOfflineText();
 		this.updateBar(0);
 		var x = 0;
 		this.nextFluffIn = -1;
-		var loopTicks = 100;
+		var loopTicks = game.global.timeWarpLimit * 2;
+		if (loopTicks == -1 || loopTicks > 300) loopTicks = 300;
 		this.lastLoop = new Date().getTime();
 		var updateFreq = 1000;
 		var nextUpdate = updateFreq;
@@ -2955,17 +2979,29 @@ var offlineProgress = {
 			}
 			var now = new Date().getTime();
 			var timeSpent = now - offlineProgress.lastLoop;
-			if (timeSpent < 175){
+			if (timeSpent < 100){
+				loopTicks += 50;
+			}
+			else if (timeSpent < 175){
 				loopTicks += 5;
 			}
 			else if (timeSpent > 200 && loopTicks > 50){
 				loopTicks -= 5;
 			}
-			offlineProgress.loopTicks = loopTicks;
 			offlineProgress.lastLoop = now;
+			let nextLoop = 0;
+			if (game.global.timeWarpLimit != -1 && loopTicks > game.global.timeWarpLimit * 2){
+				loopTicks = game.global.timeWarpLimit * 2;
+				nextLoop = 200 - timeSpent;
+				if (nextLoop < 0) nextLoop = 0;
+				else offlineProgress.lastLoop += nextLoop;
+			}
+			offlineProgress.loopTicks = loopTicks;
+			
 			if (typeof steamCanvas !== 'undefined') steamCanvasContext.clearRect(0, 0, steamCanvas.width, steamCanvas.height);
+
 			if (x < ticks && usingRealTimeOffline){
-				offlineProgress.loop = setTimeout(loop, 0);
+				offlineProgress.loop = setTimeout(loop, nextLoop);
 			}
 			else{
 				offlineProgress.finish();
@@ -3041,14 +3077,14 @@ var offlineProgress = {
 			this.extraInfoElem.innerHTML = 'Starting Offline Progress... (Updates every 2000 processed loops)';
 			return;
 		}
-		const timeSpent = Math.floor((new Date().getTime() - this.startTime) / 1000);
+		const timeSpent = ((new Date().getTime() - this.startTime) / 1000) + 1;
 		if (timeSpent > this.nextFluffIn) {
 			this.fluff();
 			this.nextFluffIn = timeSpent + 30;
 		}
 		const speed = current / (timeSpent * 10);
 		const remaining = Math.floor((this.progressMax - current) / speed / 10);
-		let newExtraText = `${prettify(current / 10)} seconds processed in ${prettify(timeSpent)} seconds (${this.loopTicks}L/F, ${prettify(speed)}x speed)<br>Estimated completion in ${this.formatTimeClock(remaining)}<br>${this.currentFluff}`;
+		let newExtraText = `${prettify(current / 10)} seconds processed in ${prettify(Math.floor(timeSpent))} seconds (${this.loopTicks}L/F, ${prettify(speed)}x speed)<br>Estimated completion in ${this.formatTimeClock(remaining)}<br>${this.currentFluff}`;
 	
 		if (this.extraInfoElem.innerHTML !== newExtraText) {
 			this.extraInfoElem.innerHTML = newExtraText;
@@ -12308,7 +12344,7 @@ function calculateDamage(baseAttack = 1, buildString, isTrimp, noCheckAchieve, c
 				novaStacks: () => (!game.global.mapsActive && game.global.novaMutStacks > 0 ? u2Mutations.types.Nova.trimpAttackMult() : 1),
 				spireDaily: () => (challengeActive('Daily') && Fluffy.isRewardActive('SADailies') ? Fluffy.rewardConfig.SADailies.attackMod() : 1),
 				stuffySpireStats: () => (game.global.u2SpireCellsBest > 0 ? u2SpireBonuses.basics() : 1),
-				spireAttack: () => (!game.global.mapsActive && game.global.spireActive && game.global.spireMutStacks > 0 ? u2Mutations.types.Spire1.trimpAttackMult() : 1)
+				sporePenalty: () => (!game.global.mapsActive && game.global.spireActive && game.global.spireMutStacks > 0 ? u2Mutations.types.Spire1.trimpAttackMult() : 1)
 			};
 
 			baseAttack = applyMultipliers(multipliers, baseAttack);

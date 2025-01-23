@@ -1533,6 +1533,17 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 			}
 		}
 	}
+	if (what == "Time Warp Limiter"){
+		game.global.lockTooltip = true;
+		elem.style.left = "33.75%";
+		elem.style.top = "25%";
+		var val = game.global.timeWarpLimit;
+		if (val == -1) val = 11;
+		else val = Math.round(val / 200);
+		tooltipText = "Time Warp too fast? Limit its speed here! Drag the slider all the way to the right for unlimited speed.";
+		tooltipText += "<br/><div style='text-align: center; font-size: 1.5em'>" + offlineProgress.getLimitBar() + "</div>";
+		costText = "<div class='maxCenter'><div class='btn btn-info' id='confirmTooltipBtn' onclick='cancelTooltip()'>Done</div>";
+	}
 	if (what == "Scale Equality Scaling"){
 		var state = game.portal.Equality.getSetting('scalingActive', equalitySlidersTip) ? "On" : "Off";
 
@@ -3922,6 +3933,14 @@ function getLootBd(what) {
 			textString += "<tr class='corruptedCalcRow'><td class='bdTitle'>Corruption Value</td><td>" + corrVal + "%</td><td>" + corruptedCells + "</td><td>x " + prettify(percent) + "</td><td>" + prettify(currentCalc) + "</td></tr>";
 		}
 	}
+	if (game.global.universe == 2 && what == "Helium"){
+		var cellCredit = u2SpireBonuses.cellCredit();
+		if (cellCredit > 0){
+			amt = u2SpireBonuses.basics();
+			currentCalc *= amt;
+			textString += "<tr><td class='bdTitle'>Stuffy's Spire</td><td></td><td>" + cellCredit + "</td><td>x " + prettify(amt) + "</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td></tr>";
+		}
+	}
 	if (what == "Helium" && game.global.mapsActive && game.global.voidBuff && map.stacked >= 1){
 		var stacks = map.stacked;
 		var maxStacks = Fluffy.getVoidStackCount() - 1;
@@ -3936,14 +3955,6 @@ function getLootBd(what) {
 		currentCalc = 0;
 		var cMode = (game.global.universe == 1) ? 2 : 3;
 		textString += "<tr class='colorSquared'><td class='bdTitle'>Challenge<sup>" + cMode + "</sup></td><td></td><td></td><td>0%</td><td>" + prettify(currentCalc) + "</td></tr>";
-	}
-	if (game.global.universe == 2 && what == "Helium"){
-		var cellCredit = u2SpireBonuses.cellCredit();
-		if (cellCredit > 0){
-			amt = u2SpireBonuses.basics();
-			currentCalc *= amt;
-			textString += "<tr><td class='bdTitle'>Stuffy's Spire</td><td></td><td>" + cellCredit + "</td><td>x " + prettify(amt) + "</td><td class='bdNumberSm'>" + prettify(currentCalc) + "</td></tr>";
-		}
 	}
 	//Heirloom bonuses last, since food/wood/metal mults can be different
 	var heirloomBonus = 0;
@@ -4363,6 +4374,7 @@ function resetGame(keepPortal, resetting) {
 	var tutorialLg;
 	var tabForMastery;
 	var u2SpireCellsBest;
+	var timewarpLimit;
 	if (keepPortal){
 		oldUniverse = game.global.universe;
 		if (oldUniverse == 2 && (game.global.world > 25 || game.stats.totalVoidMaps.value > 0)) lastU2Voids = game.stats.totalVoidMaps.value;
@@ -4543,6 +4555,7 @@ function resetGame(keepPortal, resetting) {
 		SB = game.global.SB;
 		tabForMastery = game.global.tabForMastery;
 		u2SpireCellsBest = game.global.u2SpireCellsBest;
+		timewarpLimit = game.global.timeWarpLimit;
 	}
 	game = null;
 	game = newGame();
@@ -4675,6 +4688,7 @@ function resetGame(keepPortal, resetting) {
 		game.global.SB = SB;
 		game.global.tabForMastery = tabForMastery;
 		game.global.u2SpireCellsBest = u2SpireCellsBest;
+		game.global.timeWarpLimit = timewarpLimit;
 		if (game.global.universe == 2 && autoBattle.oneTimers.Expanding_Tauntimp.owned) game.global.expandingTauntimp = true;
 		if (microchipLevel){
 			game.buildings.Microchip.owned = microchipLevel;
@@ -6354,6 +6368,10 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		tooltip("confirm", null, 'update', "Enter a number here to use as the base for your logarithmic numbers! (Default is 10)<br/><br/><input id='logBaseInput' value='" + game.global.logNotBase + "' type='number'/>", "saveLogarithmicSetting()", "Configure Log", "Confirm");
 		return;
 	}
+	if (setting == "offlineProgress" && ctrlPressed && !usingRealTimeOffline){
+		tooltip('Time Warp Limiter', null, 'update');
+		return;
+	}
 	if (setting == "archAutomator"){
 		tooltip("Archaeology Automator", null, 'update');
 		return;
@@ -7271,7 +7289,7 @@ function giveSingleAchieve(name) {
 			},
 			get w320(){
 				if (game.global.u2SpireCells < 1000) return "It's not a windy day but the trees are definitely moving around. Spooky!";
-				return "It's a beautiful day for a swimm with your Trimps! You can't actually fit in the swimming pool your Trimps made, but it'd be a nice day for it if you could.";
+				return "It's a beautiful day for a swim with your Trimps! You can't actually fit in the swimming pool your Trimps made, but it'd be a nice day for it if you could.";
 			},
 			get w325(){
 				if (game.global.u2SpireCells < 500) return "The air is getting incredibly thick this far out between two active Spires. Your Trimps look like they're starting to slow down a bit, so you give them an encouraging speech. It didn't seem to help much but they can't say you didn't try.";

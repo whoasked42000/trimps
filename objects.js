@@ -5379,7 +5379,7 @@ var u2Mutations = {
             hasMut: function(cell){
                 if (!cell.u2Mutation || !cell.u2Mutation.length) return false;
                 var mut = cell.u2Mutation[0];
-                if (mut == "S1G" || mut == "S10" || mut == "S1R") return true;
+                if (mut == "S1G" || mut == "S1O" || mut == "S1R") return true;
             },
             removeStacks: function(){
                 game.global.spireMutStacks = 0;
@@ -5389,7 +5389,7 @@ var u2Mutations = {
 				manageStacks(null, null, true, 'spireMutStacks', null, null, true);
 			},
 			drawStacks: function(){
-				manageStacks('Spore Cloud', Math.ceil(game.global.spireMutStacks), true, 'spireMutStacks', 'icomoon icon-sun', this.stackTooltip());
+				manageStacks('Spore Cloud', game.global.spireMutStacks.toFixed(1), true, 'spireMutStacks', 'icomoon icon-sun', this.stackTooltip());
 			},
             stackTooltip: function(){
                 return "The Spore Cloud is choking your Trimps and strengthening the Bad Guys! Trimps deal " + prettify(this.trimpAttackMult()) + "x damage, and enemies deal " + prettify(this.enemyAttackMult()) + "x damage. Gain 1/10th of a stack for every attack against Natural enemies in this Spire and 1 stack when killing them. Stacks reset when completing a Floor. Active in World only."
@@ -5397,7 +5397,7 @@ var u2Mutations = {
             onDeath: function(cell){
                 var mut = cell.u2Mutation[0];
                 if (mut == "S1G") game.global.spireMutStacks++;
-                if (mut == "S1O") game.global.spireMutStacks += 10;
+                else if (mut == "S1O") game.global.spireMutStacks += 10;
                 this.drawStacks();
             },
             attacked: function(cell){
@@ -5408,10 +5408,10 @@ var u2Mutations = {
                 this.drawStacks();
             },
             trimpAttackMult: function(){
-                return Math.pow(0.99, Math.ceil(game.global.spireMutStacks));
+                return Math.pow(0.99, game.global.spireMutStacks);
             },
             enemyAttackMult: function(){
-                return Math.pow(1.01, Math.ceil(game.global.spireMutStacks));
+                return Math.pow(1.01, game.global.spireMutStacks);
             },
             defs: ["S1G", "S1O", "S1R"],
             name: "Natural"

@@ -310,6 +310,7 @@ var toReturn = {
 		tutorialLg: false,
 		mazBw: -1,
 		expandingTauntimp: false,
+		timeWarpLimit: -1,
 		lastHeirlooms: {
 			u1: {
 				Shield: -1,
@@ -1755,7 +1756,7 @@ var toReturn = {
 			offlineProgress: {
 				enabled: 1,
 				extraTags: "other",
-				description: "<p><b>No Offline Progress</b> will cause no extra resources to be earned and no time to be warped when you return to the game. The Portal and Zone timers will not advance while offline, and the game will be in the same state you left it when you come back. This can be useful for speedrun achievements or if you just really really don&apos;t trust your Trimps when you&apos;re gone.</p><p><b>Hybrid Offline</b> combines Time Warp and Trustworthy Trimps into the best offline experience that Science can buy. Time Warp caps at 24 hours, so using Hybrid Offline will grant Trustworthy Trimps at the beginning of your Time Warp for all offline time over 24 hours, and will also grant Trustworthy Trimps for any extra time should you choose to end Time Warp early. Note that the Portal Time and Time in Zone clocks will advance for all time granted by Trustworthy Trimps and by Time Warp.</p><p><b>Time Warp Only</b> will grant up to 24 hours of your offline progress as Time Warp without granting any extra resources from Trustworthy Trimps at the beginning (for time over 24 hours), or at the end (for canceled Time Warp time). This can also be useful for timed runs or tracking stats, as the time added will be capped to however much time you spend in Time Warp.</p><p><b>Trustworthy Trimps Only</b> will skip Time Warp when you come back and grant resources for all time offline from Trustworthy Trimps. For when you want to get back in the game as soon as possible!</p><p style=&apos;text-align: center&apos;><b>This setting can be changed from the Time Warp screen<br/>or in Settings -> Other.</b></p>",
+				description: "<p><b>No Offline Progress</b> will cause no extra resources to be earned and no time to be warped when you return to the game. The Portal and Zone timers will not advance while offline, and the game will be in the same state you left it when you come back. This can be useful for speedrun achievements or if you just really really don&apos;t trust your Trimps when you&apos;re gone.</p><p><b>Hybrid Offline</b> combines Time Warp and Trustworthy Trimps into the best offline experience that Science can buy. Time Warp caps at 24 hours, so using Hybrid Offline will grant Trustworthy Trimps at the beginning of your Time Warp for all offline time over 24 hours, and will also grant Trustworthy Trimps for any extra time should you choose to end Time Warp early. Note that the Portal Time and Time in Zone clocks will advance for all time granted by Trustworthy Trimps and by Time Warp.</p><p><b>Time Warp Only</b> will grant up to 24 hours of your offline progress as Time Warp without granting any extra resources from Trustworthy Trimps at the beginning (for time over 24 hours), or at the end (for canceled Time Warp time). This can also be useful for timed runs or tracking stats, as the time added will be capped to however much time you spend in Time Warp.</p><p><b>Trustworthy Trimps Only</b> will skip Time Warp when you come back and grant resources for all time offline from Trustworthy Trimps. For when you want to get back in the game as soon as possible!</p><p style=&apos;text-align: center&apos;><b>This setting can be changed from the Time Warp screen<br/>or in Settings -> Other. Ctrl click from Settings to limit speed, or use the slider during Time Warp.</b></p>",
 				//description: "Disables or enables earning resources while offline. <b>Warning: If this is toggled off, no resources will be earned from Trustworthy Trimps when coming back to the game after being offline.</b> This also stops the current run timer when offline and can be helpful if you are analysing stats and do not want resources counted when there is no timer running",
 				titles: ["No Offline Progress", "Hybrid Offline", "Time Warp Only", "Trustworthy Trimps Only"],
 				secondLocation: ["toggleofflineProgresstimewarp"]
@@ -2762,7 +2763,7 @@ var toReturn = {
 				}
 				return (1.1 + (Math.floor(time / 4) * 0.01));
 			},
-			tooltip: "If things seem tough, just try hitting them harder. Each level increases your Trimps' Attack by 10% (compounding). For every 4 minutes you spend on one Zone, 1% is <b>added</b> to the compounding bonus, with a max of 2 hours. When you clear a Zone, you carry 50% of the time you spent last Zone (up to 2 hours) with you to the new Zone. For example: If you have spent an hour on one Zone, you'll earn a 25% compounding Attack bonus for each level of Tenacity. <b>Maximum of 40 levels.</b>",
+			tooltip: "If things seem tough, just try hitting them harder. Each level increases your Trimps' Attack by 10% (compounding). For every 2.4 minutes you spend on one Zone, 1% is <b>added</b> to the compounding bonus for the first hour. After 1 hour, 1% is <b>added</b> to the compounding bonus every 12 minutes, up to a max time of 2 total hours. When you clear a Zone, you carry 50% of the time you spent last Zone (up to 2 hours) with you to the new Zone. For example: If you have spent an hour on one Zone, you'll earn a 35% compounding Attack bonus for each level of Tenacity. If you've spent 2 hours on one Zone, the compounding bonus per level will be 40%. <b>Maximum of 40 levels.</b>",
 			max: 40
 		},
 		Criticality: {
@@ -3114,7 +3115,7 @@ var toReturn = {
 				if (game.global.viewingUpgrades || portalWindowOpen) useTemp = true;
 				var perkLevel = this.radLevel + 1;
 				if (useTemp) perkLevel += this.levelTemp;
-				var text = "Grants your Trimps the ability to locate small Runetrinkets around the World. Purchasing this Perk will grant your Trimps a chance per Zone cleared above Z100 to find a Runetrinket. Each Runetrinket increases your Trimps' attack, health, and gathered primary resources by 1% (additive) per perk level. You can store a maximum of " + this.trinketsPerLevel + " Runetrinkets per perk level, reducing levels in this perk will deactivate any trinkets above cap but not lose them. Runetrinkets persist through Portal and never reset. The chance to find a Runetrinket increases by about 50% per level of this Perk, and scales as the Zone number increases (up to Z200). You'll also find 1 guaranteed Runetrinket every 25 Zones above Z100 for every 2 levels of this perk.";
+				var text = "Grants your Trimps the ability to locate small Runetrinkets around the World. Purchasing this Perk will grant your Trimps a chance per Zone cleared above Z100 to find a Runetrinket. Each Runetrinket increases your Trimps' attack, health, and gathered primary resources by 1% (additive) per perk level. You can store a maximum of " + this.trinketsPerLevel + " Runetrinkets per perk level, reducing levels in this perk will deactivate any trinkets above cap but not lose them. Runetrinkets persist through Portal and never reset. The chance to find a Runetrinket increases by about 50% per level of this Perk, and scales as the Zone number increases (up to Z200). You'll also find 1 guaranteed Runetrinket every 25 Zones above Z100 for every 2 levels of this perk. <b>Maximum of 50 levels.</b>";
 				text += "<br/><br/>You have " + prettify(this.trinkets) + " Runetrinket" + needAnS(this.trinkets) + ".";
 				text += " You are currently gaining " + formatMultAsPercent(this.getMult(useTemp), true) + " attack, health, and gathered resources and you can store a total of " + prettify(this.getTrinketCap()) + " Runetrinkets.<br/><br/>" + this.getChanceText(useTemp);
 				return text;
@@ -8609,6 +8610,30 @@ var toReturn = {
 			fast: false
 		},
 		//Honorary Imps
+		Platypimp: {
+			//Designed by Quia
+			location: "Plentiful",
+			location2: "Farmlands",
+			attack: 1.1,
+			health: 0.85,
+			loot: function(level){
+				var random = Math.floor(Math.random() * 3);
+				var res = ["Wood", "Metal", "Food"];
+				var icon = ["tree-deciduous", "*cubes", "apple"];
+				message(`Your Trimps almost look normal compared to that Platypimp! Did that thing have a bill!? Somehow it dropped ${prettify(rewardResource(res[random].toLowerCase(), 0.5, level, true))} ${res[random]}.`, "Loot", icon[random], null, "primary");
+			}
+		},
+		Duckimp: {
+			//Designed by August
+			location: "Sea",
+			attack: 0.9,
+			health: 1,
+			fast: true,
+			loot: function (level) {
+				var amt = rewardResource("food", 0.5, level, true);
+				message("Talking through your problems with what's left of the Duckimp helps you realize it was made out of " + prettify(amt) + " food! Just what you needed!", "Loot", "apple", null, 'primary');
+			}
+		},
 		Kittimp: {
 			//Designed by K1d_5h31d0n
 			location: "Forest",
@@ -8670,6 +8695,7 @@ var toReturn = {
 				message("That Seirimp dropped " + prettify(amt) + " metal! Neat-O.", "Loot", "*cubes", null, 'primary');
 			}
 		},
+		//Depths
 		Slagimp: {
 			location: "Depths",
 			attack: 0.9,

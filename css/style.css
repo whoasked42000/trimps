@@ -1931,6 +1931,13 @@ body {
 	background-color: #809080
 }
 
+.twLimitSpeed{
+	margin-top: -2%;
+	width: 100%;
+	text-align: center;
+	font-size: 0.7em;
+}
+
 #statsWrapper, #achievementWrapper, #heirloomWrapper, #mutTreeWrapper{
 	background-color: black;
 	width: 100vw;
@@ -6460,9 +6467,8 @@ sup{
 }
 
 #offlineTimeOffline{
-	padding-top: 2vw;
 	text-align: center;
-	margin-bottom: 1.8vw;
+	margin-bottom: 1vw;
 }
 
 #offlineTimeOffline div input{
@@ -6483,7 +6489,7 @@ sup{
 }
 
 #offlineExtraBtnsContainer, #offlineMapBtns, #offlineZoneBtns{
-	height: 20vw;
+	height: 22.5vw;
 	border: 1px solid white;
 	padding-top: 2vw;
 }
