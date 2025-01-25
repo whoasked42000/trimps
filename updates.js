@@ -294,7 +294,7 @@ function tooltip(what, isItIn, event, textString, attachFunction, numCheck, rena
 		tooltipText = "Click to view " + ((textString == 0) ? "today" : dayOfWeek(getDailyTimeString(textString, false, true))) + "s challenge, which resets in less than " + daysUntilReset + " day" + ((daysUntilReset == 1) ? "" : "s") + ".";
 		costText = "";
 	}
-	if (what == "Decay"){
+	if (what == "Decay" || what == "Melt"){
 		var challenge = game.challenges.Decay;
 		if (game.global.challengeActive == "Melt"){
 			challenge = game.challenges.Melt;
@@ -1861,10 +1861,9 @@ function getExtraScryerText(fromForm){
 	return tooltipText;
 }
 
-function swapNiceCheckbox(elem, forceSetting, code){
+function swapNiceCheckbox(elem, forceSetting){
 	//Send just the elem to swap the current state
 	//Send elem and either true or false as forceSetting to force the checkbox to checked/unchecked
-	if (code && code !== "Space") { return; } // Keyboard support, only check/uncheck on spacebar
 	var checked;
 	if (typeof forceSetting === 'undefined') checked = !readNiceCheckbox(elem);
 	else checked = (forceSetting == true);
@@ -1895,8 +1894,7 @@ function buildNiceCheckbox(id, extraClass, enabled, extraFunction, label){
 	var classes = `icomoon niceCheckbox noselect ${(extraClass) ? extraClass : ""} icon-checkbox-${(enabled) ? "checked" : "unchecked"}`
 	extraFunction = (extraFunction) ? " " + extraFunction + ";" : "";
 	var html = `<span role='checkbox' tabindex=0 id='${id}' class='${classes}' data-checked='${enabled}' aria-checked='${enabled}' aria-label='${label}' 
-		onclick='swapNiceCheckbox(this); ${extraFunction}' 
-		onKeyDown='swapNiceCheckbox(this, undefined, event.code); ${extraFunction}'>
+		onclick='swapNiceCheckbox(this); ${extraFunction};'>
 		</span>`;
 	return html;
 }
@@ -5752,7 +5750,7 @@ function drawBuilding(what) {
 				<span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span>, 
 				<span class="thingOwned" id="${what}Owned">${game.buildings[what].owned}</span>
 				<span class="cantAffordSR">, Not Affordable</span>
-				<span class="affordSR">, Can Buy</span>
+				<span class="affordSR">, <span id="${what}BuyAmount"></span>Affordable</span>
 			</button>`;
 	}
 
@@ -5817,8 +5815,9 @@ function drawJob(what) {
 			<button class="thingColorCanNotAfford thing noselect pointer jobThing" id="${what}" onclick="buyJob('${what}')">
 				<span class="thingName"><span id="${what}Alert" class="alert badge">${alertMessage}</span>${what}</span>, 
 				<span class="thingOwned" id="${what}Owned">0</span>
+				<span class="firingSR">, Firing</span>
 				<span class="cantAffordSR">, Not Affordable</span>
-				<span class="affordSR">, Can Buy</span>
+				<span class="affordSR">, <span id="${what}BuyAmount"></span>Affordable</span>
 			</button>`;
 	}
 	return `<div onmouseover="tooltip('${what}','jobs',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer jobThing" id="${what}" onclick="buyJob('${what}')">
@@ -5927,8 +5926,9 @@ function unlockMap(what) { //what here is the array index
 		}
 	}
 	else abbrev = ((abbrev) ? getMapSpecTag(abbrev) : "");
-	if (game.options.menu.extraStats.enabled) elem.innerHTML = '<div' + tooltip + ' class="' + btnClass + '" id="' + item.id + '" onclick="selectMap(\'' + item.id + '\')"><div class="onMapIcon"><span class="' + getMapIcon(item) + '"></span></div><div class="thingName onMapName">' + item.name + '</div><br/><span class="thingOwned mapLevel"><span class="stackedVoids">' + ((item.stacked) ? "(x" + (item.stacked + 1) + ") " : "") + '</span>Level ' + level + abbrev + '</span><br/><span class="onMapStats"><span class="icomoon icon-gift2"></span>' + Math.floor(item.loot * 100) + '% </span><span class="icomoon icon-cube2"></span>' + item.size + ' <span class="icon icon-warning"></span>' + Math.floor(item.difficulty * 100) + '%</div>' + elem.innerHTML;
-	else elem.innerHTML = '<div' + tooltip + ' class="' + btnClass + '" id="' + item.id + '" onclick="selectMap(\'' + item.id + '\')"><span class="thingName">' + item.name + '</span><br/><span class="thingOwned mapLevel"><span class="stackedVoids">' + ((item.stacked) ? "(x" + (item.stacked + 1) + ") " : "") + '</span>Level ' + level + abbrev + '</span></div>' + elem.innerHTML;
+	let tagName = (usingScreenReader) ? 'li' : 'div'
+	if (game.options.menu.extraStats.enabled) elem.innerHTML = '<' + tagName + tooltip + ' class="' + btnClass + '" id="' + item.id + '" onclick="selectMap(\'' + item.id + '\')"><div class="onMapIcon"><span class="' + getMapIcon(item) + '"></span></div><div class="thingName onMapName">' + item.name + '</div><br/><span class="thingOwned mapLevel"><span class="stackedVoids">' + ((item.stacked) ? "(x" + (item.stacked + 1) + ") " : "") + '</span>Level ' + level + abbrev + '</span><br/><span class="onMapStats"><span class="icomoon icon-gift2"></span>' + Math.floor(item.loot * 100) + '% </span><span class="icomoon icon-cube2"></span>' + item.size + ' <span class="icon icon-warning"></span>' + Math.floor(item.difficulty * 100) + '%</' +tagName +'>' + elem.innerHTML;
+	else elem.innerHTML = '<' + tagName + tooltip + ' class="' + btnClass + '" id="' + item.id + '" onclick="selectMap(\'' + item.id + '\')"><span class="thingName">' + item.name + '</span><br/><span class="thingOwned mapLevel"><span class="stackedVoids">' + ((item.stacked) ? "(x" + (item.stacked + 1) + ") " : "") + '</span>Level ' + level + abbrev + '</span></'+ tagname + '>' + elem.innerHTML;
 	if (item.id == game.global.currentMapId) swapClass("mapElement", "mapElementSelected", document.getElementById(item.id));
 }
 
@@ -6011,7 +6011,7 @@ function drawUpgrade(what) {
 				<span class="thingName">${name}</span>, 
 				<span class="thingOwned" id="${what}Owned">${done}</span>
 				<span class="cantAffordSR">, Not Affordable</span>
-				<span class="affordSR">, Can Buy</span>
+				<span class="affordSR">, Affordable</span>
 			</button>`;
 	} else {
 		html = `<div onmouseover="tooltip('${what}','upgrades',event)" onmouseout="tooltip('hide')" class="thingColorCanNotAfford thing noselect pointer upgradeThing" id="${what}" onclick="buyUpgrade('${what}')">
@@ -6024,6 +6024,19 @@ function drawUpgrade(what) {
 	return html;
 }
 
+function updateSRBuyAmt(what, item) {
+	if (usingScreenReader) {
+		let amtElem = document.getElementById(`${item}BuyAmount`);
+		if (amtElem) {
+			let amt = prettify(((game.global.buyAmt == "Max") ? calculateMaxAfford(game[what][item], what=="buildings", what=="equipment", what=="jobs") : game.global.buyAmt));
+			if (what == "jobs" && game.workspaces < amt) amt = prettify(game.workspaces);
+			if (game[what][item].percent || what == "Antenna") { amt = 1 }
+			if (amt == 1) amt = ""
+			amtElem.innerHTML = amt;
+		}
+	}
+}
+
 function checkButtons(what) {
 	var where = game[what];
 	if (what == "jobs") {
@@ -6031,7 +6044,10 @@ function checkButtons(what) {
 		for (var item in game.jobs){
 			if (game.jobs[item].locked == 1) continue;
 			if (workspaces <= 0 && !(game.jobs[item].allowAutoFire && game.options.menu.fireForJobs.enabled)) updateButtonColor(item, false, true);
-			else updateButtonColor(item,canAffordJob(item, false, workspaces, true),true);
+			else {
+				updateButtonColor(item,canAffordJob(item, false, workspaces, true),true);
+				updateSRBuyAmt(what, item);
+			}
 		}
 		return;
 	}
@@ -6055,7 +6071,11 @@ function checkButtons(what) {
 			var canAfford = canAffordBuilding(itemBuild, false, false, false, true);
 /* 			if (itemBuild == "Nursery" && mutations.Magma.active())
 				canAfford = false;
- */			updateButtonColor(itemBuild, canAfford);
+ */			
+			updateSRBuyAmt(what, itemBuild)
+			updateButtonColor(itemBuild, canAfford);
+ 			
+
 		}
 		return;
 	}
@@ -6064,6 +6084,7 @@ function checkButtons(what) {
 			var thisEquipment = game.equipment[itemEquip];
 			if (thisEquipment.locked == 1) continue;
 			updateButtonColor(itemEquip, canAffordBuilding(itemEquip, null, null, true, true));
+			updateSRBuyAmt(what, itemEquip)
 		}
 		return;
 	}
@@ -6084,6 +6105,7 @@ function checkButtons(what) {
 			continue;
 		}
 		updateButtonColor(itemB, true);
+		updateSRBuyAmt(what, itemB);
 	}
 }
 
@@ -6127,8 +6149,9 @@ function updateButtonColor(what, canAfford, isJob) {
 	if(canAfford){
 		if
 			(what == "Gigastation" && (ctrlPressed || game.options.menu.ctrlGigas.enabled)) swapClass("thingColor", "thingColorCtrl", elem);
-		else
-		swapClass("thingColor", "thingColorCanAfford", elem);
+		else {
+			swapClass("thingColor", "thingColorCanAfford", elem);
+		}
 	}
 	else
 		swapClass("thingColor", "thingColorCanNotAfford", elem);
@@ -6185,8 +6208,9 @@ function drawEquipment(what) {
 			<button class="noselect pointer thingColorCanNotAfford thing" id="${what}" onclick="buyEquipment('${what}')">
 				<span class="thingName">${what} <span id="${what}Numeral">${numeral}</span></span>, 
 				<span class="thingOwned">Level: <span id="${what}Owned">${equipment.level}</span></span>
+				<span class="efficientSR">, Most Efficient</span>
 				<span class="cantAffordSR">, Not Affordable</span>
-				<span class="affordSR">, Can Buy</span>
+				<span class="affordSR">, <span id="${what}BuyAmount"></span>Affordable</span>
 			</button>`;
 	}
 	return `<div 
@@ -6488,6 +6512,7 @@ function toggleSetting(setting, elem, fromPortal, updateOnly, backwards, fromHot
 		titleElem.innerHTML = achievement.names[displayNumber];
 		titleElem.className = 'achieveTier' + achievement.tiers[displayNumber];
 		document.getElementById("achievement" + location + "Description").innerHTML = achievement.description(displayNumber);
+		screenReaderAssert(`Completed Achievement! ${achievement.names[displayNumber]}. ${achievement.description(displayNumber)}`)
 		document.getElementById("achievement" + location + "Reward").innerHTML = '<b>Reward:</b> +' + game.tierValues[achievement.tiers[displayNumber]] + "% Damage";
 		if ((forHover || forTracker) && typeof achievement.progress !== 'undefined' && (typeof achievement.highest === 'undefined' || (achievement.highest > 0 || achievement.finished > 0))){
 			if (!one && achievement.tiers.length == achievement.finished){
@@ -7404,16 +7429,16 @@ function updateDecayStacks(addStack){
 	}
 	var challenge = game.challenges[game.global.challengeActive];
 	if (addStack && challenge.stacks < challenge.maxStacks && game.upgrades.Battle.done > 0) challenge.stacks++;
-	if (elem == null){
-		var icon = (game.global.challengeActive == "Melt") ? "icomoon icon-fire" : "glyphicon glyphicon-cloud";
-		document.getElementById('debuffSpan').innerHTML += "<span id='decayStacks' onmouseout='tooltip(\"hide\")' class='badge antiBadge'><span id='decayStackCount'></span> <span class='" + icon + "'></span></span>";
-		elem = document.getElementById('decayStacks');
-	}
 	if (game.global.challengeActive == "Melt"){
 		if (challenge.stacks > challenge.largestStacks) challenge.largestStacks = challenge.stacks;
 	}
-	elem.setAttribute('onmouseover', 'tooltip("Decay", null, event)');
-	document.getElementById('decayStackCount').innerHTML = challenge.stacks;
+
+	if (elem == null) {
+		var icon = (game.global.challengeActive == "Melt") ? "icon-fire" : "glyphicon-cloud";
+		document.getElementById('debuffSpan').insertAdjacentHTML("beforeend", 
+			makeIconEffectHTML(game.global.challengeActive, false, icon, "antiBadge", ['decayStacks','decayStackText']))
+	}
+	document.getElementById('decayStackText').innerHTML = challenge.stacks;
 }
 
 function swapClass(prefix, newClass, elem) {

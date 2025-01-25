@@ -388,42 +388,42 @@
 				</div>
 				<div id="outerBuyContainer">	
 				<div id="buyTabs">
-					<ul id="buyTabsUl" class="nav nav-tabs nav-justified buyTabsUl">
-						<li role="presentation" id="allTab" onclick="filterTabs('all')" class="tabNotSelected buyTab"><a id="allA">All</a></li>
-						<li role="presentation" id="buildingsTab" onclick="filterTabs('buildings')" class="tabNotSelected buyTab"><a id="buildingsA"><span id="buildingsAlert" class="alert badge"></span>Buildings</a></li>
-						<li role="presentation" id="jobsTab" style="visibility: hidden" onclick="filterTabs('jobs')" class="tabNotSelected buyTab"><a id="jobsA"><span id="jobsAlert" class="alert badge"></span>Jobs</a></li>
-						<li role="presentation" id="upgradesTab" style="visibility: hidden" onclick="filterTabs('upgrades')" class="tabNotSelected buyTab"><a id="upgradesA"><span id="upgradesAlert" class="alert badge"></span>Upgrades</a></li>
-						<li role="presentation" id="equipmentTab" style="visibility: hidden" onclick="filterTabs('equipment')" class="tabNotSelected buyTab"><a id="equipmentA"><span id="equipmentAlert" class="alert badge"></span>Equipment</a></li>		
+					<ul id="buyTabsUl" class="nav nav-tabs nav-justified buyTabsUl" aria-label="Buy Tabs">
+						<li id="allTab" onclick="filterTabs('all')" class="tabNotSelected buyTab"><a id="allA">All</a></li>
+						<li id="buildingsTab" onclick="filterTabs('buildings')" class="tabNotSelected buyTab"><a id="buildingsA"><span id="buildingsAlert" class="alert badge"></span>Buildings</a></li>
+						<li id="jobsTab" style="visibility: hidden" onclick="filterTabs('jobs')" class="tabNotSelected buyTab"><a id="jobsA"><span id="jobsAlert" class="alert badge"></span>Jobs</a></li>
+						<li id="upgradesTab" style="visibility: hidden" onclick="filterTabs('upgrades')" class="tabNotSelected buyTab"><a id="upgradesA"><span id="upgradesAlert" class="alert badge"></span>Upgrades</a></li>
+						<li id="equipmentTab" style="visibility: hidden" onclick="filterTabs('equipment')" class="tabNotSelected buyTab"><a id="equipmentA"><span id="equipmentAlert" class="alert badge"></span>Equipment</a></li>		
 					</ul>
-					<ul id="buyTabsUl2" class="nav nav-tabs nav-justified buyTabsUl">
-						<li role="presentation" id="talentsTab" style='display: none' onclick="filterTabs('talents')" class="tabNotSelected buyTab" ><a id="talentA"><span id="talentsAlert" class="alert badge"></span><span id="mutatorsAlert" class="alert badge"></span><span id='MasteryTabName'>Mastery</span><span id="talentsEssenceTotal"></span></a></li>		
-						<li role="presentation" id="equalityTab" style='display: none'  onclick="tooltip('Scale Equality Scaling', null, 'update', true)" class="tabNotSelected equalityTabScaling buyTab" ><a id="equalityA">Equality</a></li>		
-						<li role="presentation" id="natureTab" style='display: none'  onclick="filterTabs('nature')" class="tabNotSelected buyTab empowerTabNone" ><a id="natureA">Nature</a></li>		
-						<li role="presentation" id="playerSpireTab" style='display: none' onclick="playerSpire.openPopup()" class="tabNotSelected buyTab pausedSpireNo"><a id="spireA">Spire</a></li>
-						<li role="presentation" id="alchemyTab" style='display: none' onclick="alchObj.openPopup()" class="tabNotSelected buyTab alchTabNone"><a id="alchemyA">Alchemy</a></li>
-						<li role="presentation" id="autoBattleTab" style='display: none' onclick="autoBattle.popup()" class="tabNotSelected buyTab abTabNone"><a id="autoBattleA">SA</a></li>
+					<ul id="buyTabsUl2" class="nav nav-tabs nav-justified buyTabsUl" aria-label="Features Tabs">
+						<li id="talentsTab" style='display: none' onclick="filterTabs('talents')" class="tabNotSelected buyTab" ><a id="talentA"><span id="talentsAlert" class="alert badge"></span><span id="mutatorsAlert" class="alert badge"></span><span id='MasteryTabName'>Mastery</span><span id="talentsEssenceTotal"></span></a></li>		
+						<li id="equalityTab" style='display: none'  onclick="tooltip('Scale Equality Scaling', null, 'update', true)" class="tabNotSelected equalityTabScaling buyTab" ><a id="equalityA">Equality</a></li>		
+						<li id="natureTab" style='display: none'  onclick="filterTabs('nature')" class="tabNotSelected buyTab empowerTabNone" ><a id="natureA">Nature</a></li>		
+						<li id="playerSpireTab" style='display: none' onclick="playerSpire.openPopup()" class="tabNotSelected buyTab pausedSpireNo"><a id="spireA">Spire</a></li>
+						<li id="alchemyTab" style='display: none' onclick="alchObj.openPopup()" class="tabNotSelected buyTab alchTabNone"><a id="alchemyA">Alchemy</a></li>
+						<li id="autoBattleTab" style='display: none' onclick="autoBattle.popup()" class="tabNotSelected buyTab abTabNone"><a id="autoBattleA">SA</a></li>
 					</ul>
 				</div>
 
 					<div id="numTabs" class="numTabs">
-						<ul class="nav nav-tabs nav-justified">
-							<li role="presentation" class="tabNotSelected" id="tab1" onclick="numTab(1)">
+						<ul class="nav nav-tabs nav-justified" aria-label="Buy Amount">
+							<li class="tabNotSelected" id="tab1" onclick="numTab(1)">
 								<a id="tab1Text">+1</a>
 							</li>
-							<li role="presentation" class="tabNotSelected" id="tab2" onclick="numTab(2)">
+							<li class="tabNotSelected" id="tab2" onclick="numTab(2)">
 								<a id="tab2Text">+10</a>
 							</li>
-							<li role="presentation" class="tabNotSelected" id="tab3" onclick="numTab(3)">
+							<li class="tabNotSelected" id="tab3" onclick="numTab(3)">
 								<a id="tab3Text">+25</a>
 							</li>
-							<li role="presentation" class="tabNotSelected" id="tab4" onclick="numTab(4)">
+							<li class="tabNotSelected" id="tab4" onclick="numTab(4)">
 								<a id="tab4Text">+100</a>
 							</li>
-							<li role="presentation" class="tabNotSelected" id="tab5">
+							<li class="tabNotSelected" id="tab5">
 								<a id="tab5Text" onclick="numTab(5)">+1</a>
 								<a id="tab5Text2" onclick="tooltip('Custom', null, 'update')">Custom</a>
 							</li>
-							<li role="presentation" class="tabNotSelected" id="tab6" onclick="numTab(6)"  >
+							<li class="tabNotSelected" id="tab6" onclick="numTab(6)"  >
 								<a id="tab6Text">Max</a>
 							</li>
 						</ul>
@@ -964,10 +964,10 @@
 									<div class="mapStatsValue" id="mapStatsLoot"></div>
 								</div>	
 							</div>
-							<div id="mapsHere" class="mapSize1 niceScroll">
-							</div>
-							<div id="voidMapsHere" class="niceScroll">
-							</div>
+							<ul id="mapsHere" class="mapSize1 niceScroll" aria-label="Owned Maps">
+							</ul>
+							<ul id="voidMapsHere" class="niceScroll" aria-label="Void Maps">
+							</ul>
 							</div>
 							<div id="mapGrid" class="gridShrunk" style="display: none;"></div>
 							<div id="extraGridInfo" style="display: none;">
@@ -1035,57 +1035,57 @@
 			<div class="challengeTitle">Perks</div>
 			<div id="portalStory"></div>
 			<div id="portalPresets" class="numTabs">
-				<ul class="nav nav-tabs nav-justified" id="portalPresetsTabs">
-						<li role="presentation" class="tabNotSelected" id="presetTab1" onclick="presetTab(1, true)" >
+				<ul class="nav nav-tabs nav-justified" id="portalPresetsTabs" aria-label="Presets and Import/Export">
+						<li class="tabNotSelected" id="presetTab1" onclick="presetTab(1, true)">
 							<a id="presetTab1Text">Preset 1</a>
 						</li>
-						<li role="presentation" class="tabNotSelected" id="presetTab2" onclick="presetTab(2, true)" >
+						<li class="tabNotSelected" id="presetTab2" onclick="presetTab(2, true)">
 							<a id="presetTab2Text">Preset 2</a>
 						</li>
-						<li role="presentation" class="tabNotSelected" id="presetTab3" onclick="presetTab(3, true)" >
+						<li class="tabNotSelected" id="presetTab3" onclick="presetTab(3, true)">
 							<a id="presetTab3Text">Preset 3</a>
 						</li>
-						<li role="presentation" class="tabNotEnabled" id="presetTabSave" onclick="savePerkPreset()" >
+						<li class="tabNotEnabled" id="presetTabSave" onclick="savePerkPreset()">
 							<a>Save</a>
 						</li>
-						<li role="presentation" class="tabNotEnabled" id="presetTabLoad" onclick="loadPerkPreset()" >							
+						<li class="tabNotEnabled" id="presetTabLoad" onclick="loadPerkPreset()">							
 							<a>Load</a>
 						</li>
-						<li role="presentation" class="tabNotEnabled" id="presetTabRename" onclick="renamePerkPreset(true)" >
+						<li class="tabNotEnabled" id="presetTabRename" onclick="renamePerkPreset(true)">
 							<a>Rename</a>
 						</li>
-						<li role="presentation" class="tabNotEnabled" id="presetTabExport" onclick="tooltip('Export Perks', null, 'update')" >
+						<li class="tabNotEnabled" id="presetTabExport" onclick="tooltip('Export Perks', null, 'update')">
 							<a>Export</a>
 						</li>
-						<li role="presentation" class="tabNotEnabled" id="presetTabImport" onclick="tooltip('Import Perks', null, 'update')" >
+						<li class="tabNotEnabled" id="presetTabImport" onclick="tooltip('Import Perks', null, 'update')">
 							<a>Import</a>
 						</li>
 				</ul>
 			</div>
 				<div id="pnumTabs" class="numTabs">
-					<ul class="nav nav-tabs nav-justified" id="portalTabs">
-						<li role="presentation" class="tabNotSelected" id="ptab1" onclick="numTab(1, true)">
+					<ul class="nav nav-tabs nav-justified" id="portalTabs" aria-label="Buy Amount">
+						<li class="tabNotSelected" id="ptab1" onclick="numTab(1, true)">
 							<a id="ptab1Text">+1</a>
 						</li>
-						<li role="presentation"  class="tabNotSelected" id="ptab2" onclick="numTab(2, true)">
+						<li  class="tabNotSelected" id="ptab2" onclick="numTab(2, true)">
 							<a id="ptab2Text">+10</a>
 						</li>
-						<li role="presentation"  class="tabNotSelected" id="ptab3" onclick="numTab(3, true)">
+						<li  class="tabNotSelected" id="ptab3" onclick="numTab(3, true)">
 							<a id="ptab3Text">+25</a>
 						</li>
-						<li role="presentation"  class="tabNotSelected" id="ptab4" onclick="numTab(4, true)">
+						<li  class="tabNotSelected" id="ptab4" onclick="numTab(4, true)">
 							<a id="ptab4Text">+100</a>
 						</li>
-						<li role="presentation"  class="tabNotSelected" id="ptab5" onclick="tooltip('Custom', null, 'update', true)">
+						<li  class="tabNotSelected" id="ptab5" onclick="tooltip('Custom', null, 'update', true)">
 							<a id="ptab5Text">Custom</a>
 						</li>
-						<li role="presentation" class="tabNotSelected" id="ptab6" onclick="numTab(6, true)" >
+						<li class="tabNotSelected" id="ptab6" onclick="numTab(6, true)" >
 							<a id="ptab6Text">Max</a>
 						</li>
-						<li role="presentation" class="tabNotSelected pointer" id="ptabInfo" onclick="toggleSetting('detailedPerks', null, true)">
+						<li class="tabNotSelected pointer" id="ptabInfo" onclick="toggleSetting('detailedPerks', null, true)">
 							<a id="ptabInfoText">More Info</a>
 						</li>
-						<li role="presentation" id="ptabRemove" style="display: none" onclick="toggleRemovePerks()">
+						<li id="ptabRemove" style="display: none" onclick="toggleRemovePerks()">
 							<a id="ptabRemoveText">Remove</a>
 						</li>
 					</ul>
@@ -1427,33 +1427,33 @@
 	</table>
 	<div style='position: absolute; display: block; width: 15vw; left: 85%; top: 90%; background-color: grey; z-index: 99' id="screenReaderTooltip" aria-live="assertive"></div>
 	<div id="settingsRow">
-		<table id="settingsTable">
+		<table id="settingsTable" role="list" aria-label="Game Menu">
 			<tr>
-				<td class="btn btn-info" onclick="save(false, true)">
+				<td role="listitem" class="btn btn-info" onclick="save(false, true)">
 					Save <span id="saveIndicator"></span><span id="playFabIndicator"></span>
 				</td>
-				<td class="btn btn-info" onclick="tooltip('Export', null, 'update')">
+				<td role="listitem" class="btn btn-info" onclick="tooltip('Export', null, 'update')">
 					<div>Export</div>
 				</td>
-				<td class="btn btn-info" onclick="tooltip('Import', null, 'update')">
+				<td role="listitem" class="btn btn-info" onclick="tooltip('Import', null, 'update')">
 					<div>Import</div>
 				</td>
-				<td class="btn btn-success" onclick="toggleStats()">
+				<td role="listitem" class="btn btn-success" onclick="toggleStats()">
 					<div>Stats</div>
 				</td>
-				<td class="btn tealColor" onclick="toggleAchievementWindow()">
+				<td role="listitem" class="btn tealColor" onclick="toggleAchievementWindow()">
 					<div>Achieves</div>
 				</td>
-				<td class="btn btn-default" onclick="toggleSettingsMenu()">
+				<td role="listitem" class="btn btn-default" onclick="toggleSettingsMenu()">
 					<div id='settingsText'>Settings</div>
 				</td>
-				<td class="btn" id="pastUpgradesBtn" onclick="viewPortalUpgrades()">
+				<td role="listitem" class="btn" id="pastUpgradesBtn" onclick="viewPortalUpgrades()">
 					
 				</td>
-				<td class="btn btn-new" onclick="window.open('updates.html', '_blank')">
+				<td role="listitem" class="btn btn-new" onclick="window.open('updates.html', '_blank')">
 						V <span id="versionNumber"></span> | What's New 
 				</td>
-				<td id="portalTimer" class="timerNotPaused" onclick="toggleSetting('pauseGame')" >
+				<td role="listitem" id="portalTimer" class="timerNotPaused" onclick="toggleSetting('pauseGame')" >
 					<span id="portalTime">&nbsp;</span>&nbsp;&nbsp;<span style='font-size: 0.85em; line-height: 0.85em;' class='icomoon icon-pause3'></span>&nbsp;
 				</td>
 			</tr>
@@ -1465,15 +1465,15 @@
 					<span id='searchSettingsTitle'>Choose a Category Below, or Search for a Setting/Keyword:</span>&nbsp;
 					<input id='searchSettings' onkeyup='searchSettings(this)' /><br/>
 					<div id='settingsTabs'>
-						<ul class="nav nav-tabs nav-justified">
-							<li role="presentation" style='display: none' id='NewTab' onclick="settingTab('New')" class="tabNotSelected settingTab"><a>New</a></li>
-							<li role="presentation" id='GeneralTab' onclick="settingTab('General')" class="tabNotSelected settingTab"><a>General</a></li>
-							<li role="presentation" id='PerformanceTab' onclick="settingTab('Performance')" class="tabNotSelected settingTab"><a>Performance</a></li>
-							<li role="presentation"  id='QOLTab' onclick="settingTab('QOL')" class="tabNotSelected settingTab"><a>Quality of Life</a></li>
-							<li role="presentation"  id='AlertsTab' onclick="settingTab('Alerts')" class="tabNotSelected settingTab"><a>Pop-ups and Alerts</a></li>
-							<li role="presentation"  id='LayoutTab' onclick="settingTab('Layout')" class="tabNotSelected settingTab"><a>Layout</a></li>
-							<li role="presentation"  id='OtherTab' onclick="settingTab('Other')" class="tabNotSelected settingTab"><a>Other</a></li>
-							<li role="presentation"  id='HotkeyTab' onclick="tooltip('Hotkeys', null, 'update')" class="tabNotSelected settingTab"><a>Hotkeys</a></li>
+						<ul class="nav nav-tabs nav-justified" aria-label="Settings Tabs">
+							<li style='display: none' id='NewTab' onclick="settingTab('New')" class="tabNotSelected settingTab"><a>New</a></li>
+							<li id='GeneralTab' onclick="settingTab('General')" class="tabNotSelected settingTab"><a>General</a></li>
+							<li id='PerformanceTab' onclick="settingTab('Performance')" class="tabNotSelected settingTab"><a>Performance</a></li>
+							<li id='QOLTab' onclick="settingTab('QOL')" class="tabNotSelected settingTab"><a>Quality of Life</a></li>
+							<li id='AlertsTab' onclick="settingTab('Alerts')" class="tabNotSelected settingTab"><a>Pop-ups and Alerts</a></li>
+							<li id='LayoutTab' onclick="settingTab('Layout')" class="tabNotSelected settingTab"><a>Layout</a></li>
+							<li id='OtherTab' onclick="settingTab('Other')" class="tabNotSelected settingTab"><a>Other</a></li>
+							<li id='HotkeyTab' onclick="tooltip('Hotkeys', null, 'update')" class="tabNotSelected settingTab"><a>Hotkeys</a></li>
 						</ul>
 					</div>
 				</div>					

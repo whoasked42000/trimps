@@ -6198,12 +6198,24 @@ sup{
 		1px 1px 0 black;
 }
 
-.thing.thingColorCanNotAfford .affordSR{
+.thing.thingColorCanNotAfford .affordSR, 
+.thing.thingColorFiringJob .affordSR {
 	display: none;
 }
 
-.thing.thingColorCanAfford .cantAffordSR{
+.thing.thingColorCanAfford .cantAffordSR, 
+.thing.thingColorFiringJob .cantAffordSR, 
+.thing.thingColorCtrl .cantAffordSR {
 	display: none;
+}
+
+.thing.thingColorCanAfford .firingSR, 
+.thing.thingColorCanNotAfford .firingSR {
+	display: none;
+}
+
+:not(.efficientYes) > .efficientSR {
+	display:none;
 }
 
 .screenReaderAchievements{
