@@ -68,7 +68,7 @@ body {
     margin-bottom: 10px;
 }
 
-#talentsContainer, #talentsHere{
+#talentsContainer, #talentsHere, .talentTable{
 	width: 100%;
 }
 
@@ -126,14 +126,17 @@ body {
 	  1px 1px 0 #000,5px 5px 1.4vw #3cff00, 5px -5px 1.4vw #3cff00, -5px 5px 1.4vw #3cff00, -5px -5px 1.4vw #3cff00;
 }
 
-
+.talentContainer {
+	display: inline-block;
+	width: 16.666666%;
+}
 
 .talentItem{
 	display: inline-block;
-	width: 16.666666%;
+	width: 100%;
 	text-align: center;
 	border: 1px solid white;
-	padding: 2% 0%;
+	padding: 12% 0%;
 	cursor: pointer;
 }
 
@@ -1110,10 +1113,11 @@ body {
 }
 
 .settingsBtn {
-    font-size: 1.3vw;
+    font-size: 1.25vw;
 	border: 1px solid black !important;
 	cursor: pointer;
 	text-align: center;
+	width: 100%;
 
 }
 
@@ -5881,7 +5885,6 @@ sup{
 	position: absolute;
 	top: 0;
 	left: 0.5vw;
-	border: 1px solid black;
 	height: 90vh;
 	width: calc(25vw - 4px);
 	pointer-events: none;
@@ -5982,6 +5985,7 @@ sup{
 
 .spireControlBox{
 	width: 19%;
+	background: inherit;
 }
 
 .spireTrapBox{
@@ -6005,13 +6009,14 @@ sup{
 	text-align: center;
 }
 
-.spireControlBoxDbl div{
+.spireControlBoxDbl button{
 	display: inline-block;
 	width: 45%;
 	margin: 2.5%;
 	padding: 0.25vw;
 	cursor: pointer;
 	border: 1px solid #dadada;
+	background: inherit;
 }
 
 .spireTrapBoxSmall, .spireControlBoxSmall{

@@ -1546,17 +1546,20 @@ function displayRoboTrimp() {
 	if (game.global.roboTrimpLevel <= 0) return;
 	var elem = document.getElementById("chainHolder");
 	elem.style.visibility = "visible";
+	var statusElem = document.getElementById('roboTrimpTurnsLeft')
 	if (game.global.roboTrimpCooldown > 0){
 		swapClass("shriekState", "shriekStateCooldown", elem);
-		document.getElementById('roboTrimpTurnsLeft').innerHTML = game.global.roboTrimpCooldown;
+		let text = game.global.roboTrimpCooldown
+		if (usingScreenReader) text = "MagnetoShriek Cooldown: " + text
+		statusElem.innerHTML = text
 	}
 	else {
 		document.getElementById('roboTrimpTurnsLeft').innerHTML = "";
 		var swapIn = (game.global.useShriek) ? 'shriekStateEnabled' : 'shriekStateDisabled';
 		swapClass("shriekState", swapIn, elem);
-	}
-	if (usingScreenReader){
-		elem.title = (game.global.useShriek) ? "Deactivate MagnetoShriek" : "Activate MagnetoShriek";
+		if (usingScreenReader){
+			statusElem.innerHTML = (game.global.useShriek) ? "Deactivate MagnetoShriek" : "Activate MagnetoShriek";
+		}
 	}
 }
 
@@ -6082,9 +6085,7 @@ function incrementMapLevel(amt){
 	else elem.value = newNum;
 	updateMapCost();
 	hideAdvMaps(true);
-	if (usingScreenReader) {
-		document.getElementById('screenReaderTooltip').innerHTML = "Map level set to " + newNum;
-	}
+	screenReaderAssert("Map level set to " + newNum)
 }
 
 function saveAdvMaps(){
@@ -6186,7 +6187,8 @@ function updateMapNumbers(readChange){
 	if (usingScreenReader && readChange){
 		var text = document.getElementById(readChange + 'AdvMapsText');
 		if (text != null){
-			document.getElementById('screenReaderTooltip').innerHTML = readChange + " set to " + text.innerHTML;
+			let canAfford = game.resources.fragments.owned >= updateMapCost(true)
+			screenReaderAssert((canAfford ? "Affordable " : "Can't Afford ") + readChange + " set to " + text.innerHTML);
 		}
 	}
 }
@@ -7093,7 +7095,7 @@ function toggleHeirloomHelp(){
 		var text = "Heirlooms are powerful items that can drop with a variety of bonuses and a variety of rarities. You will earn one Heirloom every time a Void Map is completed, and you have a better chance to get higher rarities if you complete the Void Map at higher zones. You can recycle extra Heirlooms to earn a special new resource called Nullifium, and you can use this Nullifium to upgrade the Heirlooms you want to keep! ";
 		text += "To interract with Heirlooms while using a Screen Reader, there are a few keyboard shortcuts. Your Nullifium count is displayed in an H1, so you can always check with 1 or shift 1 while on this screen. Press 2 or shift 2 to move to your equipped Heirlooms, 3 or shift 3 to move to your carried Heirlooms, and 4 or shift 4 to move to your extra Heirlooms. Press B to find selectable Heirlooms."
 		text += "Your Extra Heirlooms will be automatically recycled whenever you use your portal. You can carry a limited amount of Heirlooms back through the portal with you, but they must be in your Carried inventory. "
-		document.getElementById('screenReaderTooltip').innerHTML = text;
+		screenReaderAssert(text);
 		return;
 	}
 	var elem = document.getElementById("heirloomHelp");
@@ -7536,9 +7538,7 @@ function displaySelectedHeirloom(modSelected, selectedIndex, fromTooltip, locati
 		html += innerHtml + '</span><span class="heirloomMod innate" style="font-size: 1vw">Gain a gathering bonus based on worker distribution equality</span>'
 	}
 	if (fromTooltip) return html;
-	if (usingScreenReader){
-		document.getElementById('screenReaderTooltip').innerHTML = srText + "<br/><br/>Press 5 or shift 5 then B to view this Heirloom and its mods.";
-	}
+	screenReaderAssert(srText + "<br/><br/>Press 5 or shift 5 then B to view this Heirloom and its mods.");
 	if (fromPopup){
 		document.getElementById("heirloomsPopupHere").innerHTML = html;
 		document.getElementById("heirloomsPopup").style.display = "inline-block";
@@ -8621,7 +8621,7 @@ function naturePurchase(doing, spending, convertTo){
 		natureTooltip('update', doing, spending);
 		if (spending == "Wind")
 			unlockFormation(5);
-		if (usingScreenReader) screenReaderAssert(spending + " Enlightenment now active.")
+		screenReaderAssert(spending + " Enlightenment now active.")
 	}
 }
 
@@ -9628,7 +9628,7 @@ function getGenStateConfigTooltip(){
 		else thisSetting = savedSettings[x];
 		tooltipText += "<div>";
 		tooltipText += '<div style="text-align: right; width: 40%; margin-right: 10%; display: inline-block; font-size: 1.2vw;">At Zone <input class="genStateConfigInput" type="number" style="width: 50%; padding-left: 0.6vw;" id="genStateConfigInput' + x + '" value="' + thisSetting[1] + '">: </div>'
-		tooltipText += '<div data-value="' + thisSetting[0] + '" style="display: inline-block; width: 50%;" id="genStateConfigScroll' + x + '" class="genStateConfigScroll noselect settingsBtn settingBtn' + (thisSetting[0] + 1) + '" onclick="toggleGenStateConfig(this, ' + x + ')">' + getGenStateConfigBtnText(thisSetting[0]) + '</div>';
+		tooltipText += '<button data-value="' + thisSetting[0] + '" style="display: inline-block; width: 50%;" id="genStateConfigScroll' + x + '" class="genStateConfigScroll noselect settingsBtn settingBtn' + (thisSetting[0] + 1) + '" onclick="toggleGenStateConfig(this, ' + x + ')">' + getGenStateConfigBtnText(thisSetting[0]) + '</button>';
 		tooltipText += "</div>";
 	}
 	tooltipText += "</div>";
@@ -9646,7 +9646,9 @@ function toggleGenStateConfig(elem, num){
 	if (currentSetting == 3) currentSetting = -1;
 	elem.dataset.value = currentSetting;
 	swapClass('settingBtn', 'settingBtn' + (currentSetting + 1), elem);
-	elem.innerHTML = getGenStateConfigBtnText(currentSetting);
+	let text = getGenStateConfigBtnText(currentSetting)
+	elem.innerHTML = text;
+	screenReaderAssert(text)
 }
 
 function getGenStateConfigBtnText(num){
@@ -12605,52 +12607,74 @@ function getHighestIdealRow(){
 	return idealPoints.length;
 }
 
-function displayTalents(){
-	var html = "<div class='talentTierRow talentRowUnlocked'>";
-	var currentTier = 1;
+function getTalentsPurchased() {
+	let talentsPurchased = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:10, 10:0}
+	for (let talent of Object.values(game.talents)) {
+		if (talent.purchased) talentsPurchased[talent.tier]++ 
+	}
+	return talentsPurchased
+}
+
+function displayTalents() {
 	var tiers = getAllowedTalentTiers();
+	var talentsPurchased = getTalentsPurchased();
 	var purchasePower = getHighestUnlockedTalentTier();
 	var highestBuyoutRow = getHighestPurchaseableRow();
 	var highestIdealRow = getHighestIdealRow();
+	var rowUnlocked = true;
+	var currentTier = 0;
+	var makeTooltips = []
+	var html = `<table role="grid" class="talentTable">`;
 	for (var item in game.talents){
 		var talent = game.talents[item];
 		if (talent.tier > currentTier) {
 			currentTier = talent.tier;
-			html += "</div><div class='talentTierRow talentRow" + ((tiers[currentTier - 1] > 0) ? 'Unlocked' : 'Locked') + "'>";
+			rowUnlocked = (tiers[currentTier - 1] > 0);
+			let rowHeader = (talentsPurchased[currentTier] == 6 ? "Row Finished" : `${6-talentsPurchased[currentTier]} left, ` + ((tiers[currentTier-1] <= 0) ? "Row Locked" : "Row Unlocked"))
+			html += `</tr><tr class='talentTierRow talentRow${(rowUnlocked ? 'Unlocked' : 'Locked')}'><th class='visually-hidden' scope='row'>${rowHeader}</th>`;
 		}
 		var talentClass = ((ctrlPressed && talent.tier <= highestBuyoutRow) ? ((talent.tier <= highestIdealRow) ? "talentIdealRow " : "talentCanBuyRow ") : "") + "talentItem noselect talent" + ((talent.purchased) ? "Purchased" : "NotPurchased");
 		if (typeof talent.requires !== 'undefined'){
-			var requires;
-			if (Array.isArray(talent.requires)) requires = talent.requires;
-			else requires = [talent.requires];
-			for (var x = 0; x < requires.length; x++){
+			var requires = ( Array.isArray(talent.requires) ? talent.requires : [talent.requires] )
+			for (var x = 0; x < requires.length; x++) {
 				if (!game.talents[requires[x]].purchased){ 
 					talentClass += " talentReqNeeded";
 					break;
 				}
 			}
 		}
+		var statusText = ""
+		var tooltip = ""
+		var attributes = ""
+		var talentString = talent.name
 		var icon = (talent.icon.charAt(0) == "*") ? "icomoon icon-" + talent.icon.substr(1) : "glyphicon glyphicon-" + talent.icon;
-		if (currentTier > purchasePower){
-			html += "<div";
-			if (usingScreenReader) html += " role='button' title='Locked'";
-			html += " class='talentItem noselect talentNotPurchased talentLocked'><span class='talentIcon'><span class='icomoon icon-locked'></span></span></div>";
-		}
-		else if (usingScreenReader){
-			var statusText = "";
+		if (usingScreenReader) {
+			attributes = ((talentClass.search('ReqNeeded') >= 0) ? "aria-disabled='true'" : (!rowUnlocked) ? "aria-disabled='true'" : "")
+			statusText = ((talentClass.search('ReqNeeded') >= 0) ? "Requirement Not Met" : (talentClass.search('NotPurchased') >= 0) ? "Not Purchased" : "Purchased")+", "
 			talentClass += " screenReadTalent";
-			if (talentClass.search('ReqNeeded') >= 0) statusText = "Requirement Not Met";
-			else if (talentClass.search('NotPurchased') >= 0) statusText = "Not Purchased";
-			else statusText = "Purchased"
-			html += "<div role='button' class='" + talentClass + "' onclick='tooltip(\"" + item + "\", \"talents\", \"screenRead\")'>" + talent.name + " Info</div>";
-			html += "<div role='button' class='" + talentClass + "' onclick='purchaseTalent(\"" + item + "\")'><span class='talentIcon'><span class='" + icon + "'></span></span><br/><div class='talentName'>Tier " + talent.tier + " " + statusText + " " + talent.name + "</div></div>";			
+			talentString = `${talent.name} ${statusText}`
 		}
 		else {
-			html += "<div class='" + talentClass + "' onmouseover='tooltip(\"" + item + "\", \"talents\", event)' onmouseout='tooltip(\"hide\")' onclick='purchaseTalent(\"" + item + "\")'><span class='talentIcon'><span class='" + icon + "'></span></span><br/><div class='talentName'>" + talent.name + "</div></div>";
+			tooltip = `onmouseover='tooltip("${item}", "talents", event)' onmouseout='tooltip("hide")'`
+		}
+		
+		html += `<td class="talentContainer">`;
+		if (currentTier > purchasePower){
+			html += `<button aria-label='Locked' aria-disabled=true class='talentItem noselect talentNotPurchased talentLocked'><span class='talentIcon'><span class='icomoon icon-locked'></span></span></button>`;
+		}
+		else {
+			html += `<button id='mastery${item}' class='${talentClass}' ${attributes} ${tooltip} onclick='purchaseTalent("${item}")'><span class='talentIcon'><span class='${icon}'></span></span><br/><div class='talentName'>${talentString}</div></button>`;	
+			makeTooltips.push(item);
+		}
+		html += `</td>`
+	}
+	html += `</tr></table>`;
+	document.getElementById('talentsHere').innerHTML = html;
+	if (usingScreenReader) {
+		for (let item of makeTooltips) {
+			makeAccessibleTooltip(`mastery${item}`, [item, "talents"])
 		}
 	}
-	html += "</div>";
-	document.getElementById('talentsHere').innerHTML = html;
 	var respecBtn = document.getElementById('talentRespecBtn');
 	var respecAvailable = (game.global.b >= 20 || game.global.freeTalentRespecs) ? 'colorDanger' : 'colorBuyOff';
 	swapClass('color', respecAvailable, respecBtn)
@@ -12777,7 +12801,10 @@ function completeTalentPurchase(talent){
 		}
 	}
 	var cost = getNextTalentCost();
-	if (game.global.essence < cost && prettify(game.global.essence) != prettify(cost)) return;
+	if (game.global.essence < cost && prettify(game.global.essence) != prettify(cost)) { 
+		screenReaderAssert(`Can't afford, have ${prettify( cost/game.global.essence)}% Dark Essence of next cost`); 
+		return; 
+	}
 	if (game.global.essence < cost) game.global.essence = cost;
 	game.global.essence -= cost;
 	game.global.spentEssence += cost;
@@ -12785,6 +12812,8 @@ function completeTalentPurchase(talent){
 	if (typeof talent.onPurchase === 'function') talent.onPurchase();
 	if (countPurchasedTalents() == Object.keys(game.talents).length) game.global.essence = 0;
 	displayTalents();
+	screenReaderAssert(`Purchased ${talent.name}, ${checkAffordableTalents() - countPurchasedTalents()} Affordable`)
+
 }
 
 function purchaseTalentRow(tier){
@@ -20226,7 +20255,7 @@ document.addEventListener('keydown', function (e) {
 				playerSpire.selectTrap("Knowledge");
 			break;
 		case 13: //enter
-			if (usingScreenReader && playerSpire.popupOpen){
+			if (usingScreenReader && document.activeElement.id == "spireScreenReadInput"){
 				playerSpire.screenReadCommand();
 				return;
 			}
@@ -20394,7 +20423,19 @@ costUpdatesTimeout();
 setTimeout(gameTimeout, (1000 / game.settings.speed));
 game.options.menu.darkTheme.onToggle();
 
-if (usingScreenReader) screenReaderSummary();
+var srTooltipMode = "click"
+if (usingScreenReader) {
+	// disable perf settings for SR. No eye candy here.
+	let perfSettings = ['queueAnimation', 'progressBars', 'generatorAnimation', 'fadeIns', 'showHeirloomAnimations']
+	perfSettings.forEach((setting) => { game.options.menu[setting].enabled = 0; })
+	
+	screenReaderSummary();
+	makeScreenreaderTooltips();
+	let infoElem = document.getElementById("screenReaderInfo")
+	let text = `<span>${buildNiceCheckbox("srTooltipMode", false, srTooltipMode == "button",
+			'srTooltipMode = (srTooltipMode == "click" ? "button" : "click"); makeScreenreaderTooltips();', "Enable Info Buttons")}</span>`
+	infoElem.insertAdjacentHTML("beforeend", text) 
+}
 
 preventZoom(document.getElementById('talentsContainer'));
 document.getElementById('mapLevelInput').addEventListener('keydown', function(e) {
@@ -20428,8 +20469,7 @@ document.getElementById('mapLevelInput').addEventListener('keydown', function(e)
     })
 })()
 
-function makeScreenreaderTooltips(mode="click") {
-	// mode is "click" or "button"
+function makeScreenreaderTooltips() {
 	// Screen Reader Tooltips
 	// This could be used to make mouseover events too, to get them out of the html files
 	const tooltips = {
@@ -20526,23 +20566,22 @@ function makeScreenreaderTooltips(mode="click") {
 	}; 
 	if (usingScreenReader) {
 		for (const [elemID, args] of Object.entries(tooltips)) {
-			makeAccessibleTooltip(elemID, args, mode)
+			makeAccessibleTooltip(elemID, args)
 		}
-		if (mode == "click") { // remove all added info buttons (if they exist) when using click mode
+		if (srTooltipMode == "click") { // remove all added info buttons (if they exist) when using click mode
 			document.querySelectorAll(".SRinfoButton").forEach((elem) => {elem.remove()})
 		}
 	}
 }
 
-makeScreenreaderTooltips("click");
-
-function makeAccessibleTooltip(elemID, args, mode="click") {
+function makeAccessibleTooltip(elemID, args) {
 	// args is an array of [what, isItIn, textString, attachFunction, numCheck, renameBtn, noHide, hideCancel, ignoreShift]
 	if (usingScreenReader) {
 		// This contains no less than three different options for how to show tooltips. I may have gone mad.
 		// Pick one. Or two.  Or tie it to a setting. 
 		let elem = document.getElementById(elemID);
-		if (mode == "click") {
+		if (!elem) { console.warn(`Attempted to add an event listener to ${elem} but it doesn't exist`); return; }
+		if (srTooltipMode == "click") {
 			// ? tooltip
 			elem.addEventListener("keydown", function (event) {keyTooltip(event, ...args)});
 			elem.setAttribute("tabindex", 0);
@@ -20552,7 +20591,7 @@ function makeAccessibleTooltip(elemID, args, mode="click") {
 			// Because of Javascript scope issues, the wrapper breaks `this` scope. So, future self, if you find yourself tearing your hair out because you have a button with a tooltip that uses `this` in the onclick callback, this is why. Good luck to you.
 			if (elem.tagName === "BUTTON") {
 				let callback = elem.onclick;
-				elem.onclick = function() {
+				elem.onclick = () => {
 					if(shiftPressed) {
 						keyTooltip({key: "?"}, ...args)
 						return;
@@ -20563,7 +20602,7 @@ function makeAccessibleTooltip(elemID, args, mode="click") {
 		}
 
 		// Separate info buttons
-		if (mode == "button") {
+		if (srTooltipMode == "button" && elem.style.visibility !== "hidden" && elem.style.display !== "none") {
 			let infoElem = document.createElement("div");
 			infoElem.innerText = "Info";
 			infoElem.className = "visually-hidden SRinfoButton"
@@ -20572,7 +20611,7 @@ function makeAccessibleTooltip(elemID, args, mode="click") {
 		}
 	}
 	else {
-		if (true === false && !elem.onmouseover) { // TODO very cheeky way of saying this should work but I'm not doing it yet. (also needs the nature tooltip handling from keytooltip before it will all actually work)
+		if (true === false && !elem.onmouseover) { // TODO very cheeky way of saying this should work but I'm not doing it. (also needs the nature tooltip handling from keytooltip before it will all actually work)
 			elem.addEventListener("onmouseover", function (event) { tooltip(...Object.values(arguments).slice(0,2), event, ...Object.values(arguments).slice(2,) ); });
 			elem.addEventListener("onmouseout", function (event)  { tooltip("hide"); });
 		}
@@ -20584,6 +20623,11 @@ function keyTooltip(keyEvent, what, isItIn, event, textString, attachFunction, n
 	if (usingScreenReader && keyEvent && keyEvent.key == "?") {
 		const natureTooltips = ["Poison", "Wind", "Ice"]
 		if (natureTooltips.includes(isItIn)) natureTooltip(...Object.values(arguments))
+		else if (isItIn == "trapTooltip") { playerSpire.trapTooltip(what, "screenRead") }
+		else if (isItIn == "upgradeTooltip") { playerSpire.upgradeTooltip(what, "screenRead") }
+		else if (isItIn == "infoTooltip") { playerSpire.infoTooltip(what, "screenRead") }
+		else if (isItIn == "messageConfigHover") { messageConfigHover(what) }
+		
 		else tooltip(what, isItIn, "screenRead", ...Object.values(arguments).slice(3,))
 	}
 }

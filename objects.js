@@ -5036,7 +5036,7 @@ var u2Mutations = {
         var arrowLength = 0.5;
         var arrowSize = 0.1;
         var boxScale = 2 * scale;
-		if (usingScreenReader) screenReaderAssert("Press Shift S to return to the top of the Mutator screen");
+		screenReaderAssert("Press Shift S to return to the top of the Mutator screen");
 
         document.getElementById('mutTreeWrapper').style.display = 'block';
         document.getElementById("wrapper").style.display = "none";
@@ -5056,7 +5056,8 @@ var u2Mutations = {
 			var SRBuyText = `${(bgColor == 'requirement') ? "requirement not met" : bgColor }`
             var dn = (itemObj.dn) ? itemObj.dn : item;
 			if (usingScreenReader && item in headers) text += `<h1 class='visually-hidden'>${headers[item]}</h1>`
-            text += '<button aria-labelledby="' + item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')" id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
+			let tooltip = (usingScreenReader ? '' : 'onmouseover="tooltip(\'' + item + '\', \'Mutator\', event)" onmouseout="tooltip(\'hide\')"')
+            text += '<button aria-labelledby="' + item + 'Name" onclick="u2Mutations.purchase(\'' + item + '\')" ' + tooltip + ' id="' + item + 'MutatorBox" class="mutatorBox mutatorBox' + bgColor + '" style="color: ' + itemObj.color + '; width: ' + (boxScale) + 'px; height: ' + (boxScale) + 'px; left: ' + (coords[0] * scale) + 'px; top: ' + (coords[1] * scale) + 'px; font-size: ' + scale * 1.5 + 'px">';
             if (usingScreenReader ) {
 				text += '<span class="mutTreeName" id="' + item + 'Name">' + dn + ' ' + SRBuyText + '</span>';
 			}
@@ -5090,7 +5091,7 @@ var u2Mutations = {
         text += "<div id='mutZoomButtons'><button aria-label='Mastery Information' id='masteryInfo' onmouseover='tooltip(\"Mastery Info\", null, event);' onmouseout='tooltip(\"hide\")'>M</button><div id='mutZoomIn' aria-hidden=true onclick='u2Mutations.zoomClicked(-1);' onmouseover='tooltip(\"Zoom In\", \"customText\", event, \"Click this to Zoom In to the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-in'></span></div><div id='mutZoomOut' aria-hidden=true onclick='u2Mutations.zoomClicked(1);' onmouseover='tooltip(\"Zoom Out\", \"customText\", event, \"Click this to Zoom Out of the Mutators tree. You can also use mouse wheel to zoom, or click and drag the tree to move it around.\");' onmouseout='tooltip(\"hide\")'><span class='icomoon icon-zoom-out'></span></div></div>";
         text += "<hr class='visually-hidden' title='bottom of tooltip'/>"
 		document.getElementById('mutTreeWrapper').innerHTML = text;
-		for (let item in this.tree){ // because of the global keydown event, these have to be added with an event listener rather than using inline onkeydown=""
+		for (let item in this.tree){
 			makeAccessibleTooltip(`${item}MutatorBox`, [item, "Mutator"])
 		}
 		makeAccessibleTooltip("masteryInfo", ["Mastery Info", null])
