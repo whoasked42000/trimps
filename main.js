@@ -1271,6 +1271,7 @@ function load(saveString, autoLoad, fromPf) {
 	game.options.menu.progressBars.onToggle();
 	game.options.menu.autoSave.onToggle();
 	game.options.menu.tinyButtons.onToggle();
+	if (usingScreenReader) game.options.menu.showSRInfo.onToggle();
 
 	displayPerksBtn();
 	displayGoldenUpgrades();

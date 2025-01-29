@@ -964,6 +964,19 @@ var toReturn = {
 	options: {
 		displayed: false,
 		menu: {
+			showSRInfo: {
+				enabled: 1,
+				extraTags: "other",
+				description: "Hides or displays the ScreenReaderInfo box.",
+				titles: ["Hide Screen Read Info", "Show Screen Read Info"],
+				onToggle: function(){
+					if (!usingScreenReader) return;
+					var elem = document.getElementById("screenReaderInfo");
+					if (elem == null) return;
+					elem.style.display = (this.enabled == 1) ? "block" : "none";
+				},
+				lockUnless: function(){return usingScreenReader}
+			},
 			autoSave: {
 				enabled: 1,
 				extraTags: "popular general",
