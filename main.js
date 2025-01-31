@@ -10615,6 +10615,9 @@ function drawGrid(maps) {
 				if (cell.vm) className.push(cell.vm);
 			} else {
 				if (cell.u2Mutation && cell.u2Mutation.length) {
+					for (var y = 0; y < cell.u2Mutation.length; y++){
+						className.push(cell.u2Mutation[y]);
+					}
 					className.push('mutatedCell');
 					background = 'initial';
 					backgroundColor = u2Mutations.getColor(cell.u2Mutation);
