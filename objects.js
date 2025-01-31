@@ -4895,6 +4895,23 @@ var u2Mutations = {
             description: "100% of your damage can Overkill in maps at any level. Limited to 1 cell of Overkill if above World Overkill Zone.",
             purchased: false,
             ring: 1
+        },
+        Randimp1: {
+            pos: [5, -14],
+            dn: 'Randimp',
+            color: '#377cff',
+            require: ['RandLoot'],
+            description: "Randimps now give the loot of two different Exotic Imports when found.",
+            purchased: false
+        },
+        Randimp2: {
+            pos: [5, -19],
+            dn: 'Really Randimp',
+            color: '#377cff',
+            require: ['Randimp1'],
+            description: "Randimps now give the loot of three different Exotic Imports when found.",
+            purchased: false,
+            ring: 1
         }
 
     },

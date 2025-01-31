@@ -1160,6 +1160,9 @@ function load(saveString, autoLoad, fromPf) {
 	if (betaV < 6){
 		game.global.autoUpgrades = (game.global.autoUpgrades) ? 1 : 0;
 	}
+	if (betaV < 7){
+		if (game.achievements.zones2.finished > 32) game.achievements.zones2.finished = 32;
+	}
 	//End test server only
 	//Temporary until next patch
 
@@ -6647,7 +6650,7 @@ function buyMap() {
 		if (!game.global.currentMapId) selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1].id);
 		return 1;
 	}
-	else message("You can't afford this map! You need " + prettify(cost) + " fragments.", "Notices");
+	else message("You can't afford this map! You need " + prettify(cost) + " fragments but only have " + prettify(game.resources.fragments.owned) + ".", "Notices");
 	return -3;
 }
 
@@ -12923,7 +12926,7 @@ function checkAverageExotics(which){
 	var exoticChance = getExoticChance();
 	var cells = (game.global.world - 1) * 100
 	var expectedExotics = cells * (exoticChance / 100);
-	expectedExotics += (cells * 0.02) / 5; //randimp
+	expectedExotics += (cells * 0.02) / (5 / game.badGuys.Magimp.lootCount()); //randimp
 	expectedExotics += Math.floor(game.global.world / 10) * 2;
 	expectedExotics = Math.floor(expectedExotics);
 	var needExotic = expectedExotics - game.unlocks.impCount[which];

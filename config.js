@@ -26,7 +26,7 @@ var toReturn = {
 		//Leave 'version' at 4.914 forever, for compatability with old saves
 		version: 4.914,
 		isBeta: true,
-		betaV: 6,
+		betaV: 7,
 		killSavesBelow: 0.13,
 		uniqueId: new Date().getTime() + "" + Math.floor(Math.random() * 1e10),
 		playerGathering: "",
@@ -6985,9 +6985,9 @@ var toReturn = {
 				return "Highest is " + game.global.highestRadonLevelCleared;
 			},
 			evaluate: function() {return game.global.highestRadonLevelCleared;},
-			breakpoints: [2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500],
-			tiers: [9, 9, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15],
-			names: ["This is Harder", "Second Coming", "Blimp Destroyer", "Improbable Again", "Unstoppable", "Progresser", "Fifty Fifty", "Actually Unbroken", "Lucky 7D", "Apt", "The Unshocked", "Universalist", "Through the Unknown", "Swarming", "Steamroller", "Universal Destroyer", "Eater of Zones", "Bringer of Progress", "Major Zonage", "Master of Alchemy", "Ballistic", "Neverending Journey", "Zone Eater", "Zone Feaster", "Mutated Master", "Progression Professional", "Zonepocalypse", "Universal Specialist", "Zoning Committee", "Quadcentennial", "Terrific Traveler", "Progression Professor", "World Wanderer", "Indefatigable"],
+			breakpoints: [2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450],
+			tiers: [9, 9, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15],
+			names: ["This is Harder", "Second Coming", "Blimp Destroyer", "Improbable Again", "Unstoppable", "Progresser", "Fifty Fifty", "Actually Unbroken", "Lucky 7D", "Apt", "The Unshocked", "Universalist", "Through the Unknown", "Swarming", "Steamroller", "Universal Destroyer", "Eater of Zones", "Bringer of Progress", "Major Zonage", "Master of Alchemy", "Ballistic", "Neverending Journey", "Zone Eater", "Zone Feaster", "Mutated Master", "Progression Professional", "Zonepocalypse", "Universal Specialist", "Zoning Committee", "Quadcentennial", "Terrific Traveler", "Progression Professor"], // "World Wanderer", "Indefatigable",
 			icon: "icomoon icon-navigation",
 			newStuff: [],
 			size: 1.4
@@ -7334,12 +7334,12 @@ var toReturn = {
 				if (this.breakpoints.length > this.finished) return prettify(this.evaluate()) + " / " + prettify(this.breakpoints[this.finished]);
 				return prettify(this.evaluate()) + " total";
 			},
-			breakpoints: [5000, 1e5, 1e6, 5e7, 2.5e9, 1e11, 5e12],
+			breakpoints: [5000, 1e5, 1e6, 5e7, 2.5e9, 1e11, 5e12, 1e14],
 			display: function () {
 				return (game.global.highestRadonLevelCleared >= 200);
 			},
-			tiers: [13, 13, 14, 14, 14, 14, 14],
-			names: ["Seed Scavenger", "Seed Surveyor", "Seed Securer", "Seed Sower", "Seed Studier", "Seed Specialist", "Seed Savior"],
+			tiers: [13, 13, 14, 14, 14, 14, 14, 15],
+			names: ["Seed Scavenger", "Seed Surveyor", "Seed Securer", "Seed Sower", "Seed Studier", "Seed Specialist", "Seed Senior", "Seed Savior"],
 			icon: "icomoon icon-grid2",
 			newStuff: []
 		},
@@ -7835,9 +7835,9 @@ var toReturn = {
 			reverse: true,
 			timed: true,
 			showAll: true,
-			breakpoints: [360, 100, 45, 30],//In minutes
-			tiers: [11, 12, 12, 12],
-			names: ["Thawed", "Tempered", "Melty", "Molten"],
+			breakpoints: [360, 100, 45, 30, 1],//In minutes
+			tiers: [11, 12, 12, 12, 14],
+			names: ["Thawed", "Tempered", "Melty", "Molten", "Boiling"],
 			icon: "icomoon icon-clock2",
 			newStuff: []
 		},
@@ -7862,7 +7862,7 @@ var toReturn = {
 			reverse: true,
 			timed: true,
 			showAll: true,
-			breakpoints: [1200, 600, 140, 70],//In minutes
+			breakpoints: [1200, 600, 100, 45],//In minutes
 			tiers: [14, 14, 15, 15],
 			names: ["Swiftly Stuffed", "Denature Dash", "Lightning Lumberjack", "Supersonic Spire"],
 			icon: "icomoon icon-clock2",
@@ -8545,6 +8545,12 @@ var toReturn = {
 			attack: 1, 
 			health: 1,
 			fast: false,
+			lootCount: function(){
+				var count = 1;
+				if (u2Mutations.tree.Randimp1.purchased) count++;
+				if (u2Mutations.tree.Randimp2.purchased) count++;
+				return count;
+			},
 			loot: function(level){
 				var imports = [];
 				for (var item in game.unlocks.imps){
@@ -8553,9 +8559,15 @@ var toReturn = {
 						imports.push(item);
 					}
 				}
-				var enemySeed = (game.global.mapsActive) ? Math.floor(Math.random() * 10000000) : game.global.enemySeed++;
-				var selected = imports[getRandomIntSeeded(enemySeed, 0, imports.length)];
-				game.badGuys[selected].loot(level, true);
+				var count = this.lootCount();
+				for (var x = 0; x < count; x++){
+					var enemySeed = (game.global.mapsActive) ? Math.floor(Math.random() * 10000000) : game.global.enemySeed++;
+					var rng = getRandomIntSeeded(enemySeed, 0, imports.length);
+					var selected = imports[rng];
+					game.badGuys[selected].loot(level, true);
+					imports.splice(rng, 1);
+				}
+				game.global.enemySeed += (3 - count);
 			}
 		},
 		Pumpkimp: {
@@ -8654,6 +8666,17 @@ var toReturn = {
 			fast: false
 		},
 		//Honorary Imps
+		Nooimp: {
+			//Designed by Noo Noo
+			location: "Sea",
+			attack: 1.2,
+			health: 0.8,
+			fast: false,
+			loot: function(level){
+				var amt = rewardResource("food", 0.5, level, true);
+				message("Noot noot! You splashed water on that imp! It quickly swims away, leaving behind " + prettify(amt) + " food.", "Loot", "apple", null, 'primary');
+			}
+		},
 		Platypimp: {
 			//Designed by Quia
 			location: "Plentiful",
