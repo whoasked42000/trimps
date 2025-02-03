@@ -25,7 +25,7 @@ var toReturn = {
 		stringVersion: '5.10.0',
 		//Leave 'version' at 4.914 forever, for compatability with old saves
 		version: 4.914,
-		isBeta: true,
+		isBeta: false,
 		betaV: 7,
 		killSavesBelow: 0.13,
 		uniqueId: new Date().getTime() + "" + Math.floor(Math.random() * 1e10),

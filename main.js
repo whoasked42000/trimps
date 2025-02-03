@@ -1067,73 +1067,6 @@ function load(saveString, autoLoad, fromPf) {
 	}
 	if (compareVersion([5,10,0], oldStringVersion)){
 		if (playerSpire.rowsAllowed >= 20) giveSingleAchieve("Power Tower");
-	}
-	//End compatibility
-	//Test server only
-	if (betaV < 1){
-		for (var x = 0; x < game.global.heirloomsCarried.length; x++){
-			var heirloom = game.global.heirloomsCarried[x];
-			if (heirloom.type != "Shield" || heirloom.rarity != 12) continue;
-			for (var y = 0; y < heirloom.mods.length; y++){
-				var mod = heirloom.mods[y];
-				if (mod[0] != 'doubleCrit') continue;
-				mod[1]/=10
-			}
-		}
-		for (var x = 0; x < game.global.heirloomsExtra.length; x++){
-			var heirloom = game.global.heirloomsExtra[x];
-			if (heirloom.type != "Shield" || heirloom.rarity != 12) continue;
-			for (var y = 0; y < heirloom.mods.length; y++){
-				var mod = heirloom.mods[y];
-				if (mod[0] != 'doubleCrit') continue;
-				mod[1]/=10
-			}
-		}
-		if (game.global.ShieldEquipped.rarity == 12){
-			for (var y = 0; y < game.global.ShieldEquipped.mods.length; y++){
-				var mod = game.global.ShieldEquipped.mods[y];
-				if (mod[0] != 'doubleCrit') continue;
-				mod[1]/=10
-			}
-		}
-	}
-	if (betaV < 2){
-		for (var x = 0; x < game.global.heirloomsCarried.length; x++){
-			var heirloom = game.global.heirloomsCarried[x];
-			if (heirloom.type != "Shield" || heirloom.rarity != 12) continue;
-			for (var y = 0; y < heirloom.mods.length; y++){
-				var mod = heirloom.mods[y];
-				if (mod[0] != 'playerEfficiency') continue;
-				mod[0] = 'empty';
-				mod[1] = 0;
-				mod[2] = 0;
-				mod[3] = 0;
-			}
-		}
-		for (var x = 0; x < game.global.heirloomsExtra.length; x++){
-			var heirloom = game.global.heirloomsExtra[x];
-			if (heirloom.type != "Shield" || heirloom.rarity != 12) continue;
-			for (var y = 0; y < heirloom.mods.length; y++){
-				var mod = heirloom.mods[y];
-				if (mod[0] != 'playerEfficiency') continue;
-				mod[0] = 'empty';
-				mod[1] = 0;
-				mod[2] = 0;
-				mod[3] = 0;
-			}
-		}
-		if (game.global.ShieldEquipped.rarity == 12){
-			for (var y = 0; y < game.global.ShieldEquipped.mods.length; y++){
-				var mod = game.global.ShieldEquipped.mods[y];
-				if (mod[0] != 'playerEfficiency') continue;
-				mod[0] = 'empty';
-				mod[1] = 0;
-				mod[2] = 0;
-				mod[3] = 0;
-			}
-		}
-	}
-	if (betaV < 3){
 		game.portal.Equality.settings.reg = {
 			scalingActive: savegame.portal.Equality.scalingActive,
 			scalingSetting: savegame.portal.Equality.scalingSetting,
@@ -1141,9 +1074,6 @@ function load(saveString, autoLoad, fromPf) {
 			scalingReverse: savegame.portal.Equality.scalingActive,
 			disabledStackCount: savegame.portal.Equality.disabledStackCount
 		}
-	}
-	//Add to permanent after test server
-	if (betaV < 4){
 		var bestU2Voids = 0;
 		if (game.global.universe == 2) {
 			bestU2Voids = game.stats.totalVoidMaps.value;
@@ -1151,18 +1081,12 @@ function load(saveString, autoLoad, fromPf) {
 		}
 		if (game.global.lastU2Voids > bestU2Voids) bestU2Voids = game.global.lastU2Voids;
 		game.stats.mostU2Voids.valueTotal = bestU2Voids;
-	}
-	//Add to permanent after test server
-	if (betaV < 5){
 		autoBattle.checkAddRingSlot();
-	}
-	//Add to permanent after test server
-	if (betaV < 6){
 		game.global.autoUpgrades = (game.global.autoUpgrades) ? 1 : 0;
 	}
-	if (betaV < 7){
-		if (game.achievements.zones2.finished > 32) game.achievements.zones2.finished = 32;
-	}
+	//End compatibility
+	//Test server only
+
 	//End test server only
 	//Temporary until next patch
 

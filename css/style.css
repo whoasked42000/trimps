@@ -4979,7 +4979,7 @@ background-color: rgba(255,255,255,0.25);
 }
 
 .btn-new{
-	background: linear-gradient(90deg, rgba(27,11,171,1) 10%, rgba(5,5,5,1) 35%, rgba(194,16,187,1) 65%, rgba(171,172,12,1) 85%);
+	background: linear-gradient(90deg, rgba(34,177,76,1) 42%, rgba(255,127,39,1) 60%, rgba(255,127,39,1) 77%, rgba(255,0,0,1) 91%);
 	color: white;
 	font-weight: bold;
 	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
@@ -4992,7 +4992,7 @@ background-color: rgba(255,255,255,0.25);
 .btn-new:active,
 .btn-new.active,
 .open > .dropdown-toggle.btn-new {
-	background: linear-gradient(90deg, rgba(127,127,128,1) 10%, rgba(23,105,37,1) 26%, rgba(108,9,157,1) 41%, rgba(122,23,23,1) 57%, rgba(107,74,19,1) 75%, rgba(161,110,8,1) 92%);
+	background: linear-gradient(90deg, rgba(34,177,76,1) 20%, rgba(255,127,39,1) 30%, rgba(34,177,76,1) 45%, rgba(255,0,0,1) 50%, rgba(34,177,76,1) 55%, rgba(255,127,39,1) 70%, rgba(34,177,76,1) 80%);
 	color: white;
 }
 
