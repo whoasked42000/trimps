@@ -5740,9 +5740,11 @@ function breed() {
 	const totalTimeText = Math.ceil(totalTime * 10) / 10;
 
 	if (game.options.menu.showFullBreed.enabled) {
-		fullBreed = `${totalTimeText} Secs`;
-		timeRemaining = `${timeRemaining} / ${fullBreed}`;
-	}
+        fullBreed = `${totalTimeText} Secs`;
+        timeRemaining = `${timeRemaining} / ${fullBreed}`;
+    } else {
+        timeRemaining += ` Secs`;
+    }
 
 	if (decimalOwned.cmp(trimpsMax) >= 0 && trimps.owned >= trimpsMax) {
 		trimps.owned = trimpsMax;
@@ -7726,7 +7728,7 @@ function upgradeMod(confirmed, count){
 	var resourceName = heirloom.type == "Core" ? "Spirestones" : "Nullifium";
 	if (resource < cost) return;
 	if (!confirmed && game.options.menu.boneAlerts.enabled == 1) {
-		tooltip('confirm', null, 'update', 'You are about to upgrade ' + game.heirlooms[heirloom.type][heirloom.mods[selectedMod][0]].name + ((count > 1) ? ' 10 times' : '') + ' for ' + prettify(cost) + ' ' + resourceName + '. Are you sure?' , 'upgradeMod(true, ' + count + ')', 'Upgrade Mod');
+		tooltip('confirm', null, 'update', 'You are about to upgrade ' + game.heirlooms[heirloom.type][heirloom.mods[selectedMod][0]].name + ((count > 1) ? ' ' + count + ' times' : '') + ' for ' + prettify(cost) + ' ' + resourceName + '. Are you sure?' , 'upgradeMod(true, ' + count + ')', 'Upgrade Mod');
 		return;
 	}
 	var newBonus = getModUpgradeValue(heirloom, selectedMod, count);
@@ -8473,7 +8475,7 @@ function natureTooltip(event, doing, spending, convertTo){
 	if (tipCost == 0) tipCost = "";
 	else tipCost = (game.empowerments[spending].tokens < tipCost) ? "<span class='red'>" + prettify(tipCost) + " Tokens of " + spending + "</span>" : "<span class='green'>" + prettify(tipCost) + " Tokens of " + spending + "</span>";
 	if (usingScreenReader && event == "update") return; // don't do updates for screenreaders
-	tooltip(tipTitle, 'customText', (usingScreenReader ? "screenRead" : event), tipText, tipCost, null, null, null, null, true);
+	tooltip(tipTitle, 'customText', (usingScreenReader ? "screenRead" : event), tipText, tipCost, null, null, null, null, false);
 	tooltipUpdateFunction = function () {natureTooltip(event, doing, spending, convertTo)}
 }
 
@@ -20305,7 +20307,7 @@ document.addEventListener('keydown', function (e) {
 			if (checkLettersOk() && game.global.portalActive) portalClicked();
 			break;
 		case 69: //e
-			if (game.global.lockTooltip && lastTooltipTitle == "Scale Equality Scaling") {
+			if (game.global.lockTooltip && lastTooltipTitle.startsWith("Scale Equality Scaling")) {
 				cancelTooltip();
 				break;
 			}

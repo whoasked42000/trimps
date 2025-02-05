@@ -5868,8 +5868,10 @@ function makeBuildJobUpgEquipButtonHTML(type, what, owned) {
 	}
 	const numeralSpan = (type == 'equipment' ? `<span id="${what}Numeral">${numeral}</span>` : "")
 	const efficientArmor = (type == "equipment") ? "efficientNo " : "";
+	let displayName = what;
+	if (game[type][what].name) displayName = game[type][what].name;
 	let html = `<${tagName} class="${efficientArmor}thingColorCanNotAfford thing noselect pointer ${buttonType[type].toLowerCase()}Thing" id="${what}" onclick="buy${buttonType[type]}('${what}')" ${tooltips}>
-			<span class="thingName"><span id="${what}Alert" class="alert badge">${alertMessage}</span>${what} ${numeralSpan}</span>${sep} 
+			<span class="thingName"><span id="${what}Alert" class="alert badge">${alertMessage}</span>${displayName} ${numeralSpan}</span>${sep} 
 			<span class="thingOwned">${(type == 'equipment' ? "Level:" : "")} <span id="${what}Owned">${owned}</span></span>`
 	if (usingScreenReader) {
 		if (type == "jobs") html += `<span class="firingSR">, Firing</span>`
