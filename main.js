@@ -12687,7 +12687,6 @@ function updateTalentNumbers() {
 	}
 
 	const essence = game.options.menu.masteryTab.enabled >= 2 ? ' (' + (game.global.tabForMastery ? prettify(game.global.essence) : prettify(game.global.mutatedSeeds)) + ')' : '';
-
 	if (alertElem.innerHTML !== '') {
 		alertElem.innerHTML = '';
 	}
@@ -15574,19 +15573,24 @@ function fight(makeUp) {
 		}
 		let noMessage = false;
 		if (typeof unlock !== 'undefined' && typeof unlock.fire !== 'undefined') {
-			unlock.fire(cell.level);
-			if (game.global.mapsActive) {
-				if (typeof game.mapUnlocks[cell.special].last !== 'undefined') {
-					game.mapUnlocks[cell.special].last += 5;
-					if (typeof game.upgrades[cell.special].prestige && getSLevel() >= 4 && !challengeActive('Mapology') && Math.ceil(game.mapUnlocks[cell.special].last / 5) % 2 === 1) {
-						unlock.fire(cell.level);
+			if (!game.global.mapsActive || !game.mapUnlocks[cell.special].last || game.mapUnlocks[cell.special].last <= currentMapObj.level){
+				unlock.fire(cell.level);
+				if (game.global.mapsActive) {
+					if (typeof game.mapUnlocks[cell.special].last !== 'undefined') {
 						game.mapUnlocks[cell.special].last += 5;
-						message(unlock.message.replace('a book', 'two books'), 'Unlocks', null, null, 'repeated', cell.text);
-						noMessage = true;
+						if (typeof game.upgrades[cell.special].prestige && getSLevel() >= 4 && !challengeActive('Mapology') && Math.ceil(game.mapUnlocks[cell.special].last / 5) % 2 === 1) {
+							unlock.fire(cell.level);
+							game.mapUnlocks[cell.special].last += 5;
+							message(unlock.message.replace('a book', 'two books'), 'Unlocks', null, null, 'repeated', cell.text);
+							noMessage = true;
+						}
 					}
+					if (typeof game.mapUnlocks[cell.special].canRunOnce !== 'undefined') game.mapUnlocks[cell.special].canRunOnce = false;
+					if (unlock.filterUpgrade) refreshMaps();
 				}
-				if (typeof game.mapUnlocks[cell.special].canRunOnce !== 'undefined') game.mapUnlocks[cell.special].canRunOnce = false;
-				if (unlock.filterUpgrade) refreshMaps();
+			}
+			else {
+				message("Your Scientists have already read that book! Better look elsewhere for some new reading material.", "Notices")
 			}
 		} else if (cell.special !== '') {
 			unlockEquipment(cell.special);

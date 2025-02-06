@@ -1742,7 +1742,7 @@ var autoBattle = {
             description: function(){
                 return "The Enemy is always Shocked, taking at least " + prettify(this.shockMod() * 100) + "% more damage. +" + prettify(this.health()) + " Health, +" + prettify(this.resist()) +  "% Poison Resist, +3 Maximum Poison Stacks.";
             },
-            upgrade: "+20% PermaShock Damage, +500 Health, 20% Poison Resist",
+            upgrade: "+20% PermaShock Damage, +1000 Health, 20% Poison Resist",
             shockMod: function(){
                 return (0.2 * this.level);
             },
@@ -4940,7 +4940,7 @@ var u2Mutations = {
             updateTalentNumbers();
         } else {
             const seedCount = document.getElementById('talentsEssenceTotal');
-            const seedText = game.options.menu.masteryTab.enabled === 2 ? ` (${prettify(game.global.mutatedSeeds)})` : '';
+            const seedText = (game.options.menu.masteryTab.enabled == 2 || (game.options.menu.masteryTab.enabled == 3 && alertText != "!")) ? " (" + prettify(game.global.mutatedSeeds) + ")" : "";
             if (seedCount.innerHTML !== seedText) seedCount.innerHTML = seedText;
         }
     },
