@@ -15573,7 +15573,7 @@ function fight(makeUp) {
 		}
 		let noMessage = false;
 		if (typeof unlock !== 'undefined' && typeof unlock.fire !== 'undefined') {
-			if (!game.global.mapsActive || !game.mapUnlocks[cell.special].last || game.mapUnlocks[cell.special].last <= currentMapObj.level){
+			if (!game.global.mapsActive || !game.mapUnlocks[cell.special].last || game.mapUnlocks[cell.special].last + 5 <= currentMapObj.level){
 				unlock.fire(cell.level);
 				if (game.global.mapsActive) {
 					if (typeof game.mapUnlocks[cell.special].last !== 'undefined') {
