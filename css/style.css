@@ -7631,3 +7631,10 @@ input[type="checkbox"] {
     -moz-appearance: none;
 	appearance: none;
 }
+
+label {
+	display: inline !important;
+	max-width: inherit !important;
+	margin-bottom: inherit !important;
+	font-weight: inherit !important;
+  }

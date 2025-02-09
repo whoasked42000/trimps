@@ -952,7 +952,7 @@ var playerSpire = {
 				<div id='spireTrapsWindow'></div>
 				<div id='playerSpireUpgradesArea'></div>
 			</div>`
-
+		if (this.smallMode) this.shrink()
         this.drawSpire();
         this.drawInfo();
     },
