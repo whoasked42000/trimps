@@ -8635,7 +8635,7 @@ var toReturn = {
 			location: "All",
 			attack: 105,
 			health: 0.1,
-			fast: true
+			fast: false
 		},
 		twimpp: {
 			location: "All",
