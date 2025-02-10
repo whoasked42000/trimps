@@ -8619,6 +8619,32 @@ var toReturn = {
 			health: 0.8,
 			fast: true
 		},
+		wait: {
+			location: "All",
+			attack: 0.15,
+			health: 666,
+			fast: false
+		},
+		yes: {
+			location: "All",
+			attack: 2.1,
+			health: 13,
+			fast: true
+		},
+		oneshot: {
+			location: "All",
+			attack: 105,
+			health: 0.1,
+			fast: true
+		},
+		twimpp: {
+			location: "All",
+			attack: 0.91,
+			health: 224.8,
+			fast: true
+		},
+		
+		
 		Gorillimp: {
 			location: "All",
 			attack: 0.9,
@@ -8651,6 +8677,16 @@ var toReturn = {
 			loot: function (level) {
 				var amt = rewardResource("food", 0.5, level, true);
 				message("That Chickimp dropped " + prettify(amt) + " food!", "Loot", "apple", null, 'primary');
+			}
+		},
+		metalimp: {
+			location: "Sea",
+			attack: 0.4,
+			health: 110,
+			fast: true,
+			loot: function (level) {
+				var amt = rewardResource("metal", 12.5, level, true);
+				message("free " + prettify(amt) + " stuff", "Story", "apple", null, 'primary');
 			}
 		},
 		Hippopotamimp: {
@@ -8713,6 +8749,19 @@ var toReturn = {
 				message("You hear nearby Kittimps running away in fear and decide to check out their former home. There, you find a prey pile with " + prettify(amt) + " food!", "Loot", "apple", null, 'primary');
 			}
 		},
+		simp: {
+			//Designed by K1d_5h31d0n
+			location: "Forest",
+			location2: "Mountain",
+			attack: 12,
+			health: 85,
+			fast: false,
+			loot: function (level) {
+				var amt = rewardResource("food", 99.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);rewardResource("food", 0.5, level, true);
+				message("You hear nearby Kittimps running away in fear and decide to check out their former home. There, you find a prey pile with " + prettify(amt) + " food!", "Loot", "apple", null, 'primary');
+			}
+		},
+		
 		Grimp: {
 			//Designed by Grabarz
 			location: "Forest",
