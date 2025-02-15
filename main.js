@@ -4228,7 +4228,7 @@ function rewardResource(what, baseAmt, level, checkMapLootScale, givePercentage)
 		if (game.global.challengeActive == "Alchemy") amt *= alchObj.getPotionEffect("Potion of Finding");
 		amt *= alchObj.getPotionEffect("Elixir of Finding");
 	}
-	if (getPerkLevel("Greed")) amt *= game.portal.Greed.getMult();
+	if (getPerkLevel("Greed") || getPerkLevel("Masterfulness")) amt *= game.portal.Greed.getMult();
 	if (game.global.challengeActive == "Quagmire") amt *= game.challenges.Quagmire.getLootMult();
 	if (Fluffy.isRewardActive("wealthy") && what != "helium") amt *= 2;
 	var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
@@ -13677,6 +13677,7 @@ function startSpire(confirmed){
 			if (spireSetting == 1 || (spireSetting == 2 && spireNum >= highestSpire - 1) || (spireSetting == 3 && spireNum >= highestSpire)){
 				game.global.fighting = false;
 				mapsSwitch();
+				if (challengeActive('Berserk')) game.challenges.Berserk.trimpDied();
 			}
 			else handleExitSpireBtn();
 		}
@@ -17210,7 +17211,7 @@ function scaleLootBonuses(amt, ignoreScry){
 	if (game.global.universe == 2 && u2Mutations.tree.Loot.purchased) amt *= 1.5;
 	if (game.global.challengeActive == "Alchemy") amt *= alchObj.getPotionEffect("Potion of Finding");
 	amt *= alchObj.getPotionEffect("Elixir of Finding");
-	if (getPerkLevel("Greed")) amt *= game.portal.Greed.getMult();
+	if (getPerkLevel("Greed") || getPerkLevel("Masterfulness")) amt *= game.portal.Greed.getMult();
 	if (Fluffy.isRewardActive("wealthy")) amt *= 2;
 	if (getUberEmpowerment() == "Wind") amt *= 10;
 	if (!ignoreScry && isScryerBonusActive()) amt *= 2;

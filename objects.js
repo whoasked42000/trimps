@@ -5064,7 +5064,7 @@ var u2Mutations = {
         document.getElementById('mutTreeWrapper').innerHTML = '';
         var costText = (Object.keys(this.tree).length > this.purchaseCount) ? "Next Mutator Costs: " + prettify(this.nextCost()) : "All Mutators Purchased!";
         var curTransform = (this.curTransform) ? " style='transform: " + this.curTransform + ";'" : "";
-        var text = "<hr class='visually-hidden' title='top of tooltip'/><div style='position: relative; z-index:2;'><div id='mutMenu' aria-owns='masteryInfo' style='position: absolute; top: 2%; left: 2%; display: inline-block;'><span aria-hidden=true style='font-size: 1.1em; margin-left: 0.25em;' class='btn btn-lg btn-info' onclick='u2Mutations.showNames()' id='u2MutShowNameBtn'>" + ((game.global.showU2MutNames) ? "Hide Names" : "Show Names") + "</span><br/><span tabindex=0 role=button style='font-size: 1.1em; margin-top: 0.25em;' id='swapToMasteryBtn' class='btn btn-lg btn-success' onclick='u2Mutations.swapTab(false)'>Show Masteries" + this.getMasteryAlert() + "</span></div><div style='background-color: black'>Seeds Available: " + prettify(game.global.mutatedSeeds) + "&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" + costText + "</div><span role=button tabindex=0 aria-label='close' id='mutTreeCloseBtn' class='icomoon icon-close' onclick='u2Mutations.closeTree()'></span></div><div id='mutTree'" + curTransform + ">";
+        var text = "<hr class='visually-hidden' title='top of tooltip'/><div style='position: relative; z-index:2;'><div id='mutMenu' aria-owns='masteryInfo' style='position: absolute; top: 2%; left: 2%; display: inline-block;'><span aria-hidden=true style='font-size: 1.1em; margin-left: 0.25em;' class='btn btn-lg btn-info' onclick='u2Mutations.showNames()' id='u2MutShowNameBtn'>" + ((game.global.showU2MutNames) ? "Hide Names" : "Show Names") + "</span><br/><span tabindex=0 role=button style='font-size: 1.1em; margin-top: 0.25em;' id='swapToMasteryBtn' class='btn btn-lg btn-success' onclick='u2Mutations.swapTab(false)'>Show Masteries" + this.getMasteryAlert() + "</span></div><div id='mutSeedCounter' style='background-color: black'>Seeds Available: " + prettify(game.global.mutatedSeeds) + "&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;" + costText + "</div><span role=button tabindex=0 aria-label='close' id='mutTreeCloseBtn' class='icomoon icon-close' onclick='u2Mutations.closeTree()'></span></div><div id='mutTree'" + curTransform + ">";
         text += "<div id='mutRing1' style='width: " + (40.8*scale) + "px; height: " + (33.0*scale) + "px; top: " + (-16.5*scale) + "px; left: " + (-20.4*scale) + "px;'></div>"
 		const headers = {Scruffy: "Scruffy and Heirlooms", Health: "Combat, Radon, and Imports", MaZ: "Resources", Overkill1: "Speed"}
         for (var item in this.tree){
@@ -5181,6 +5181,7 @@ var u2Mutations = {
             reward *= (1 + (getDailyHeliumValue(countDailyWeight()) / 100));
         }
         if (Fluffy.isRewardActive("bigSeeds")) reward *= 10;
+        reward *= u2SpireBonuses.seedDrop();
         reward = calcHeirloomBonus("Staff", "SeedDrop", reward);
         game.global.mutatedSeeds += reward;
         if (typeof game.global.messages.Loot.seeds === 'undefined') game.global.messages.Loot.seeds = true;
@@ -5193,7 +5194,19 @@ var u2Mutations = {
             var radonReward = rewardResource("helium", 1, 99, false, radonPct);
             message("You were able to take " + prettify(radonReward) + " Radon Vials from that Mutated Enemy!", "Loot", heliumIcon(true), 'helium', 'helium');
         }
-        if (this.open) this.openTree();
+
+        if (this.open) {
+            const nextCost = this.nextCost();
+            if (game.global.mutatedSeeds >= nextCost) {
+                this.openTree();
+            } else {
+                const seedElem = document.getElementById('mutSeedCounter');
+                const costText = Object.keys(this.tree).length > this.purchaseCount ? 'Next Mutator Costs: ' + prettify(nextCost) : 'All Mutators Purchased!';
+                const seedText = `Seeds Available: ${prettify(game.global.mutatedSeeds)}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;${costText}`;
+                if (seedElem.innerHTML !== seedText) seedElem.innerHTML = seedText;
+            }
+        }
+		
         this.setAlert();
     },
     addMutations: function(array){

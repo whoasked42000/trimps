@@ -2754,7 +2754,8 @@ var toReturn = {
 			radSpent: 0,
 			timeLastZone: -1,
 			getMult: function(){
-				return Math.pow(this.getBonusAmt(), getPerkLevel("Tenacity") + getPerkLevel("Masterfulness"));
+				const bonusAmount = this.getBonusAmt();
+				return Math.pow(Math.max(1.1, bonusAmount), getPerkLevel("Tenacity") + getPerkLevel("Masterfulness")); 
 			},
 			getCarryoverMult: function(){
 				var mult = 0.5
@@ -2765,7 +2766,7 @@ var toReturn = {
 				if (game.global.spireActive && !game.global.mapsActive) return 60;
 				var minutes = getZoneMinutes();
 				var lastZone = this.timeLastZone;
-				if (lastZone == -1) lastZone = 0;
+				if (lastZone <= 0) lastZone = this.timeLastZone = 0;
 				if (lastZone > 120) lastZone = 120;
 				minutes += (lastZone * this.getCarryoverMult());
 				if (minutes > 120) minutes = 120;
