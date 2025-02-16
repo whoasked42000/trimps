@@ -987,8 +987,10 @@ function load(saveString, autoLoad, fromPf) {
 	}
 	if (compareVersion([5,5,0], oldStringVersion)){
 		if (game.global.challengeActive == "Archaeology" && game.global.world >= 91) game.challenges.Archaeology.onComplete();
+		if (savegame.portal.Equality){
 		savegame.portal.Equality.reversingSetting = savegame.portal.Equality.scalingSetting + 1;
 		if (savegame.portal.Equality.reversingSetting > 10) savegame.portal.Equality.reversingSetting = 10;
+		}
 		addNewFeats([10,11,19,20,21,22], true);
 		checkAchieve("zones2");
 		checkAchieve("totalRadon");
@@ -1067,12 +1069,14 @@ function load(saveString, autoLoad, fromPf) {
 	}
 	if (compareVersion([5,10,0], oldStringVersion)){
 		if (playerSpire.rowsAllowed >= 20) giveSingleAchieve("Power Tower");
-		game.portal.Equality.settings.reg = {
-			scalingActive: savegame.portal.Equality.scalingActive,
-			scalingSetting: savegame.portal.Equality.scalingSetting,
-			reversingSetting: savegame.portal.Equality.reversingSetting,
-			scalingReverse: savegame.portal.Equality.scalingActive,
-			disabledStackCount: savegame.portal.Equality.disabledStackCount
+		if (savegame.portal.Equality){
+			game.portal.Equality.settings.reg = {
+				scalingActive: savegame.portal.Equality.scalingActive,
+				scalingSetting: savegame.portal.Equality.scalingSetting,
+				reversingSetting: savegame.portal.Equality.reversingSetting,
+				scalingReverse: savegame.portal.Equality.scalingActive,
+				disabledStackCount: savegame.portal.Equality.disabledStackCount
+			}
 		}
 		var bestU2Voids = 0;
 		if (game.global.universe == 2) {
@@ -1146,6 +1150,7 @@ function load(saveString, autoLoad, fromPf) {
 	toggleAutoJobs(true);
 	toggleAutoEquip(true);
 	toggleAutoGolden(true);
+	document.getElementById("goldConfig").style.display = (game.global.canGuString ? "block" : "none");
     setGather(game.global.playerGathering);
     numTab(1);
 	if (!fromPf && game.options.menu.usePlayFab.enabled == 1) {
@@ -4227,7 +4232,7 @@ function rewardResource(what, baseAmt, level, checkMapLootScale, givePercentage)
 		if (game.global.challengeActive == "Alchemy") amt *= alchObj.getPotionEffect("Potion of Finding");
 		amt *= alchObj.getPotionEffect("Elixir of Finding");
 	}
-	if (getPerkLevel("Greed")) amt *= game.portal.Greed.getMult();
+	if (getPerkLevel("Greed") || getPerkLevel("Masterfulness")) amt *= game.portal.Greed.getMult();
 	if (game.global.challengeActive == "Quagmire") amt *= game.challenges.Quagmire.getLootMult();
 	if (Fluffy.isRewardActive("wealthy") && what != "helium") amt *= 2;
 	var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
@@ -5160,6 +5165,7 @@ function autoBuyJob(what, isRatio, purchaseAmt, max){
 				checkAndFix = true;
 			}	
 		}
+		else return;
 	}
 	for (var costItem in job.cost) {
         if (checkJobItem(what, true, costItem, null, buyAmt) !== true) return false;
@@ -13526,10 +13532,14 @@ function runMapAtZone(index){
 				break;
 			}
 		}
-		if (meltMap){
+		if (meltMap != -1){
 			if (game.global.currentMapId) recycleMap();
 			selectMap(meltMap.id);
 			runMap();
+		}
+		else{
+			mapsClicked(true);
+			return;
 		}
 		if (setting.until == 6) game.global.mapCounterGoal = 25;
 		if (setting.until == 7) game.global.mapCounterGoal = 50;
@@ -13676,6 +13686,7 @@ function startSpire(confirmed){
 			if (spireSetting == 1 || (spireSetting == 2 && spireNum >= highestSpire - 1) || (spireSetting == 3 && spireNum >= highestSpire)){
 				game.global.fighting = false;
 				mapsSwitch();
+				if (challengeActive('Berserk')) game.challenges.Berserk.trimpDied();
 			}
 			else handleExitSpireBtn();
 		}
@@ -13881,17 +13892,17 @@ function getSpireStory(spireNum, row, getAll){
 			r560: "You spot Stuffy hiding behind an incredibly out of place looking bush and decide to just ask him why he's releasing all this Mutation on the planet he claims to love so much. He tells you he's making Nature stronger and that the planet would thank him if it could. Just as you were about to respond, both Stuffy and the bush vanish.",
 			r590: "Is the Stabilizer on this Floor dancing on 8 legs or are the Spores just starting to get to you? Either way you should probably go break that thing.",
 			r600: "As you emerge from the non-existent space of the previous Floor, you take in a deep Spore-free breath and pat yourself on the back. Out of the corner of your eye you notice a small yellow shard, and touching it fills you with ancient knowledge allowing you to gain an extra 20% Nullifium when recycling Heirlooms!", //Needs reward
-			r607: "The Mutation continues to grow and organize. You let out a deep sigh thinking about how many Spores will be in the air at the end of this Floor.",
+			r607: "Ok that Mutation is definitely a tree. A big scary tree!",
 			r630: "Scruffy seems to be growing tired of making notes of everything that has happened in this Spire.",
 			r660: "Stuffy comes by once again but you can't really understand what he's saying. You're not sure if it's the spores or if he's just messing with you.",
 			r690: "Once again you spot a Stabilizer! You really want to clear it fast, the spores are not very enjoyable.",
 			r700: "As you finish up the Floor and the Floor drains away, you take a look at your Trimps and realize they're pretty great. That's seven whole floors and one mad Stuffy, and now Scruffy earns another 50% XP!", //+50% scruffy xp
-			r707: "Ok that Mutation is definitely a tree. A big scary tree!",
+			r707: "One of the Mutated cells here looks different! You ask Scruffy about it and he tells you that the orange ones have a much higher concentration of Spores, and will release 10x the normal amount of Spores when attacked and killed. You're not liking the sound of that...",
 			r750: "You've made it three quarters of the way through the Spire! This evil structure is now a small fragment of what it once was, thanks to you. Scruffy offers you a small, strange berry as congratulations.",
 			r775: "Stuffy stops by again and asks you really nicely to just leave. He says he won't mess with you anymore, but that he can't stand to let Druopitee down. You tell him you'll leave if he destroys the rest of the Spire, but he just makes a weird noise and runs off.",
 			r790: "You know the deal, another Stabilizer spotted for your Spire-Destroying pleasure!",
 			r800: "That's eight Floors down, two to go! You found another strange blue orb which you toss directly to a Trimp and show no surprise when they gain another +15% Crit Chance! Scruffy points forward, you nod your head, and continue on.", //+15% crit
-			r807: "One of the Mutated cells here looks different! You ask Scruffy about it and he tells you that the orange ones have a much higher concentration of Spores, and will release 10x the normal amount of Spores when attacked and killed. You're not liking the sound of that...",
+			r807: "The Mutation continues to grow and organize. You let out a deep sigh thinking about how many Spores will be in the air at the end of this Floor.",
 			r830: "Stuffy tried to take a Trimp hostage in order to force you to leave, but he dropped the Trimp and it ran back like nothing happened.",
 			r860: "Stuffy's making some odd noises up ahead, it seems like you've thoroughly frightened him.",
 			r890: "Is that another Stabilizer down there? Don't mind if you do.",
@@ -16507,7 +16518,7 @@ function manageLeadStacks(remove) {
 	if (game.global.world % 2 === 1) {
 		if (determinedBuff === null) {
 			const goodGuyElem = document.getElementById('goodGuyName');
-			const htmlMessage = '&nbsp' + makeIconEffectHTML("Determined", "'Your Trimps are determined to succeed. They gain 50% attack and earn double resources from all sources.", "icon-sun2", "antiBadge", ["determinedBuff"])
+			const htmlMessage = '&nbsp' + makeIconEffectHTML("Determined", "Your Trimps are determined to succeed. They gain 50% attack and earn double resources from all sources.", "icon-sun2", "antiBadge", ["determinedBuff"])
 			if (!goodGuyElem.innerHTML.includes(htmlMessage)) goodGuyElem.insertAdjacentHTML('beforeend', htmlMessage);
 			determinedBuff = document.getElementById('determinedBuff');
 		}
@@ -17209,7 +17220,7 @@ function scaleLootBonuses(amt, ignoreScry){
 	if (game.global.universe == 2 && u2Mutations.tree.Loot.purchased) amt *= 1.5;
 	if (game.global.challengeActive == "Alchemy") amt *= alchObj.getPotionEffect("Potion of Finding");
 	amt *= alchObj.getPotionEffect("Elixir of Finding");
-	if (getPerkLevel("Greed")) amt *= game.portal.Greed.getMult();
+	if (getPerkLevel("Greed") || getPerkLevel("Masterfulness")) amt *= game.portal.Greed.getMult();
 	if (Fluffy.isRewardActive("wealthy")) amt *= 2;
 	if (getUberEmpowerment() == "Wind") amt *= 10;
 	if (!ignoreScry && isScryerBonusActive()) amt *= 2;
@@ -19484,7 +19495,7 @@ function getPlayFabLoginHTML(){
 	if (game.global.rememberInfo) {
 		info = readPlayFabInfo();
 	}
-		tipHtml[0] += "<div id='playFabLoginContainer' class='col-xs-6'><b id='playFabLoginTitle'>Login to PlayFab</b><br/><span id='playFabEmailHidden' style='display: none'>Your Email<br/><span id='emailNotice' style='font-size: 0.8em'>(For recovery, not required)<br/></span><input type='text' id='registerEmail' /></span><span id='usernameBox'>PlayFab Username<br/><input type='text' id='loginUserName' " + ((info) ? "value='" + info[0] + "'" : "") + "/></span><span id='playFabPasswordBox'><br/>Password <span style='font-size: 0.8em'>(6-30 Chars)</span><br/><input type='password' id='loginPassword'" + ((info) ? " value='" + info[1] + "'" : "") + "/></span><br/><div id='playFabConfirmPasswordHidden' style='display: none'>Confirm Password<br/><input type='password' id='confirmPassword' /><br/></div><span id='rememberInfoBox'>Remember Account Info<br/><input type='checkbox' id='rememberInfo' " + ((info) ? "checked='true'" : "") + "/><br/></span><div id='playFabLoginBtn' class='btn btn-sm btn-info' onclick='playFabLoginWithPlayFab()'>Login</div><div id='playFabRegisterBtn' class='btn btn-sm btn-info' style='display: none' onclick='playFabRegisterPlayFabUser()'>Register</div><span style='display: none' id='playFabRecoverBtns'><div class='btn btn-sm btn-info' onclick='playFabRecoverInfo(false)' style='display: none'>Get Username</div><div class='btn btn-sm btn-primary' onclick='playFabRecoverInfo(true)'>Send Password Reset Email</div></span><div id='playFabSwitchRegisterBtn' onclick='switchForm(true)' class='btn btn-sm btn-primary'>Register Playfab Account</div><div id='playFabSwitchRecoveryBtn' onclick='switchForm(false)' class='btn btn-sm btn-warning'>Recover Account Info</div></div>"
+		tipHtml[0] += "<div id='playFabLoginContainer' class='col-xs-6'><b id='playFabLoginTitle'>Login to PlayFab</b><br/><span id='playFabEmailHidden' style='display: none'>Your Email<br/><span id='emailNotice' style='font-size: 0.8em'>(For recovery, not required)<br/></span><input type='text' id='registerEmail' /></span><span id='usernameBox'>PlayFab Username<br/><input type='text' id='loginUserName' " + ((info) ? "value='" + info[0] + "'" : "") + "/></span><span id='playFabPasswordBox'><br/>Password <span style='font-size: 0.8em'>(6-30 Chars)</span><br/><input type='password' id='loginPassword'" + ((info) ? " value='" + info[1] + "'" : "") + "/></span><br/><div id='playFabConfirmPasswordHidden' style='display: none'>Confirm Password<br/><input type='password' id='confirmPassword' /><br/></div><label id='rememberInfoBox'>Remember Account Info<br/>" + buildNiceCheckbox("rememberInfo", false, (info ? true : false)) +  "<br/></label><div id='playFabLoginBtn' class='btn btn-sm btn-info' onclick='playFabLoginWithPlayFab()'>Login</div><div id='playFabRegisterBtn' class='btn btn-sm btn-info' style='display: none' onclick='playFabRegisterPlayFabUser()'>Register</div><span style='display: none' id='playFabRecoverBtns'><div class='btn btn-sm btn-info' onclick='playFabRecoverInfo(false)' style='display: none'>Get Username</div><div class='btn btn-sm btn-primary' onclick='playFabRecoverInfo(true)'>Send Password Reset Email</div></span><div id='playFabSwitchRegisterBtn' onclick='switchForm(true)' class='btn btn-sm btn-primary'>Register Playfab Account</div><div id='playFabSwitchRecoveryBtn' onclick='switchForm(false)' class='btn btn-sm btn-warning'>Recover Account Info</div></div>"
 	}
 	tipHtml[0] += "<div id='playFabLoginInfo' class='col-xs-6'><ul><li>While connected to PlayFab, every time you manually save and <b>once per 30 minutes when auto-saving</b>, your file will also be sent to PlayFab's servers.</li><li>Data will be cleared from PlayFab's servers after 3 months of inactivity, this is not a permanent save!</li></ul>"
 	tipHtml[1] = "<div class='btn btn-sm btn-danger' onclick='cancelTooltip()'>Cancel</div>";
